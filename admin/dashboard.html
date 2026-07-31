@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1f35">
+  <title>Dashboard Admin — Rattilil Qur'an</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
+
+  <!-- Sidebar overlay mobile -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="tutupSidebar()"></div>
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <img
+          src="https://raw.githubusercontent.com/rattililquran/rattililquran.github.io/main/assets/images/logo-abu.png"
+          alt="Logo Rattilil Qur'an"
+          class="sidebar-logo"
+        >
+        <div class="sidebar-title">Portal Admin</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" id="nav-pendaftar" onclick="switchTab('pendaftar')">
+          <span class="nav-icon">📋</span> Pendaftar
+        </button>
+        <button class="nav-item" id="nav-jadwal" onclick="switchTab('jadwal')">
+          <span class="nav-icon">📅</span> Jadwal & Kuota
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="logout()">
+          <span>↩</span> Keluar
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <div class="main-content">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="btn-menu" onclick="bukaSidebar()" aria-label="Buka menu">☰</button>
+          <div>
+            <div class="topbar-title" id="topbar-title">Pendaftar</div>
+            <div class="topbar-sub" id="topbar-sub">Kelola data pendaftar murid baru</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-outline btn-sm" onclick="refresh()">↻ Muat Ulang</button>
+        </div>
+      </header>
+
+      <!-- Page body -->
+      <div class="page-body">
+
+        <!-- Alert global -->
+        <div class="alert alert-error" id="alert-global" style="display:none">
+          <span>⚠</span>
+          <span id="alert-global-msg"></span>
+        </div>
+
+        <!-- ===== TAB: PENDAFTAR ===== -->
+        <div id="tab-pendaftar">
+          <!-- Stats -->
+          <div class="stats-grid" id="stats-grid">
+            <div class="stat-card primary">
+              <div class="stat-label">Total Pendaftar</div>
+              <div class="stat-value" id="stat-total">—</div>
+            </div>
+            <div class="stat-card accent">
+              <div class="stat-label">Diterima</div>
+              <div class="stat-value" id="stat-diterima">—</div>
+            </div>
+            <div class="stat-card warning">
+              <div class="stat-label">Dalam Proses</div>
+              <div class="stat-value" id="stat-proses">—</div>
+            </div>
+            <div class="stat-card danger">
+              <div class="stat-label">Ditolak</div>
+              <div class="stat-value" id="stat-ditolak">—</div>
+            </div>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="toolbar">
+            <input
+              class="search-input"
+              type="text"
+              id="search-input"
+              placeholder="🔍  Cari nama, HP, atau nomor..."
+              oninput="filterData()"
+            >
+            <select class="filter-select" id="filter-status" onchange="filterData()">
+              <option value="">Semua Status</option>
+              <option value="TERDAFTAR">Terdaftar</option>
+              <option value="BERKAS_OK">Berkas OK</option>
+              <option value="WAWANCARA">Wawancara</option>
+              <option value="DITERIMA">Diterima</option>
+              <option value="DITOLAK">Ditolak</option>
+            </select>
+            <select class="filter-select" id="filter-gender" onchange="filterData()">
+              <option value="">Semua Gender</option>
+              <option value="Putra">Putra</option>
+              <option value="Putri">Putri</option>
+            </select>
+            <select class="filter-select" id="filter-jadwal" onchange="filterData()">
+              <option value="">Semua Jadwal</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="exportCSV()">
+              ⬇ Ekspor CSV
+            </button>
+          </div>
+
+          <!-- Table -->
+          <div class="table-wrap">
+            <table class="data-table" id="table-pendaftar">
+              <thead>
+                <tr>
+                  <th>No. Daftar</th>
+                  <th>Nama</th>
+                  <th>HP</th>
+                  <th>Program</th>
+                  <th>Gender</th>
+                  <th>Jadwal</th>
+                  <th>Tgl. Daftar</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-pendaftar">
+                <tr><td colspan="9" class="no-data">Memuat data...</td></tr>
+              </tbody>
+            </table>
+            <div class="pagination" id="pagination" style="display:none">
+              <span id="pag-info"></span>
+              <div class="page-btns" id="pag-btns"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== TAB: JADWAL ===== -->
+        <div id="tab-jadwal" style="display:none">
+          <div class="toolbar" style="margin-bottom:16px">
+            <h2 style="font-size:1rem;font-weight:800;color:var(--ink);flex:1">Kelola Jadwal & Kuota</h2>
+            <button class="btn btn-primary btn-sm" onclick="muatJadwal()">↻ Muat Ulang</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="table-jadwal">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Program</th>
+                  <th>Hari & Jam</th>
+                  <th>Pengajar</th>
+                  <th>Gender</th>
+                  <th>Kuota</th>
+                  <th>Status</th>
+                  <th>Aktif</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-jadwal">
+                <tr><td colspan="9" class="no-data">Memuat data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /page-body -->
+    </div><!-- /main-content -->
+  </div><!-- /admin-layout -->
+
+  <!-- Modal Detail / Update Status -->
+  <div class="modal-backdrop" id="modal-detail">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-detail-title">Detail Pendaftar</div>
+        <button class="modal-close" onclick="tutupModal('modal-detail')">✕</button>
+      </div>
+
+      <div class="detail-grid" id="detail-grid"></div>
+
+      <hr style="border:none;border-top:1px solid var(--line);margin:16px 0">
+
+      <div class="form-group">
+        <label class="form-label" for="edit-status">Ubah Status</label>
+        <select class="form-select" id="edit-status">
+          <option value="TERDAFTAR">Terdaftar</option>
+          <option value="BERKAS_OK">Berkas OK</option>
+          <option value="WAWANCARA">Wawancara</option>
+          <option value="DITERIMA">Diterima</option>
+          <option value="DITOLAK">Ditolak</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="edit-catatan-publik">Catatan untuk Pendaftar</label>
+        <textarea class="form-textarea" id="edit-catatan-publik" placeholder="Catatan ini akan terlihat oleh pendaftar saat cek status..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="edit-catatan-internal">Catatan Internal</label>
+        <textarea class="form-textarea" id="edit-catatan-internal" placeholder="Catatan ini hanya terlihat oleh admin..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-danger btn-sm" id="btn-arsip" onclick="arsipPendaftar()">Arsipkan</button>
+        <button class="btn btn-outline btn-sm" onclick="tutupModal('modal-detail')">Batal</button>
+        <button class="btn btn-primary btn-sm" id="btn-simpan-status" onclick="simpanStatus()">
+          <div class="spinner"></div>
+          <span class="btn-text">Simpan</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Edit Jadwal -->
+  <div class="modal-backdrop" id="modal-jadwal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Edit Jadwal</div>
+        <button class="modal-close" onclick="tutupModal('modal-jadwal')">✕</button>
+      </div>
+
+      <input type="hidden" id="edit-jadwal-id">
+
+      <div class="form-group">
+        <label class="form-label">Program</label>
+        <div id="edit-jadwal-nama" style="font-weight:700;color:var(--ink);padding:8px 0"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="edit-kuota">Kuota Maksimal</label>
+        <input class="form-input" type="number" id="edit-kuota" min="1" max="100">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="edit-status-slot">Status Slot</label>
+        <select class="form-select" id="edit-status-slot">
+          <option value="TERSEDIA">Tersedia</option>
+          <option value="PENUH">Penuh</option>
+          <option value="TUTUP">Tutup</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Jadwal Aktif</label>
+        <div style="display:flex;gap:12px;margin-top:6px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.875rem;font-weight:600">
+            <input type="radio" name="edit-active" id="edit-active-ya" value="true"> Ya
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.875rem;font-weight:600">
+            <input type="radio" name="edit-active" id="edit-active-tidak" value="false"> Tidak
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="tutupModal('modal-jadwal')">Batal</button>
+        <button class="btn btn-primary btn-sm" id="btn-simpan-jadwal" onclick="simpanJadwal()">
+          <div class="spinner"></div>
+          <span class="btn-text">Simpan</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
