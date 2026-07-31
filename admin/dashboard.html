@@ -356,6 +356,57 @@
     </div>
   </div>
 
+  <!-- Modal Tambah Jadwal Baru -->
+  <div class="modal-backdrop" id="modal-tambah-jadwal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Tambah Jadwal Baru</div>
+        <button class="modal-close" onclick="tutupModal('modal-tambah-jadwal')">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="new-jadwal-id">Jadwal ID <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="new-jadwal-id" placeholder="Contoh: J004" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-program">Nama Program <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="new-program" placeholder="Contoh: Tahfizh Malam">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-hari">Hari <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="new-hari" placeholder="Contoh: Senin-Rabu">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-jam">Jam <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="new-jam" placeholder="Contoh: 19:00-21:00">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-pengajar">Pengajar</label>
+        <input class="form-input" id="new-pengajar" placeholder="Contoh: Ustadz Hasan">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-gender">Gender</label>
+        <select class="form-select" id="new-gender">
+          <option value="">Semua</option>
+          <option value="Putra">Putra</option>
+          <option value="Putri">Putri</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-kuota">Kuota Maksimal</label>
+        <input class="form-input" id="new-kuota" type="number" value="13" min="1">
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="tutupModal('modal-tambah-jadwal')">Batal</button>
+        <button class="btn btn-primary btn-sm" id="btn-simpan-jadwal-baru" onclick="simpanJadwalBaru()">
+          <div class="spinner"></div>
+          <span class="btn-text">Tambah Jadwal</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast container -->
   <div class="toast-container" id="toast-container"></div>
 

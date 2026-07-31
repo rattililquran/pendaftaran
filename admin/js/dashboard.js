@@ -450,34 +450,43 @@ function bukaEditJadwal(id) {
 }
 
 function bukaModalTambahJadwal() {
-  state.selectedJadwal = null;
-  document.getElementById('edit-jadwal-id').value = '';
-  document.getElementById('edit-jadwal-nama').textContent = 'Jadwal Baru';
-  document.getElementById('edit-kuota').value = '13';
-  document.getElementById('edit-kuota').type = 'number';
-  document.getElementById('edit-kuota').previousElementSibling.textContent = 'Kuota Maksimal';
-  document.getElementById('edit-status-slot').innerHTML =
-    '<option value="TERSEDIA">Tersedia</option>' +
-    '<option value="PENUH">Penuh</option>' +
-    '<option value="TUTUP">Tutup</option>';
-  document.getElementById('edit-status-slot').previousElementSibling.textContent = 'Status Slot';
-  document.getElementById('edit-active-ya').checked = true;
-  document.getElementById('btn-simpan-jadwal').onclick = tambahJadwalBaru;
-  bukaModal('modal-jadwal');
+  document.getElementById('new-jadwal-id').value = '';
+  document.getElementById('new-program').value   = '';
+  document.getElementById('new-hari').value      = '';
+  document.getElementById('new-jam').value       = '';
+  document.getElementById('new-pengajar').value  = '';
+  document.getElementById('new-gender').value    = '';
+  document.getElementById('new-kuota').value     = '13';
+  bukaModal('modal-tambah-jadwal');
 }
 
-function tambahJadwalBaru() {
-  var btn = document.getElementById('btn-simpan-jadwal');
+function simpanJadwalBaru() {
+  var btn = document.getElementById('btn-simpan-jadwal-baru');
+  var id  = document.getElementById('new-jadwal-id').value.trim();
+  var prg = document.getElementById('new-program').value.trim();
+  var hari = document.getElementById('new-hari').value.trim();
+  var jam  = document.getElementById('new-jam').value.trim();
+
+  if (!id || !prg || !hari || !jam) {
+    tampilkanToast('Jadwal ID, Program, Hari, dan Jam wajib diisi.', 'error');
+    return;
+  }
+
   setLoading(btn, true);
 
   var body = {
-    action:     'admin.updateJadwal',
-    token:      state.token,
-    jadwal_id:  'J' + (Date.now() % 10000),
-    kuota_maks: parseInt(document.getElementById('edit-kuota').value),
-    status_slot: document.getElementById('edit-status-slot').value,
-    active:     document.querySelector('input[name="edit-active"]:checked').value === 'true',
-    is_new:     'true'
+    action:      'admin.tambahJadwal',
+    token:       state.token,
+    jadwal_id:   id,
+    program:     prg,
+    hari:        hari,
+    jam:         jam,
+    pengajar:    document.getElementById('new-pengajar').value.trim(),
+    gender:      document.getElementById('new-gender').value,
+    kuota_maks:  parseInt(document.getElementById('new-kuota').value) || 13,
+    terisi:      0,
+    status_slot: 'TERSEDIA',
+    active:      'true'
   };
 
   fetch(CONFIG.BACKEND_URL, { method: 'POST', body: new URLSearchParams(body) })
@@ -486,10 +495,8 @@ function tambahJadwalBaru() {
       setLoading(btn, false);
       if (res.ok) {
         tampilkanToast('Jadwal berhasil ditambahkan.', 'success');
-        tutupModal('modal-jadwal');
+        tutupModal('modal-tambah-jadwal');
         muatJadwal();
-        // Reset onclick ke fungsi simpan normal
-        document.getElementById('btn-simpan-jadwal').onclick = simpanJadwal;
       } else {
         tampilkanToast(res.pesan || 'Gagal menambah jadwal.', 'error');
       }
