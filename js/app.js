@@ -419,14 +419,14 @@ function fetchBackend(method, params) {
     ]);
   }
 
-  // POST — kirim sebagai form-encoded agar tidak trigger preflight CORS
-  var formData = new FormData();
+  // POST — gunakan URLSearchParams agar tidak trigger preflight CORS
+  var searchParams = new URLSearchParams();
   Object.keys(params).forEach(function(k) {
-    formData.append(k, params[k]);
+    searchParams.append(k, params[k]);
   });
 
   return Promise.race([
-    fetch(url, { method: 'POST', body: formData }).then(function(r) { return r.json(); }),
+    fetch(url, { method: 'POST', body: searchParams }).then(function(r) { return r.json(); }),
     new Promise(function(_, reject) {
       setTimeout(function() { reject(new Error('timeout')); }, CONFIG.REQUEST_TIMEOUT || 30000);
     })

@@ -312,8 +312,7 @@ function simpanStatus() {
 
   fetch(CONFIG.BACKEND_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    body: new URLSearchParams(body)
   })
     .then(function (r) { return r.json(); })
     .then(function (res) {
@@ -347,8 +346,7 @@ function arsipPendaftar() {
 
   fetch(CONFIG.BACKEND_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    body: new URLSearchParams(body)
   })
     .then(function (r) { return r.json(); })
     .then(function (res) {
@@ -456,8 +454,7 @@ function simpanJadwal() {
 
   fetch(CONFIG.BACKEND_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    body: new URLSearchParams(body)
   })
     .then(function (r) { return r.json(); })
     .then(function (res) {
