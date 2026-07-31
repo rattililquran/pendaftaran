@@ -225,11 +225,11 @@ function ikonStatus(status) {
 
 function deskripsiStatus(status) {
   var map = {
-    'TERDAFTAR': 'Data pendaftaran Anda telah kami terima. Tim kami sedang memproses berkas Anda.',
-    'BERKAS_OK': 'Berkas Anda telah diperiksa dan dinyatakan lengkap. Menunggu jadwal wawancara.',
-    'WAWANCARA': 'Selamat! Anda dijadwalkan untuk wawancara. Pantau informasi lebih lanjut dari admin.',
-    'DITERIMA':  'Selamat! Anda resmi diterima sebagai murid Rattilil Qur\'an.',
-    'DITOLAK':   'Mohon maaf, pendaftaran Anda belum dapat kami terima. Hubungi admin untuk informasi lebih lanjut.'
+    'TERDAFTAR': 'Bismillah. Data pendaftaran Anda telah kami terima dengan baik. Tim kami sedang memproses berkas Anda. Semoga Allah memudahkan setiap langkah.',
+    'BERKAS_OK': 'Alhamdulillah. Berkas Anda telah diperiksa dan dinyatakan lengkap. Menunggu jadwal wawancara. Baarakallahu fiikum.',
+    'WAWANCARA': 'Alhamdulillah. Anda dijadwalkan untuk wawancara. Semoga Allah memberi kemudahan dan kelancaran. Tawakkal ilallah.',
+    'DITERIMA':  'Alhamdulillahirabbil\'aalamin. Selamat! Anda resmi diterima sebagai murid Rattilil Qur\'an. Semoga Allah memberkahi perjalanan Anda dalam menghafal dan memahami Al-Qur\'an. بَارَكَ اللهُ فِيكُمْ',
+    'DITOLAK':   'Innalillahi wa inna ilaihi raji\'un. Mohon maaf, pendaftaran Anda belum dapat kami terima saat ini. Semoga Allah membuka pintu kebaikan yang lebih baik. Hubungi admin untuk informasi lebih lanjut.'
   };
   return map[status] || '';
 }
