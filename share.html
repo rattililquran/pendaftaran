@@ -112,7 +112,20 @@
     function shareWA(e){e.preventDefault();window.open('https://wa.me/?text='+encodeURIComponent(pesanWA),'_blank')}
     function shareFB(e){e.preventDefault();window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(LINK),'_blank','width=600,height=400')}
     function shareTW(e){e.preventDefault();var t='Alhamdulillah! Baru mendaftar ke Rattilil Quran\nMari berlomba dalam kebaikan! '+LINK;window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(t),'_blank')}
-    function copyLink(){navigator.clipboard.writeText(LINK).then(function(){var el=document.getElementById('copy-link-text');el.textContent='✓ Link Tersalin!';setTimeout(function(){el.textContent='Salin Link Pendaftaran'},2500)})}
+    function copyToClipboard(text, onSuccess) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(onSuccess).catch(function() {
+          fallbackCopy(text); onSuccess();
+        });
+      } else { fallbackCopy(text); onSuccess(); }
+    }
+    function fallbackCopy(text) {
+      var el = document.createElement('textarea');
+      el.value = text; el.style.position = 'fixed'; el.style.opacity = '0';
+      document.body.appendChild(el); el.select();
+      document.execCommand('copy'); document.body.removeChild(el);
+    }
+    function copyLink(){copyToClipboard(LINK,function(){var el=document.getElementById('copy-link-text');el.textContent='✓ Link Tersalin!';setTimeout(function(){el.textContent='Salin Link Pendaftaran'},2500)})}
     function copyPesan(){navigator.clipboard.writeText(pesanWA).then(function(){var btn=document.getElementById('btn-copy-pesan');btn.textContent='✓ Tersalin!';btn.classList.add('copied');setTimeout(function(){btn.textContent='⎘ Salin';btn.classList.remove('copied')},2500)})}
   </script>
 </body>

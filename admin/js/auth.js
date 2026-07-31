@@ -14,7 +14,7 @@
 function login() {
   var password = document.getElementById('password').value.trim();
   var btn      = document.getElementById('btn-login');
-  var alertEl  = document.getElementById('alert-login'); // fix: jangan shadow var 'alert'
+  // alert element handled via tampilkanAlertLogin()
 
   if (!password) {
     tampilkanAlertLogin('Password tidak boleh kosong.');

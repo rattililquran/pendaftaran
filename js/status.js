@@ -48,7 +48,7 @@ function cekStatus() {
 
   // Validasi
   var valid = true;
-  if (!no || !/^RTL\d{6,}$/.test(no)) {
+  if (!no || !/^RTL\d{4,}$/.test(no)) {
     tampilkanError('no', true);
     valid = false;
   } else {

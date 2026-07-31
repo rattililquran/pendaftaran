@@ -101,6 +101,7 @@ function muatStats() {
   fetch(url)
     .then(function (r) { return r.json(); })
     .then(function (res) {
+      if (!res.ok && res.error === 'UNAUTHORIZED') { logout(); return; }
       if (res.ok && res.data) {
         var stats = res.data;
         document.getElementById('stat-total').textContent = stats.total || 0;
@@ -607,7 +608,7 @@ function simpanJadwal() {
   var id = document.getElementById('edit-jadwal-id').value;
   var kuota = parseInt(document.getElementById('edit-kuota').value);
   var statusSlot = document.getElementById('edit-status-slot').value;
-  var active = document.querySelector('input[name="edit-active"]:checked').value === 'true';
+  var active = (document.querySelector('input[name="edit-active"]:checked') || {value:'true'}).value === 'true';
   var btn = document.getElementById('btn-simpan-jadwal');
 
   setLoading(btn, true);
@@ -648,18 +649,25 @@ function simpanJadwal() {
 
 function exportCSV() {
   var csv = 'No. Pendaftaran,Nama,HP,Email,Tgl. Lahir,Gender,Program,Jadwal,Status,Tgl. Daftar\n';
+  function csvSafe(v) {
+    var s = String(v || '');
+    // Cegah CSV injection
+    if (s.match(/^[=+\-@]/)) s = "'" + s;
+    // Escape double quote
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
   state.filteredData.forEach(function (r) {
     csv += [
-      r.no_pendaftaran,
-      '"' + r.nama + '"',
-      r.hp,
-      r.email || '',
-      r.tgl_lahir || '',
-      r.gender || '',
-      '"' + r.program + '"',
-      r.jadwal_id,
-      r.status,
-      formatTanggal(r.timestamp)
+      csvSafe(r.no_pendaftaran),
+      csvSafe(r.nama),
+      csvSafe(r.hp),
+      csvSafe(r.email),
+      csvSafe(r.tgl_lahir),
+      csvSafe(r.gender),
+      csvSafe(r.program),
+      csvSafe(r.jadwal_id),
+      csvSafe(r.status),
+      csvSafe(formatTanggal(r.timestamp))
     ].join(',') + '\n';
   });
 
