@@ -3,7 +3,7 @@
 var CONFIG = {
   // URL Web App Google Apps Script
   // Ganti dengan URL deployment Anda
-  BACKEND_URL: 'https://script.google.com/macros/s/AKfycbykZ-9V9qEKGMlSkOyJ45YqaUYNcEDHoOjPYlR3ZA_794VZ9U6mND3jM-OFZaNY0TNC/exec',
+  BACKEND_URL: 'https://script.google.com/macros/s/AKfycbxZf_bBz7oZ4OhXsJHwTJxXLvv06ks3-eFCU6xANC8VHnRkLFcLIUxj2glLaod2BzK3/exec',
 
   // Nama institusi (tampil di UI)
   NAMA_INSTITUSI: 'Rattilil Qur\'an',
