@@ -49,18 +49,28 @@ function switchTab(tab) {
   });
   document.getElementById('nav-' + tab).classList.add('active');
 
-  if (tab === 'pendaftar') {
-    document.getElementById('tab-pendaftar').style.display = 'block';
-    document.getElementById('tab-jadwal').style.display = 'none';
-    document.getElementById('topbar-title').textContent = 'Pendaftar';
-    document.getElementById('topbar-sub').textContent = 'Kelola data pendaftar murid baru';
-  } else if (tab === 'jadwal') {
-    document.getElementById('tab-pendaftar').style.display = 'none';
-    document.getElementById('tab-jadwal').style.display = 'block';
-    document.getElementById('topbar-title').textContent = 'Jadwal & Kuota';
-    document.getElementById('topbar-sub').textContent = 'Kelola jadwal dan kuota per program';
-    muatJadwal();
+  var tabs = ['pendaftar', 'jadwal', 'gelombang', 'formfields'];
+  tabs.forEach(function(t) {
+    var el = document.getElementById('tab-' + t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+  });
+
+  var titles = {
+    'pendaftar':  ['Pendaftar',       'Kelola data pendaftar murid baru'],
+    'jadwal':     ['Jadwal & Kuota',  'Kelola jadwal dan kuota per program'],
+    'gelombang':  ['Gelombang',       'Kelola gelombang dan status pendaftaran'],
+    'formfields': ['Form Fields',     'Konfigurasi pertanyaan form pendaftaran']
+  };
+
+  if (titles[tab]) {
+    document.getElementById('topbar-title').textContent = titles[tab][0];
+    document.getElementById('topbar-sub').textContent   = titles[tab][1];
   }
+
+  if (tab === 'jadwal')     muatJadwal();
+  if (tab === 'gelombang')  muatGelombang();
+  if (tab === 'formfields') muatFormFields();
+
   tutupSidebar();
 }
 
@@ -75,12 +85,11 @@ function tutupSidebar() {
 }
 
 function refresh() {
-  if (state.currentTab === 'pendaftar') {
-    muatStats();
-    muatPendaftar();
-  } else {
-    muatJadwal();
-  }
+  var tab = state.currentTab;
+  if (tab === 'pendaftar')  { muatStats(); muatPendaftar(); }
+  else if (tab === 'jadwal')     muatJadwal();
+  else if (tab === 'gelombang')  muatGelombang();
+  else if (tab === 'formfields') muatFormFields();
 }
 
 // ============================================================================
@@ -561,4 +570,255 @@ function esc(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+// ============================================================================
+// GELOMBANG
+// ============================================================================
+
+function muatGelombang() {
+  var tbody = document.getElementById('tbody-gelombang');
+  tbody.innerHTML = '<tr><td colspan="8" class="no-data">Memuat data...</td></tr>';
+
+  var url = CONFIG.BACKEND_URL + '?action=admin.gelombang&token=' + encodeURIComponent(state.token);
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (!res.ok) { tbody.innerHTML = '<tr><td colspan="8" class="no-data">Gagal memuat data.</td></tr>'; return; }
+
+      // Update status pendaftaran toggle
+      var label = document.getElementById('status-pendaftaran-label');
+      var buka  = res.pendaftaran_buka;
+      label.textContent   = buka ? 'Dibuka' : 'Ditutup';
+      label.style.background = buka ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)';
+      label.style.color      = buka ? '#047857' : '#b91c1c';
+
+      var btn = document.getElementById('btn-toggle-pendaftaran');
+      btn.querySelector('.btn-text').textContent = buka ? 'Tutup Pendaftaran' : 'Buka Pendaftaran';
+      btn.style.background = buka ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#10b981,#059669)';
+      state.pendaftaranBuka = buka;
+
+      state.gelombang = res.data || [];
+      renderTabelGelombang();
+    })
+    .catch(function() { tbody.innerHTML = '<tr><td colspan="8" class="no-data">Koneksi bermasalah.</td></tr>'; });
+}
+
+function renderTabelGelombang() {
+  var tbody = document.getElementById('tbody-gelombang');
+  if (!state.gelombang || state.gelombang.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="no-data">Belum ada gelombang.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = '';
+  state.gelombang.forEach(function(g) {
+    var aktif = g.status === 'AKTIF';
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td style="font-weight:700">' + esc(String(g.wave_id)) + '</td>' +
+      '<td>' + esc(g.nama) + '</td>' +
+      '<td>' + (g.tgl_mulai || '—') + '</td>' +
+      '<td>' + (g.tgl_selesai || '—') + '</td>' +
+      '<td>' + esc(g.tahun_ajaran || '—') + '</td>' +
+      '<td><span class="badge ' + (aktif ? 'badge-DITERIMA' : 'badge-DITOLAK') + '">' + esc(g.status) + '</span></td>' +
+      '<td>' + (aktif ? '✅' : '❌') + '</td>' +
+      '<td><button class="btn-icon" onclick="bukaEditGelombang(' + g.wave_id + ')">✏️</button></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function togglePendaftaran() {
+  var btn  = document.getElementById('btn-toggle-pendaftaran');
+  var buka = !state.pendaftaranBuka;
+  setLoading(btn, true);
+
+  var body = { action: 'admin.updateGelombang', token: state.token, pendaftaran_buka: buka ? 'true' : 'false' };
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', body: new URLSearchParams(body) })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      setLoading(btn, false);
+      if (res.ok) { tampilkanToast('Status pendaftaran diperbarui.', 'success'); muatGelombang(); }
+      else { tampilkanToast(res.pesan || 'Gagal.', 'error'); }
+    })
+    .catch(function() { setLoading(btn, false); tampilkanToast('Koneksi bermasalah.', 'error'); });
+}
+
+function bukaEditGelombang(waveId) {
+  var g = (state.gelombang || []).find(function(x) { return x.wave_id == waveId; });
+  if (!g) return;
+  state.selectedGelombang = g;
+
+  // Isi modal edit gelombang (reuse modal-jadwal dengan field berbeda)
+  document.getElementById('edit-jadwal-id').value    = g.wave_id;
+  document.getElementById('edit-jadwal-nama').textContent = 'Gelombang ' + g.wave_id + ' — ' + g.nama;
+  document.getElementById('edit-kuota').value        = g.tgl_mulai || '';
+  document.getElementById('edit-kuota').type         = 'date';
+  document.getElementById('edit-kuota').previousElementSibling.textContent = 'Tanggal Mulai';
+  document.getElementById('edit-status-slot').innerHTML =
+    '<option value="AKTIF"' + (g.status === 'AKTIF' ? ' selected' : '') + '>AKTIF</option>' +
+    '<option value="SELESAI"' + (g.status === 'SELESAI' ? ' selected' : '') + '>SELESAI</option>' +
+    '<option value="DIBATALKAN"' + (g.status === 'DIBATALKAN' ? ' selected' : '') + '>DIBATALKAN</option>';
+  document.getElementById('edit-status-slot').previousElementSibling.textContent = 'Status Gelombang';
+
+  // Override simpan button
+  document.getElementById('btn-simpan-jadwal').onclick = simpanGelombang;
+  bukaModal('modal-jadwal');
+}
+
+function bukaModalTambahGelombang() {
+  state.selectedGelombang = null;
+  document.getElementById('edit-jadwal-id').value = '';
+  document.getElementById('edit-jadwal-nama').textContent = 'Gelombang Baru';
+  document.getElementById('edit-kuota').value = '';
+  document.getElementById('edit-kuota').type  = 'date';
+  document.getElementById('edit-kuota').previousElementSibling.textContent = 'Tanggal Mulai';
+  document.getElementById('edit-status-slot').innerHTML =
+    '<option value="AKTIF">AKTIF</option><option value="SELESAI">SELESAI</option>';
+  document.getElementById('edit-status-slot').previousElementSibling.textContent = 'Status Gelombang';
+  document.getElementById('btn-simpan-jadwal').onclick = simpanGelombang;
+  bukaModal('modal-jadwal');
+}
+
+function simpanGelombang() {
+  var btn  = document.getElementById('btn-simpan-jadwal');
+  var isNew = !state.selectedGelombang;
+  setLoading(btn, true);
+
+  var body = {
+    action:          isNew ? 'admin.updateGelombang' : 'admin.updateGelombang',
+    token:           state.token,
+    tgl_mulai:       document.getElementById('edit-kuota').value,
+    status:          document.getElementById('edit-status-slot').value,
+    action_gelombang: isNew ? 'tambah' : 'update'
+  };
+
+  if (!isNew) body.wave_id = state.selectedGelombang.wave_id;
+
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', body: new URLSearchParams(body) })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      setLoading(btn, false);
+      if (res.ok) { tampilkanToast('Gelombang disimpan.', 'success'); tutupModal('modal-jadwal'); muatGelombang(); }
+      else { tampilkanToast(res.pesan || 'Gagal.', 'error'); }
+    })
+    .catch(function() { setLoading(btn, false); tampilkanToast('Koneksi bermasalah.', 'error'); });
+}
+
+
+// ============================================================================
+// FORM FIELDS
+// ============================================================================
+
+function muatFormFields() {
+  var tbody = document.getElementById('tbody-formfields');
+  tbody.innerHTML = '<tr><td colspan="7" class="no-data">Memuat data...</td></tr>';
+
+  var url = CONFIG.BACKEND_URL + '?action=admin.formfields&token=' + encodeURIComponent(state.token);
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (!res.ok) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Gagal memuat data.</td></tr>'; return; }
+      state.formFields = res.data || [];
+      renderTabelFormFields();
+    })
+    .catch(function() { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Koneksi bermasalah.</td></tr>'; });
+}
+
+function renderTabelFormFields() {
+  var tbody = document.getElementById('tbody-formfields');
+  if (!state.formFields || state.formFields.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="no-data">Tidak ada data.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = '';
+  state.formFields.forEach(function(f) {
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td style="font-weight:700;font-size:0.82rem">' + esc(f.field_id) + '</td>' +
+      '<td>' + esc(f.label) + '</td>' +
+      '<td style="font-size:0.82rem"><span class="badge badge-TERDAFTAR">' + esc(f.type) + '</span></td>' +
+      '<td>' + (f.required ? '✅' : '❌') + '</td>' +
+      '<td style="font-size:0.82rem">' + f.order + '</td>' +
+      '<td>' + (f.active ? '✅' : '❌') + '</td>' +
+      '<td><button class="btn-icon" onclick="bukaEditFormField(\'' + f.field_id + '\')">✏️</button></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function bukaEditFormField(fieldId) {
+  var f = (state.formFields || []).find(function(x) { return x.field_id === fieldId; });
+  if (!f) return;
+  state.selectedFormField = f;
+
+  // Reuse modal-detail dengan konten baru
+  document.getElementById('modal-detail-title').textContent = 'Edit Field: ' + f.field_id;
+  document.getElementById('detail-grid').innerHTML =
+    '<div class="detail-item full">' +
+    '  <div class="detail-label">Field ID</div>' +
+    '  <div class="detail-value">' + esc(f.field_id) + '</div>' +
+    '</div>' +
+    '<div class="detail-item full">' +
+    '  <div class="detail-label">Label</div>' +
+    '  <input class="form-input" id="ff-label" value="' + esc(f.label) + '">' +
+    '</div>' +
+    '<div class="detail-item">' +
+    '  <div class="detail-label">Urutan</div>' +
+    '  <input class="form-input" id="ff-order" type="number" value="' + f.order + '">' +
+    '</div>' +
+    '<div class="detail-item">' +
+    '  <div class="detail-label">Options (pisah |)</div>' +
+    '  <input class="form-input" id="ff-options" value="' + esc(f.options) + '">' +
+    '</div>';
+
+  document.getElementById('edit-status').innerHTML =
+    '<option value="true"' + (f.required ? ' selected' : '') + '>Wajib diisi</option>' +
+    '<option value="false"' + (!f.required ? ' selected' : '') + '>Opsional</option>';
+  document.getElementById('edit-status').previousElementSibling.textContent = 'Wajib Diisi';
+
+  document.getElementById('edit-catatan-publik').value  = f.active ? 'true' : 'false';
+  document.getElementById('edit-catatan-publik').previousElementSibling.textContent = 'Status Aktif (true/false)';
+  document.getElementById('edit-catatan-internal').style.display = 'none';
+  document.getElementById('edit-catatan-internal').previousElementSibling.style.display = 'none';
+
+  document.getElementById('btn-arsip').style.display = 'none';
+  document.getElementById('btn-simpan-status').onclick = simpanFormField;
+  bukaModal('modal-detail');
+}
+
+function simpanFormField() {
+  var f   = state.selectedFormField;
+  if (!f) return;
+  var btn = document.getElementById('btn-simpan-status');
+  setLoading(btn, true);
+
+  var body = {
+    action:    'admin.updateFormField',
+    token:     state.token,
+    field_id:  f.field_id,
+    label:     document.getElementById('ff-label').value,
+    order:     document.getElementById('ff-order').value,
+    options:   document.getElementById('ff-options').value,
+    required:  document.getElementById('edit-status').value,
+    active:    document.getElementById('edit-catatan-publik').value
+  };
+
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', body: new URLSearchParams(body) })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      setLoading(btn, false);
+      if (res.ok) {
+        tampilkanToast('Form field diperbarui.', 'success');
+        tutupModal('modal-detail');
+        muatFormFields();
+        // Reset modal detail ke mode normal
+        document.getElementById('btn-arsip').style.display = '';
+        document.getElementById('btn-simpan-status').onclick = simpanStatus;
+        document.getElementById('edit-catatan-internal').style.display = '';
+        document.getElementById('edit-catatan-internal').previousElementSibling.style.display = '';
+      } else {
+        tampilkanToast(res.pesan || 'Gagal.', 'error');
+      }
+    })
+    .catch(function() { setLoading(btn, false); tampilkanToast('Koneksi bermasalah.', 'error'); });
+}
 }

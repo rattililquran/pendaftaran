@@ -36,6 +36,12 @@
         <button class="nav-item" id="nav-jadwal" onclick="switchTab('jadwal')">
           <span class="nav-icon">📅</span> Jadwal & Kuota
         </button>
+        <button class="nav-item" id="nav-gelombang" onclick="switchTab('gelombang')">
+          <span class="nav-icon">🌊</span> Gelombang
+        </button>
+        <button class="nav-item" id="nav-formfields" onclick="switchTab('formfields')">
+          <span class="nav-icon">📝</span> Form Fields
+        </button>
       </nav>
 
       <div class="sidebar-footer">
@@ -172,6 +178,78 @@
               </thead>
               <tbody id="tbody-jadwal">
                 <tr><td colspan="9" class="no-data">Memuat data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ===== TAB: GELOMBANG ===== -->
+        <div id="tab-gelombang" style="display:none">
+          <!-- Toggle buka/tutup pendaftaran -->
+          <div class="table-wrap" style="padding:20px;margin-bottom:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+              <div>
+                <div style="font-size:1rem;font-weight:800;color:var(--ink)">Status Pendaftaran</div>
+                <div style="font-size:0.82rem;color:var(--ink-3);margin-top:4px">Buka atau tutup pendaftaran untuk semua calon murid</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <span id="status-pendaftaran-label" style="font-size:0.85rem;font-weight:700;padding:4px 14px;border-radius:999px;background:var(--soft);color:var(--primary-3)">Memuat...</span>
+                <button class="btn btn-primary btn-sm" id="btn-toggle-pendaftaran" onclick="togglePendaftaran()">
+                  <div class="spinner"></div>
+                  <span class="btn-text">Toggle</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabel gelombang -->
+          <div class="toolbar" style="margin-bottom:16px">
+            <h2 style="font-size:1rem;font-weight:800;color:var(--ink);flex:1">Daftar Gelombang</h2>
+            <button class="btn btn-outline btn-sm" onclick="bukaModalTambahGelombang()">+ Tambah</button>
+            <button class="btn btn-primary btn-sm" onclick="muatGelombang()">↻ Muat Ulang</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nama Gelombang</th>
+                  <th>Tgl Mulai</th>
+                  <th>Tgl Selesai</th>
+                  <th>Tahun Ajaran</th>
+                  <th>Status</th>
+                  <th>Aktif</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-gelombang">
+                <tr><td colspan="8" class="no-data">Memuat data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ===== TAB: FORM FIELDS ===== -->
+        <div id="tab-formfields" style="display:none">
+          <div class="toolbar" style="margin-bottom:16px">
+            <h2 style="font-size:1rem;font-weight:800;color:var(--ink);flex:1">Konfigurasi Form Pendaftaran</h2>
+            <button class="btn btn-primary btn-sm" onclick="muatFormFields()">↻ Muat Ulang</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Field ID</th>
+                  <th>Label</th>
+                  <th>Tipe</th>
+                  <th>Wajib</th>
+                  <th>Urutan</th>
+                  <th>Aktif</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-formfields">
+                <tr><td colspan="7" class="no-data">Memuat data...</td></tr>
               </tbody>
             </table>
           </div>
