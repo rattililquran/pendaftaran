@@ -261,9 +261,20 @@ function renderJadwal(list) {
       '<input type="radio" name="jadwal" id="jadwal-' + j.jadwal_id + '" value="' + j.jadwal_id + '"' + (penuh ? ' disabled' : '') + '>' +
       '<div class="jadwal-kuota ' + kuotaClass + '">' + kuotaLabel + '</div>' +
       '<div class="jadwal-nama">' + esc(j.program) + '</div>' +
+      // Hari & Jam — ditampilkan besar dan mencolok
+      '<div class="jadwal-schedule">' +
+        '<div class="jadwal-schedule-item">' +
+          '<span class="jadwal-schedule-label">Hari</span>' +
+          '<span class="jadwal-schedule-value">' + esc(j.hari || '—') + '</span>' +
+        '</div>' +
+        '<div class="jadwal-schedule-divider"></div>' +
+        '<div class="jadwal-schedule-item">' +
+          '<span class="jadwal-schedule-label">Jam</span>' +
+          '<span class="jadwal-schedule-value">' + esc(j.jam || '—') + '</span>' +
+        '</div>' +
+      '</div>' +
+      // Info tambahan kecil
       '<div class="jadwal-meta">' +
-        '<span>📅 ' + esc(j.hari || '—') + '</span>' +
-        '<span>🕐 ' + esc(j.jam || '—') + '</span>' +
         (j.pengajar ? '<span>👤 ' + esc(j.pengajar) + '</span>' : '') +
         (j.gender   ? '<span>👥 ' + esc(j.gender) + '</span>' : '') +
       '</div>';

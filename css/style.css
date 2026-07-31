@@ -464,11 +464,60 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
   pointer-events: none;
 }
 
+/* ---- Jadwal Schedule (Hari & Jam) ---- */
+.jadwal-schedule {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--soft);
+  border: 1.5px solid rgba(14,165,233,.2);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  margin: 10px 0 8px;
+}
+
+.jadwal-card.selected .jadwal-schedule {
+  background: white;
+  border-color: var(--primary);
+}
+
+.jadwal-schedule-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.jadwal-schedule-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--primary-3);
+  opacity: .7;
+}
+
+.jadwal-schedule-value {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+
+.jadwal-schedule-divider {
+  width: 1.5px;
+  height: 36px;
+  background: rgba(14,165,233,.2);
+  margin: 0 12px;
+  flex-shrink: 0;
+}
+
 .jadwal-nama {
   font-weight: 700;
   font-size: 0.92rem;
   color: var(--ink);
-  margin-bottom: 4px;
+  margin-bottom: 0;
 }
 
 .jadwal-meta {
