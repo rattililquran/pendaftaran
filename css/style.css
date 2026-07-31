@@ -447,9 +447,9 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
 }
 
 .jadwal-card.selected {
-  border-color: var(--primary);
-  background: var(--soft);
-  box-shadow: 0 0 0 3px rgba(14,165,233,.15);
+  border-color: #c0392b;
+  background: #fff5f5;
+  box-shadow: 0 0 0 3px rgba(192,57,43,.15);
 }
 
 .jadwal-card.penuh {
