@@ -501,7 +501,11 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
 .jadwal-schedule-value {
   font-size: 0.95rem;
   font-weight: 800;
-  color: var(--ink);
+  color: #c0392b;
+  background: linear-gradient(135deg, #c0392b, #d4a017);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: -.01em;
 }
 
