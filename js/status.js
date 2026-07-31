@@ -197,54 +197,6 @@ function renderTimeline(statusAktif) {
   });
 }
 
-  if (statusAktif === 'DITOLAK') {
-    container.innerHTML =
-      '<div style="display:flex;align-items:center;gap:8px;padding:10px;background:rgba(239,68,68,.1);border-radius:12px;font-size:0.85rem;color:#B91C1C">' +
-      '<span>✕</span><span>Pendaftaran tidak dapat dilanjutkan. Hubungi admin untuk informasi lebih lanjut.</span></div>';
-    return;
-  }
-
-  var aktifIdx = -1;
-  ALUR_STATUS.forEach(function(s, i) {
-    if (s.key === statusAktif) aktifIdx = i;
-  });
-
-  ALUR_STATUS.forEach(function(s, i) {
-    var done    = i < aktifIdx;
-    var aktif   = i === aktifIdx;
-    var pending = i > aktifIdx;
-
-    var item = document.createElement('div');
-    item.style.cssText = 'display:flex;align-items:center;gap:12px;padding:8px 0;' + (i < ALUR_STATUS.length - 1 ? 'border-bottom:1px solid var(--line);' : '');
-
-    var dot = document.createElement('div');
-    dot.style.cssText = 'width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;';
-    if (done)    dot.style.background = 'rgba(16,185,129,.1)';
-    if (aktif)   dot.style.background = 'var(--soft)';
-    if (pending) dot.style.background = 'var(--bg)';
-    dot.textContent = done ? '✓' : s.icon;
-
-    var label = document.createElement('div');
-    label.style.cssText = 'font-size:0.88rem;font-weight:' + (aktif ? '700' : '400') + ';color:' +
-      (done ? '#047857' : aktif ? 'var(--primary-3)' : 'var(--ink-4)') + ';';
-    label.textContent = s.label;
-
-    if (aktif) {
-      var badge = document.createElement('span');
-      badge.style.cssText = 'margin-left:auto;font-size:0.72rem;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--soft);color:var(--primary-3);';
-      badge.textContent = 'Saat ini';
-      item.appendChild(dot);
-      item.appendChild(label);
-      item.appendChild(badge);
-    } else {
-      item.appendChild(dot);
-      item.appendChild(label);
-    }
-
-    container.appendChild(item);
-  });
-}
-
 // ============================================================================
 // HELPERS
 // ============================================================================
