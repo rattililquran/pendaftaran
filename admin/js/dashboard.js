@@ -432,7 +432,13 @@ function bukaEditJadwal(id) {
   document.getElementById('edit-jadwal-id').value = j.jadwal_id;
   document.getElementById('edit-jadwal-nama').textContent = j.program + ' — ' + j.hari + ', ' + j.jam;
   document.getElementById('edit-kuota').value = j.kuota_maks;
-  document.getElementById('edit-status-slot').value = j.status_slot;
+  document.getElementById('edit-kuota').type = 'number';
+  document.getElementById('edit-kuota').previousElementSibling.textContent = 'Kuota Maksimal';
+  document.getElementById('edit-status-slot').innerHTML =
+    '<option value="TERSEDIA"' + (j.status_slot === 'TERSEDIA' ? ' selected' : '') + '>Tersedia</option>' +
+    '<option value="PENUH"'    + (j.status_slot === 'PENUH'    ? ' selected' : '') + '>Penuh</option>' +
+    '<option value="TUTUP"'    + (j.status_slot === 'TUTUP'    ? ' selected' : '') + '>Tutup</option>';
+  document.getElementById('edit-status-slot').previousElementSibling.textContent = 'Status Slot';
 
   if (j.active === true || j.active === 'true') {
     document.getElementById('edit-active-ya').checked = true;
@@ -441,6 +447,138 @@ function bukaEditJadwal(id) {
   }
 
   bukaModal('modal-jadwal');
+}
+
+function bukaModalTambahJadwal() {
+  state.selectedJadwal = null;
+  document.getElementById('edit-jadwal-id').value = '';
+  document.getElementById('edit-jadwal-nama').textContent = 'Jadwal Baru';
+  document.getElementById('edit-kuota').value = '13';
+  document.getElementById('edit-kuota').type = 'number';
+  document.getElementById('edit-kuota').previousElementSibling.textContent = 'Kuota Maksimal';
+  document.getElementById('edit-status-slot').innerHTML =
+    '<option value="TERSEDIA">Tersedia</option>' +
+    '<option value="PENUH">Penuh</option>' +
+    '<option value="TUTUP">Tutup</option>';
+  document.getElementById('edit-status-slot').previousElementSibling.textContent = 'Status Slot';
+  document.getElementById('edit-active-ya').checked = true;
+  document.getElementById('btn-simpan-jadwal').onclick = tambahJadwalBaru;
+  bukaModal('modal-jadwal');
+}
+
+function tambahJadwalBaru() {
+  var btn = document.getElementById('btn-simpan-jadwal');
+  setLoading(btn, true);
+
+  var body = {
+    action:     'admin.updateJadwal',
+    token:      state.token,
+    jadwal_id:  'J' + (Date.now() % 10000),
+    kuota_maks: parseInt(document.getElementById('edit-kuota').value),
+    status_slot: document.getElementById('edit-status-slot').value,
+    active:     document.querySelector('input[name="edit-active"]:checked').value === 'true',
+    is_new:     'true'
+  };
+
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', body: new URLSearchParams(body) })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      setLoading(btn, false);
+      if (res.ok) {
+        tampilkanToast('Jadwal berhasil ditambahkan.', 'success');
+        tutupModal('modal-jadwal');
+        muatJadwal();
+        // Reset onclick ke fungsi simpan normal
+        document.getElementById('btn-simpan-jadwal').onclick = simpanJadwal;
+      } else {
+        tampilkanToast(res.pesan || 'Gagal menambah jadwal.', 'error');
+      }
+    })
+    .catch(function() { setLoading(btn, false); tampilkanToast('Koneksi bermasalah.', 'error'); });
+}
+
+function bukaModalTambahField() {
+  state.selectedFormField = null;
+  document.getElementById('modal-detail-title').textContent = 'Tambah Form Field';
+  document.getElementById('detail-grid').innerHTML =
+    '<div class="detail-item full">' +
+    '  <div class="detail-label">Field ID (unik, tanpa spasi)</div>' +
+    '  <input class="form-input" id="ff-field-id" placeholder="contoh: alamat">' +
+    '</div>' +
+    '<div class="detail-item full">' +
+    '  <div class="detail-label">Label</div>' +
+    '  <input class="form-input" id="ff-label" placeholder="contoh: Alamat Lengkap">' +
+    '</div>' +
+    '<div class="detail-item">' +
+    '  <div class="detail-label">Tipe</div>' +
+    '  <select class="form-select" id="ff-type">' +
+    '    <option value="text">text</option>' +
+    '    <option value="email">email</option>' +
+    '    <option value="tel">tel</option>' +
+    '    <option value="date">date</option>' +
+    '    <option value="select">select</option>' +
+    '    <option value="textarea">textarea</option>' +
+    '  </select>' +
+    '</div>' +
+    '<div class="detail-item">' +
+    '  <div class="detail-label">Urutan</div>' +
+    '  <input class="form-input" id="ff-order" type="number" value="10">' +
+    '</div>' +
+    '<div class="detail-item full">' +
+    '  <div class="detail-label">Options (pisah |, untuk select)</div>' +
+    '  <input class="form-input" id="ff-options" placeholder="Pilihan 1|Pilihan 2|Pilihan 3">' +
+    '</div>';
+
+  document.getElementById('edit-status').innerHTML =
+    '<option value="true">Wajib diisi</option>' +
+    '<option value="false">Opsional</option>';
+  document.getElementById('edit-status').previousElementSibling.textContent = 'Wajib Diisi';
+  document.getElementById('edit-catatan-publik').value = 'true';
+  document.getElementById('edit-catatan-publik').previousElementSibling.textContent = 'Status Aktif (true/false)';
+  document.getElementById('edit-catatan-internal').style.display = 'none';
+  document.getElementById('edit-catatan-internal').previousElementSibling.style.display = 'none';
+  document.getElementById('btn-arsip').style.display = 'none';
+  document.getElementById('btn-simpan-status').onclick = simpanFieldBaru;
+  bukaModal('modal-detail');
+}
+
+function simpanFieldBaru() {
+  var btn = document.getElementById('btn-simpan-status');
+  setLoading(btn, true);
+
+  var fieldId = document.getElementById('ff-field-id') ? document.getElementById('ff-field-id').value.trim() : '';
+  if (!fieldId) { tampilkanToast('Field ID wajib diisi.', 'error'); setLoading(btn, false); return; }
+
+  var body = {
+    action:    'admin.updateFormField',
+    token:     state.token,
+    field_id:  fieldId,
+    label:     document.getElementById('ff-label').value,
+    order:     document.getElementById('ff-order').value,
+    options:   document.getElementById('ff-options').value,
+    required:  document.getElementById('edit-status').value,
+    active:    document.getElementById('edit-catatan-publik').value,
+    is_new:    'true'
+  };
+
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', body: new URLSearchParams(body) })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      setLoading(btn, false);
+      if (res.ok) {
+        tampilkanToast('Field berhasil ditambahkan.', 'success');
+        tutupModal('modal-detail');
+        muatFormFields();
+        // Reset modal ke mode normal
+        document.getElementById('btn-arsip').style.display = '';
+        document.getElementById('btn-simpan-status').onclick = simpanStatus;
+        document.getElementById('edit-catatan-internal').style.display = '';
+        document.getElementById('edit-catatan-internal').previousElementSibling.style.display = '';
+      } else {
+        tampilkanToast(res.pesan || 'Gagal menambah field.', 'error');
+      }
+    })
+    .catch(function() { setLoading(btn, false); tampilkanToast('Koneksi bermasalah.', 'error'); });
 }
 
 function simpanJadwal() {
