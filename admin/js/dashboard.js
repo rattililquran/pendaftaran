@@ -821,4 +821,3 @@ function simpanFormField() {
     })
     .catch(function() { setLoading(btn, false); tampilkanToast('Koneksi bermasalah.', 'error'); });
 }
-}
