@@ -3,7 +3,7 @@
  * Rattilil Qur'an PMB
  */
 
-var CACHE_NAME = 'rattilil-pmb-v1';
+var CACHE_NAME = 'rattilil-pmb-v2';
 var ASSETS = [
   '/',
   '/index.html',
