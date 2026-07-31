@@ -4,6 +4,14 @@
  */
 
 document.addEventListener('DOMContentLoaded', function () {
+  // Set max date ke hari ini
+  var today = new Date().toISOString().split('T')[0];
+  var tglInput = document.getElementById('tgl_verif');
+  if (tglInput) tglInput.setAttribute('max', today);
+
+  // Dynamic year di footer
+  var tahunEl = document.getElementById('tahun-footer');
+  if (tahunEl) tahunEl.textContent = new Date().getFullYear();
   // Jika ada query param ?no=RTL24180001 langsung isi
   var params = new URLSearchParams(window.location.search);
   var no = params.get('no');
@@ -129,7 +137,7 @@ function renderTimeline(statusAktif) {
 
   if (statusAktif === 'DITOLAK') {
     container.innerHTML =
-      '<div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--coral-soft);border-radius:var(--radius-md);font-size:0.85rem;color:#B91C1C">' +
+      '<div style="display:flex;align-items:center;gap:8px;padding:10px;background:rgba(239,68,68,.1);border-radius:12px;font-size:0.85rem;color:#B91C1C">' +
       '<span>✕</span><span>Pendaftaran tidak dapat dilanjutkan. Hubungi admin untuk informasi lebih lanjut.</span></div>';
     return;
   }
@@ -145,23 +153,23 @@ function renderTimeline(statusAktif) {
     var pending = i > aktifIdx;
 
     var item = document.createElement('div');
-    item.style.cssText = 'display:flex;align-items:center;gap:12px;padding:8px 0;' + (i < ALUR_STATUS.length - 1 ? 'border-bottom:1px solid var(--outline);' : '');
+    item.style.cssText = 'display:flex;align-items:center;gap:12px;padding:8px 0;' + (i < ALUR_STATUS.length - 1 ? 'border-bottom:1px solid var(--line);' : '');
 
     var dot = document.createElement('div');
     dot.style.cssText = 'width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;';
-    if (done)    dot.style.background = 'var(--leaf-soft)';
-    if (aktif)   dot.style.background = 'var(--sky-soft)';
-    if (pending) dot.style.background = 'var(--surface-sunken)';
+    if (done)    dot.style.background = 'rgba(16,185,129,.1)';
+    if (aktif)   dot.style.background = 'var(--soft)';
+    if (pending) dot.style.background = 'var(--bg)';
     dot.textContent = done ? '✓' : s.icon;
 
     var label = document.createElement('div');
     label.style.cssText = 'font-size:0.88rem;font-weight:' + (aktif ? '700' : '400') + ';color:' +
-      (done ? 'var(--leaf-deep)' : aktif ? 'var(--sky-deep)' : 'var(--ink-faint)') + ';';
+      (done ? '#047857' : aktif ? 'var(--primary-3)' : 'var(--ink-4)') + ';';
     label.textContent = s.label;
 
     if (aktif) {
       var badge = document.createElement('span');
-      badge.style.cssText = 'margin-left:auto;font-size:0.72rem;font-weight:700;padding:2px 10px;border-radius:var(--radius-full);background:var(--sky-soft);color:var(--sky-deep);';
+      badge.style.cssText = 'margin-left:auto;font-size:0.72rem;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--soft);color:var(--primary-3);';
       badge.textContent = 'Saat ini';
       item.appendChild(dot);
       item.appendChild(label);

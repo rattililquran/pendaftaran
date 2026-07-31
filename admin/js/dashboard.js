@@ -227,7 +227,22 @@ function gantiHalaman(p) {
 // FILTER & SEARCH
 // ============================================================================
 
+// Debounce untuk search input
+var _searchTimeout = null;
 function filterData() {
+  clearTimeout(_searchTimeout);
+  _searchTimeout = setTimeout(function() { _doFilter(); }, 250);
+}
+
+function resetFilter() {
+  document.getElementById('search-input').value  = '';
+  document.getElementById('filter-status').value = '';
+  document.getElementById('filter-gender').value = '';
+  document.getElementById('filter-jadwal').value = '';
+  _doFilter();
+}
+
+function _doFilter() {
   var search = document.getElementById('search-input').value.toLowerCase();
   var status = document.getElementById('filter-status').value;
   var gender = document.getElementById('filter-gender').value;

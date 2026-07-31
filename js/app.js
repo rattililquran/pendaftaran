@@ -23,6 +23,15 @@ document.addEventListener('DOMContentLoaded', function () {
   state.clientToken = generateToken();
   updateStepUI(1);
 
+  // Set max date tgl_lahir ke hari ini (tidak bisa pilih masa depan)
+  var today = new Date().toISOString().split('T')[0];
+  var tglInput = document.getElementById('tgl_lahir');
+  if (tglInput) tglInput.setAttribute('max', today);
+
+  // Dynamic year di footer
+  var tahunEl = document.getElementById('tahun-footer');
+  if (tahunEl) tahunEl.textContent = new Date().getFullYear();
+
   // Event listener gender
   ['gender-putra', 'gender-putri'].forEach(function(id) {
     var el = document.getElementById(id);

@@ -127,6 +127,7 @@
             type="date"
             id="tgl_lahir"
             name="tgl_lahir"
+            max=""
             required
           >
           <div class="form-hint">Digunakan sebagai data verifikasi saat cek status.</div>
@@ -237,7 +238,7 @@
     </div><!-- /container -->
 
     <footer class="site-footer">
-      <p>© 2026 Rattilil Qur'an &nbsp;·&nbsp;
+      <p>© <span id="tahun-footer"></span> Rattilil Qur'an &nbsp;·&nbsp;
         <a href="status.html">Cek Status Pendaftaran</a>
       </p>
     </footer>
@@ -246,6 +247,9 @@
   <!-- ==================== MODAL SUKSES ==================== -->
   <div class="modal-backdrop" id="modal-sukses" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+        <button onclick="document.getElementById('modal-sukses').classList.remove('visible')" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--ink-3);padding:4px 8px;border-radius:var(--r-sm)">✕</button>
+      </div>
       <div class="modal-icon" aria-hidden="true">✓</div>
       <h2 class="modal-title" id="modal-title">Pendaftaran Berhasil!</h2>
       <p class="modal-subtitle">
