@@ -64,7 +64,7 @@ function cekStatus() {
 
   setLoading(btn, true);
   sembunyikanAlert();
-  document.getElementById('detail-box').classList.remove('visible');
+  document.getElementById('result-wrapper').classList.remove('visible');
 
   fetchBackend({ action: 'cekStatus', no: no, verif: tgl })
     .then(function (res) {
@@ -91,33 +91,42 @@ function cekStatus() {
 // ============================================================================
 
 function tampilkanHasil(data) {
-  // Nomor & badge status
-  document.getElementById('hasil-nomor').textContent  = data.no_pendaftaran || '—';
-  document.getElementById('hasil-nama').textContent   = data.nama || '—';
-  document.getElementById('hasil-program').textContent = data.program || '—';
-  document.getElementById('hasil-jadwal').textContent = data.jadwal || data.jadwal_id || '—';
-  document.getElementById('hasil-tanggal').textContent = formatTanggal(data.timestamp || data.tgl_daftar);
-
-  // Badge status
-  var badge = document.getElementById('hasil-badge');
   var status = data.status || 'TERDAFTAR';
-  badge.textContent = labelStatus(status);
-  badge.className = 'status-badge ' + (statusClass(status));
+
+  // Nomor pendaftaran pill
+  document.getElementById('hasil-nomor').textContent = data.no_pendaftaran || '—';
+
+  // Detail info
+  document.getElementById('hasil-nama').textContent     = data.nama || '—';
+  document.getElementById('hasil-program').textContent  = data.program || '—';
+  document.getElementById('hasil-jadwal').textContent   = data.jadwal || data.jadwal_id || '—';
+  document.getElementById('hasil-tanggal').textContent  = formatTanggal(data.timestamp || data.tgl_daftar);
+
+  // Hero status
+  var hero = document.getElementById('status-hero');
+  hero.className = 'status-hero s-' + status;
+  document.getElementById('status-icon').textContent      = ikonStatus(status);
+  document.getElementById('status-hero-label').textContent = 'Status Pendaftaran';
+  document.getElementById('status-hero-text').textContent  = labelStatus(status);
+  document.getElementById('status-hero-desc').textContent  = deskripsiStatus(status);
 
   // Catatan publik
   var catatanBox = document.getElementById('catatan-box');
-  if (data.catatan_publik && data.catatan_publik.trim()) {
-    document.getElementById('hasil-catatan').textContent = data.catatan_publik;
-    catatanBox.style.display = 'block';
+  var catatan = data.catatan_publik || data.catatan || '';
+  if (catatan.trim()) {
+    document.getElementById('hasil-catatan').textContent = catatan;
+    catatanBox.classList.add('visible');
   } else {
-    catatanBox.style.display = 'none';
+    catatanBox.classList.remove('visible');
   }
 
   // Timeline status
   renderTimeline(status);
 
-  document.getElementById('detail-box').classList.add('visible');
-  document.getElementById('detail-box').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Tampilkan result wrapper
+  var wrapper = document.getElementById('result-wrapper');
+  wrapper.classList.add('visible');
+  wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ============================================================================
@@ -125,15 +134,68 @@ function tampilkanHasil(data) {
 // ============================================================================
 
 var ALUR_STATUS = [
-  { key: 'TERDAFTAR',   label: 'Terdaftar',       icon: '📝' },
-  { key: 'BERKAS_OK',   label: 'Berkas Diperiksa', icon: '📋' },
-  { key: 'WAWANCARA',   label: 'Wawancara',        icon: '💬' },
-  { key: 'DITERIMA',    label: 'Diterima',         icon: '✅' }
+  { key: 'TERDAFTAR', label: 'Terdaftar',        sub: 'Data diterima',         icon: '📝' },
+  { key: 'BERKAS_OK', label: 'Berkas Diperiksa',  sub: 'Berkas lengkap',        icon: '📋' },
+  { key: 'WAWANCARA', label: 'Wawancara',          sub: 'Jadwal dikonfirmasi',   icon: '💬' },
+  { key: 'DITERIMA',  label: 'Diterima',           sub: 'Selamat bergabung!',    icon: '✅' }
 ];
 
 function renderTimeline(statusAktif) {
   var container = document.getElementById('status-timeline');
   container.innerHTML = '';
+
+  if (statusAktif === 'DITOLAK') {
+    container.innerHTML =
+      '<div style="display:flex;align-items:center;gap:12px;padding:16px;background:rgba(239,68,68,.06);border-radius:0 0 var(--r) var(--r)">' +
+      '<div style="width:36px;height:36px;border-radius:50%;background:rgba(239,68,68,.12);border:2px solid #fca5a5;display:flex;align-items:center;justify-content:center;flex-shrink:0">❌</div>' +
+      '<div><div style="font-size:0.88rem;font-weight:700;color:#b91c1c">Tidak Diterima</div>' +
+      '<div style="font-size:0.75rem;color:#ef4444;margin-top:2px">Hubungi admin untuk informasi lebih lanjut</div></div></div>';
+    return;
+  }
+
+  var aktifIdx = -1;
+  ALUR_STATUS.forEach(function(s, i) {
+    if (s.key === statusAktif) aktifIdx = i;
+  });
+
+  ALUR_STATUS.forEach(function(s, i) {
+    var done    = i < aktifIdx;
+    var current = i === aktifIdx;
+    var pending = i > aktifIdx;
+
+    var item = document.createElement('div');
+    item.className = 'timeline-item';
+
+    var dot = document.createElement('div');
+    dot.className = 'timeline-dot ' + (done ? 'done' : current ? 'current' : 'pending');
+    dot.textContent = done ? '✓' : s.icon;
+
+    var info = document.createElement('div');
+    info.className = 'timeline-info';
+
+    var name = document.createElement('div');
+    name.className = 'timeline-name' + (pending ? ' pending' : '');
+    name.textContent = s.label;
+
+    var sub = document.createElement('div');
+    sub.className = 'timeline-sub';
+    sub.textContent = done ? s.sub : (current ? 'Tahap saat ini' : 'Menunggu');
+
+    info.appendChild(name);
+    info.appendChild(sub);
+    item.appendChild(dot);
+    item.appendChild(info);
+
+    if (current) {
+      var badge = document.createElement('span');
+      badge.className = 'timeline-badge';
+      badge.textContent = 'Saat ini';
+      item.appendChild(badge);
+    }
+
+    container.appendChild(item);
+  });
+}
 
   if (statusAktif === 'DITOLAK') {
     container.innerHTML =
@@ -190,12 +252,34 @@ function renderTimeline(statusAktif) {
 function labelStatus(status) {
   var map = {
     'TERDAFTAR':  'Terdaftar',
-    'BERKAS_OK':  'Berkas OK',
-    'WAWANCARA':  'Wawancara',
-    'DITERIMA':   'Diterima',
+    'BERKAS_OK':  'Berkas Diperiksa',
+    'WAWANCARA':  'Jadwal Wawancara',
+    'DITERIMA':   'Diterima! 🎉',
     'DITOLAK':    'Tidak Diterima'
   };
   return map[status] || status;
+}
+
+function ikonStatus(status) {
+  var map = {
+    'TERDAFTAR': '📝',
+    'BERKAS_OK': '📋',
+    'WAWANCARA': '💬',
+    'DITERIMA':  '✅',
+    'DITOLAK':   '❌'
+  };
+  return map[status] || '📄';
+}
+
+function deskripsiStatus(status) {
+  var map = {
+    'TERDAFTAR': 'Data pendaftaran Anda telah kami terima. Tim kami sedang memproses berkas Anda.',
+    'BERKAS_OK': 'Berkas Anda telah diperiksa dan dinyatakan lengkap. Menunggu jadwal wawancara.',
+    'WAWANCARA': 'Selamat! Anda dijadwalkan untuk wawancara. Pantau informasi lebih lanjut dari admin.',
+    'DITERIMA':  'Selamat! Anda resmi diterima sebagai murid Rattilil Qur\'an.',
+    'DITOLAK':   'Mohon maaf, pendaftaran Anda belum dapat kami terima. Hubungi admin untuk informasi lebih lanjut.'
+  };
+  return map[status] || '';
 }
 
 function statusClass(status) {

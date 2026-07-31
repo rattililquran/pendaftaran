@@ -11,6 +11,281 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ---- Status Result Enhancements ---- */
+    .result-wrapper {
+      margin-top: 24px;
+      display: none;
+    }
+    .result-wrapper.visible { display: block; animation: fadeUp .3s ease; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero status card */
+    .status-hero {
+      border-radius: var(--r-lg);
+      padding: 28px 24px;
+      text-align: center;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .status-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: .06;
+      background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0);
+      background-size: 20px 20px;
+    }
+
+    .status-hero.s-TERDAFTAR  { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1.5px solid #bfdbfe; }
+    .status-hero.s-BERKAS_OK  { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1.5px solid #bbf7d0; }
+    .status-hero.s-WAWANCARA  { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1.5px solid #fde68a; }
+    .status-hero.s-DITERIMA   { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1.5px solid #bbf7d0; }
+    .status-hero.s-DITOLAK    { background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 1.5px solid #fecaca; }
+
+    .status-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 1.8rem;
+    }
+
+    .s-TERDAFTAR  .status-icon { background: rgba(59,130,246,.15);  }
+    .s-BERKAS_OK  .status-icon { background: rgba(16,185,129,.15);  }
+    .s-WAWANCARA  .status-icon { background: rgba(245,158,11,.15);  }
+    .s-DITERIMA   .status-icon { background: rgba(16,185,129,.15);  }
+    .s-DITOLAK    .status-icon { background: rgba(239,68,68,.15);   }
+
+    .status-hero-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 6px;
+      opacity: .7;
+    }
+
+    .s-TERDAFTAR  .status-hero-label { color: #1d4ed8; }
+    .s-BERKAS_OK  .status-hero-label { color: #047857; }
+    .s-WAWANCARA  .status-hero-label { color: #92400e; }
+    .s-DITERIMA   .status-hero-label { color: #047857; }
+    .s-DITOLAK    .status-hero-label { color: #b91c1c; }
+
+    .status-hero-text {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .s-TERDAFTAR  .status-hero-text { color: #1e40af; }
+    .s-BERKAS_OK  .status-hero-text { color: #065f46; }
+    .s-WAWANCARA  .status-hero-text { color: #78350f; }
+    .s-DITERIMA   .status-hero-text { color: #065f46; }
+    .s-DITOLAK    .status-hero-text { color: #991b1b; }
+
+    .status-hero-desc {
+      font-size: 0.82rem;
+      opacity: .75;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    .s-TERDAFTAR  .status-hero-desc { color: #1d4ed8; }
+    .s-BERKAS_OK  .status-hero-desc { color: #047857; }
+    .s-WAWANCARA  .status-hero-desc { color: #92400e; }
+    .s-DITERIMA   .status-hero-desc { color: #065f46; }
+    .s-DITOLAK    .status-hero-desc { color: #b91c1c; }
+
+    /* Nomor pendaftaran pill */
+    .nomor-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      border: 1.5px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--sh-sm);
+    }
+
+    .nomor-pill-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--ink-3);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .nomor-pill-value {
+      font-family: 'Plus Jakarta Sans', monospace;
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--ink);
+      letter-spacing: .5px;
+    }
+
+    /* Detail info card */
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      overflow: hidden;
+      margin-bottom: 16px;
+      box-shadow: var(--sh-sm);
+    }
+
+    .info-card-header {
+      background: var(--soft);
+      padding: 10px 16px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--ink-3);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      gap: 16px;
+    }
+
+    .info-row:last-child { border-bottom: none; }
+
+    .info-row-label {
+      font-size: 0.82rem;
+      color: var(--ink-3);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .info-row-value {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--ink);
+      text-align: right;
+    }
+
+    /* Catatan admin */
+    .catatan-admin {
+      background: linear-gradient(135deg, #fffbeb, #fef9c3);
+      border: 1.5px solid #fde68a;
+      border-radius: var(--r);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .catatan-admin.visible { display: block; animation: fadeUp .3s ease; }
+
+    .catatan-admin-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #92400e;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 8px;
+    }
+
+    .catatan-admin-text {
+      font-size: 0.9rem;
+      color: #78350f;
+      line-height: 1.6;
+    }
+
+    /* Timeline enhanced */
+    .timeline-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      overflow: hidden;
+      box-shadow: var(--sh-sm);
+    }
+
+    .timeline-header {
+      background: var(--soft);
+      padding: 10px 16px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--ink-3);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .timeline-body { padding: 8px 0; }
+
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      position: relative;
+    }
+
+    .timeline-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      border: 2px solid transparent;
+      transition: all .2s;
+    }
+
+    .timeline-dot.done    { background: rgba(16,185,129,.12); border-color: #6ee7b7; color: #047857; }
+    .timeline-dot.current { background: var(--soft); border-color: var(--primary); color: var(--primary-3); box-shadow: 0 0 0 4px rgba(14,165,233,.1); }
+    .timeline-dot.pending { background: var(--bg); border-color: var(--line); color: var(--ink-4); }
+
+    .timeline-info { flex: 1; }
+
+    .timeline-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .timeline-name.pending { color: var(--ink-4); font-weight: 500; }
+
+    .timeline-sub {
+      font-size: 0.75rem;
+      color: var(--ink-4);
+      margin-top: 2px;
+    }
+
+    .timeline-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--grad);
+      color: white;
+      white-space: nowrap;
+    }
+  </style>
 </head>
 <body>
   <!-- Background orbs -->
@@ -47,7 +322,7 @@
 
       <!-- Form Cek Status -->
       <div class="card">
-        <h1 class="card-title">Status Pendaftaran</h1>
+        <h1 class="card-title">Cek Status Pendaftaran</h1>
         <p class="card-subtitle">
           Masukkan nomor pendaftaran dan tanggal lahir untuk melihat status terkini.
         </p>
@@ -60,9 +335,10 @@
             class="form-input"
             type="text"
             id="no_pendaftaran"
-            placeholder="Contoh: RTL24180001"
+            placeholder="Contoh: RTL24180400"
             autocomplete="off"
             autocapitalize="characters"
+            style="font-family:'Plus Jakarta Sans',monospace;font-weight:700;letter-spacing:.5px"
             required
           >
           <div class="form-hint">Format: RTL2418 diikuti 4 angka</div>
@@ -85,55 +361,69 @@
 
         <button class="btn btn-primary" id="btn-cek" onclick="cekStatus()">
           <div class="spinner" aria-hidden="true"></div>
-          <span class="btn-text">Cek Status</span>
+          <span class="btn-text">Cek Status Sekarang</span>
         </button>
+      </div>
 
-        <!-- Hasil -->
-        <div class="detail-box" id="detail-box">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:8px">
-            <div>
-              <div style="font-size:0.8rem; color:var(--ink-4); margin-bottom:4px">Nomor Pendaftaran</div>
-              <div style="font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.2rem; color:var(--ink)" id="hasil-nomor">—</div>
-            </div>
-            <div id="hasil-badge" class="status-badge status-TERDAFTAR">TERDAFTAR</div>
-          </div>
+      <!-- ===== HASIL ===== -->
+      <div class="result-wrapper" id="result-wrapper">
 
-          <div style="background:var(--bg); border-radius:12px; padding:16px">
-            <div class="konfirmasi-row" style="border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:8px">
-              <span class="label">Nama</span>
-              <span class="value" id="hasil-nama">—</span>
-            </div>
-            <div class="konfirmasi-row" style="border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:8px">
-              <span class="label">Program</span>
-              <span class="value" id="hasil-program">—</span>
-            </div>
-            <div class="konfirmasi-row" style="border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:8px">
-              <span class="label">Jadwal</span>
-              <span class="value" id="hasil-jadwal">—</span>
-            </div>
-            <div class="konfirmasi-row">
-              <span class="label">Terdaftar sejak</span>
-              <span class="value" id="hasil-tanggal">—</span>
-            </div>
-          </div>
-
-          <!-- Catatan publik jika ada -->
-          <div id="catatan-box" style="display:none; margin-top:16px; background:var(--soft); border-radius:12px; padding:16px">
-            <div style="font-size:0.8rem; font-weight:600; color:var(--primary-3); margin-bottom:4px">Catatan dari Admin</div>
-            <div style="font-size:0.9rem; color:var(--ink)" id="hasil-catatan">—</div>
-          </div>
-
-          <!-- Timeline status -->
-          <div style="margin-top:20px">
-            <div style="font-size:0.8rem; font-weight:600; color:var(--ink-3); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px">Alur Status</div>
-            <div class="status-timeline" id="status-timeline"></div>
+        <!-- Nomor pendaftaran pill -->
+        <div style="text-align:center;margin-bottom:16px">
+          <div class="nomor-pill">
+            <span class="nomor-pill-label">No. Daftar</span>
+            <span class="nomor-pill-value" id="hasil-nomor">—</span>
           </div>
         </div>
-      </div>
 
-      <div style="text-align:center; margin-top:20px">
-        <a href="index.html" class="btn btn-ghost">← Kembali ke Form Pendaftaran</a>
-      </div>
+        <!-- Hero status -->
+        <div class="status-hero" id="status-hero">
+          <div class="status-icon" id="status-icon">📝</div>
+          <div class="status-hero-label" id="status-hero-label">Status Pendaftaran</div>
+          <div class="status-hero-text" id="status-hero-text">—</div>
+          <div class="status-hero-desc" id="status-hero-desc"></div>
+        </div>
+
+        <!-- Catatan admin -->
+        <div class="catatan-admin" id="catatan-box">
+          <div class="catatan-admin-header">
+            <span>📢</span> Pesan dari Admin
+          </div>
+          <div class="catatan-admin-text" id="hasil-catatan">—</div>
+        </div>
+
+        <!-- Detail info -->
+        <div class="info-card">
+          <div class="info-card-header">Detail Pendaftaran</div>
+          <div class="info-row">
+            <span class="info-row-label">Nama</span>
+            <span class="info-row-value" id="hasil-nama">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Program</span>
+            <span class="info-row-value" id="hasil-program">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Jadwal</span>
+            <span class="info-row-value" id="hasil-jadwal">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Terdaftar sejak</span>
+            <span class="info-row-value" id="hasil-tanggal">—</span>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-card">
+          <div class="timeline-header">Alur Proses Pendaftaran</div>
+          <div class="timeline-body" id="status-timeline"></div>
+        </div>
+
+        <div style="text-align:center;margin-top:20px">
+          <a href="index.html" class="btn btn-ghost">← Kembali ke Form Pendaftaran</a>
+        </div>
+
+      </div><!-- /result-wrapper -->
 
     </div><!-- /container -->
 
