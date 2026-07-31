@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1f35">
+  <title>Ajak Saudara Bergabung — Rattilil Qur'an</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .share-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-xl);padding:32px 28px;box-shadow:var(--sh)}
+    .hadits-box{background:linear-gradient(135deg,#fff8f0,#fff3e0);border:1.5px solid #fde68a;border-radius:var(--r);padding:20px;margin:20px 0;text-align:center}
+    .hadits-arab{font-family:'Amiri',serif;font-size:1.4rem;color:#92400e;line-height:2;margin-bottom:10px}
+    .hadits-terjemah{font-size:0.85rem;color:#78350f;font-style:italic;line-height:1.7;margin-bottom:8px}
+    .hadits-sumber{font-size:0.75rem;color:#92400e;font-weight:700;opacity:.7}
+    .pesan-box{background:var(--soft);border:1.5px solid rgba(14,165,233,.2);border-radius:var(--r);padding:16px;margin:20px 0;text-align:left;position:relative}
+    .pesan-box-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--primary-3);margin-bottom:8px}
+    .pesan-teks{white-space:pre-line;font-size:0.82rem;color:var(--ink-2);line-height:1.7}
+    .btn-copy-pesan{position:absolute;top:12px;right:12px;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:5px 10px;font-size:0.72rem;font-weight:700;color:var(--primary);cursor:pointer;transition:all .15s;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+    .btn-copy-pesan:hover{background:var(--soft);border-color:var(--primary)}
+    .btn-copy-pesan.copied{background:rgba(16,185,129,.1);border-color:#10b981;color:#047857}
+    .share-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}
+    .share-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:var(--r-sm);font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:0.85rem;font-weight:700;border:none;cursor:pointer;text-decoration:none;transition:transform .15s,box-shadow .2s}
+    .share-btn:hover{transform:translateY(-2px)}
+    .share-wa{background:#25D366;color:white;box-shadow:0 4px 14px rgba(37,211,102,.35);grid-column:1/-1;font-size:0.95rem;padding:14px}
+    .share-wa:hover{box-shadow:0 8px 20px rgba(37,211,102,.45)}
+    .share-fb{background:#1877f2;color:white;box-shadow:0 4px 14px rgba(24,119,242,.3)}
+    .share-tw{background:#000;color:white;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+    .share-link{background:var(--card);color:var(--ink);border:1.5px solid var(--line);box-shadow:var(--sh-sm);grid-column:1/-1}
+    .share-link:hover{border-color:var(--primary);color:var(--primary)}
+    .doa-box{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #bbf7d0;border-radius:var(--r);padding:16px;margin-top:20px;text-align:center}
+    .doa-arab{font-family:'Amiri',serif;font-size:1.1rem;color:#047857;margin-bottom:6px;line-height:1.8}
+    .doa-terjemah{font-size:0.78rem;color:#065f46;font-style:italic;line-height:1.6}
+    @media(max-width:480px){.share-card{padding:22px 16px}.share-grid{grid-template-columns:1fr}.share-wa,.share-link{grid-column:auto}}
+  </style>
+</head>
+<body>
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
+  <div class="orb orb-3" aria-hidden="true"></div>
+  <div class="page-wrapper">
+    <div class="container">
+      <header class="site-header">
+        <img src="https://raw.githubusercontent.com/rattililquran/rattililquran.github.io/main/assets/images/logo-abu.png" alt="Logo Rattilil Qur'an" class="site-logo">
+        <p class="site-quote">SEBUAH IKHTIAR MENJADI MANUSIA TERBAIK</p>
+      </header>
+      <div class="share-card">
+        <div style="font-family:'Amiri',serif;font-size:1.3rem;color:#c0392b;text-align:center;margin-bottom:12px;line-height:2">بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيمِ</div>
+        <h1 style="font-size:1.15rem;font-weight:800;color:var(--ink);margin-bottom:8px;text-align:center">Mari Berlomba-lomba dalam Kebaikan</h1>
+        <p style="font-size:0.85rem;color:var(--ink-3);line-height:1.7;text-align:center;margin-bottom:4px">Alhamdulillah, pendaftaran Anda telah berhasil.<br>Kini ajak saudara-saudara Anda untuk ikut bergabung.</p>
+        <div class="hadits-box">
+          <div class="hadits-arab">اَلدَّالُّ عَلَى الْخَيْرِ كَفَاعِلِهِ</div>
+          <div class="hadits-terjemah">"Orang yang menunjukkan kepada kebaikan,<br>maka ia mendapatkan pahala seperti orang yang melakukannya."</div>
+          <div class="hadits-sumber">HR. Muslim &amp; Tirmidzi</div>
+        </div>
+        <p style="font-size:0.85rem;color:var(--ink-2);line-height:1.7;margin-bottom:0">Setiap orang yang Anda ajak untuk belajar Al-Qur'an, insya Allah menjadi <strong>amal jariyah</strong> yang pahalanya terus mengalir bahkan setelah kita tiada. Jangan tahan kebaikan hanya untuk diri sendiri — sebarkan kepada keluarga, sahabat, dan siapapun yang Anda kenal. 🤲</p>
+        <div class="pesan-box">
+          <div class="pesan-box-label">Pesan siap bagikan</div>
+          <button class="btn-copy-pesan" id="btn-copy-pesan" onclick="copyPesan()">⎘ Salin</button>
+          <div class="pesan-teks" id="pesan-teks"></div>
+        </div>
+        <div class="share-grid">
+          <a class="share-btn share-wa" href="#" onclick="shareWA(event)" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Bagikan via WhatsApp
+          </a>
+          <a class="share-btn share-fb" href="#" onclick="shareFB(event)" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            Facebook
+          </a>
+          <a class="share-btn share-tw" href="#" onclick="shareTW(event)" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            X (Twitter)
+          </a>
+          <button class="share-btn share-link" onclick="copyLink()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            <span id="copy-link-text">Salin Link Pendaftaran</span>
+          </button>
+        </div>
+        <div class="doa-box">
+          <div class="doa-arab">مَنْ دَلَّ عَلَى خَيْرٍ فَلَهُ مِثْلُ أَجْرِ فَاعِلِهِ</div>
+          <div class="doa-terjemah">Semoga setiap langkah Anda dalam mengajak kebaikan menjadi amal jariyah.<br><strong>بَارَكَ اللهُ فِيكُمْ وَجَزَاكُمُ اللهُ خَيْرًا</strong></div>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:10px">
+          <a href="index.html" class="btn btn-secondary" style="flex:1;text-align:center">← Daftar Lagi</a>
+          <a href="https://rattililquran.github.io/" class="btn btn-primary" style="flex:1">Ke Beranda →</a>
+        </div>
+      </div>
+    </div>
+    <footer class="site-footer">
+      <p>© <span id="tahun-footer"></span> Rattilil Qur'an</p>
+    </footer>
+  </div>
+  <script src="js/config.js"></script>
+  <script>
+    document.getElementById('tahun-footer').textContent = new Date().getFullYear();
+    var LINK = 'https://rattililquran.github.io/pendaftaran/';
+    var pesanWA =
+      'Assalamu\'alaikum warahmatullahi wabarakatuh 🌙\n\n' +
+      'Alhamdulillah, saya baru saja mendaftarkan diri ke *Rattilil Qur\'an* — lembaga Tahfizh Al-Qur\'an.\n\n' +
+      '📖 *Rattilil Qur\'an* membuka pendaftaran murid baru untuk program Tahfizh Al-Qur\'an.\n\n' +
+      '✨ Rasulullah ﷺ bersabda:\n' +
+      '_"اَلدَّالُّ عَلَى الْخَيْرِ كَفَاعِلِهِ"_\n' +
+      '_"Orang yang menunjukkan kepada kebaikan, mendapat pahala seperti pelakunya."_\n' +
+      '_(HR. Muslim & Tirmidzi)_\n\n' +
+      'Mari kita berlomba-lomba mengajak saudara kita bergabung dalam kebaikan ini.\n' +
+      'Semoga menjadi amal jariyah untuk kita semua. 🤲\n\n' +
+      '👇 Daftar sekarang:\n' + LINK;
+    document.getElementById('pesan-teks').textContent = pesanWA;
+    function shareWA(e){e.preventDefault();window.open('https://wa.me/?text='+encodeURIComponent(pesanWA),'_blank')}
+    function shareFB(e){e.preventDefault();window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(LINK),'_blank','width=600,height=400')}
+    function shareTW(e){e.preventDefault();var t='Alhamdulillah! Baru mendaftar ke Rattilil Quran\nMari berlomba dalam kebaikan! '+LINK;window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(t),'_blank')}
+    function copyLink(){navigator.clipboard.writeText(LINK).then(function(){var el=document.getElementById('copy-link-text');el.textContent='✓ Link Tersalin!';setTimeout(function(){el.textContent='Salin Link Pendaftaran'},2500)})}
+    function copyPesan(){navigator.clipboard.writeText(pesanWA).then(function(){var btn=document.getElementById('btn-copy-pesan');btn.textContent='✓ Tersalin!';btn.classList.add('copied');setTimeout(function(){btn.textContent='⎘ Salin';btn.classList.remove('copied')},2500)})}
+  </script>
+</body>
+</html>

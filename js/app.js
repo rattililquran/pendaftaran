@@ -389,19 +389,22 @@ function salinNomor() {
   var nomor = document.getElementById('nomor-pendaftaran').textContent;
   var btn   = document.getElementById('btn-salin');
 
+  function redirectKeShare() {
+    setTimeout(function () {
+      window.location.href = 'share.html?no=' + encodeURIComponent(nomor);
+    }, 1200);
+  }
+
   if (navigator.clipboard) {
     navigator.clipboard.writeText(nomor).then(function () {
       btn.classList.add('copied');
       document.getElementById('salin-icon').textContent = '✓';
-      document.getElementById('salin-text').textContent = 'Tersalin!';
-      setTimeout(function () {
-        btn.classList.remove('copied');
-        document.getElementById('salin-icon').textContent = '⎘';
-        document.getElementById('salin-text').textContent = 'Salin Nomor';
-      }, 2500);
+      document.getElementById('salin-text').textContent = 'Tersalin! Mengalihkan...';
+      redirectKeShare();
+    }).catch(function() {
+      redirectKeShare();
     });
   } else {
-    // Fallback untuk browser lama
     var el = document.createElement('textarea');
     el.value = nomor;
     el.style.position = 'fixed';
@@ -411,11 +414,8 @@ function salinNomor() {
     document.execCommand('copy');
     document.body.removeChild(el);
     btn.classList.add('copied');
-    document.getElementById('salin-text').textContent = 'Tersalin!';
-    setTimeout(function () {
-      btn.classList.remove('copied');
-      document.getElementById('salin-text').textContent = 'Salin Nomor';
-    }, 2500);
+    document.getElementById('salin-text').textContent = 'Tersalin! Mengalihkan...';
+    redirectKeShare();
   }
 }
 
