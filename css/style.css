@@ -665,7 +665,69 @@ body {
   .step-label { display: none; }
 }
 
-/* ---- Skeleton Loading ---- */
+/* ---- Gender Selector ---- */
+.gender-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.gender-card {
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  transition: all 0.15s ease;
+  background: var(--bg);
+  min-height: 56px;
+}
+
+.gender-card:hover {
+  border-color: var(--sky-bright);
+  background: var(--sky-soft);
+}
+
+.gender-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gender-card.selected {
+  border-color: var(--sky);
+  background: var(--sky-soft);
+  box-shadow: 0 0 0 3px var(--sky-soft);
+}
+
+.gender-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.gender-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+/* ---- Step 2 subtitle gender info ---- */
+.gender-info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--sky-soft);
+  color: var(--sky-deep);
+  border-radius: var(--radius-full);
+  padding: 4px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
 .skeleton {
   background: linear-gradient(90deg, var(--surface-sunken) 25%, var(--outline) 50%, var(--surface-sunken) 75%);
   background-size: 200% 100%;

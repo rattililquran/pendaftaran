@@ -89,7 +89,7 @@
 
         <div class="form-group">
           <label class="form-label" for="email">
-            Email <span style="color:var(--ink-subtle);font-weight:400">(opsional)</span>
+            Email <span class="required" aria-hidden="true">*</span>
           </label>
           <input
             class="form-input"
@@ -118,6 +118,25 @@
           <div class="form-error" id="err-tgl_lahir">Tanggal lahir wajib diisi.</div>
         </div>
 
+        <div class="form-group">
+          <label class="form-label">
+            Jenis Kelamin <span class="required" aria-hidden="true">*</span>
+          </label>
+          <div class="gender-row" role="radiogroup" aria-label="Pilih jenis kelamin">
+            <label class="gender-card" id="label-putra">
+              <input type="radio" name="gender" id="gender-putra" value="Putra">
+              <span class="gender-icon">♂</span>
+              <span class="gender-label">Putra</span>
+            </label>
+            <label class="gender-card" id="label-putri">
+              <input type="radio" name="gender" id="gender-putri" value="Putri">
+              <span class="gender-icon">♀</span>
+              <span class="gender-label">Putri</span>
+            </label>
+          </div>
+          <div class="form-error" id="err-gender">Jenis kelamin wajib dipilih.</div>
+        </div>
+
         <div class="btn-row">
           <button class="btn btn-primary" id="btn-next-1" onclick="keStep2()">
             <span class="btn-text">Lanjut →</span>
@@ -128,7 +147,8 @@
       <!-- ==================== STEP 2: PILIH JADWAL ==================== -->
       <div class="card" id="step-2" style="display:none">
         <h2 class="card-title">Pilih Jadwal</h2>
-        <p class="card-subtitle">Pilih jadwal belajar yang sesuai. Jadwal yang penuh tidak dapat dipilih.</p>
+        <p class="card-subtitle">Jadwal ditampilkan sesuai jenis kelamin yang dipilih.</p>
+        <div class="gender-info-badge" id="gender-badge">👤 <span id="gender-badge-text">—</span></div>
 
         <div id="jadwal-loading">
           <div class="skeleton"></div>
@@ -171,6 +191,10 @@
           <div class="konfirmasi-row">
             <span class="label">Tanggal Lahir</span>
             <span class="value" id="konfirm-tgl">—</span>
+          </div>
+          <div class="konfirmasi-row">
+            <span class="label">Jenis Kelamin</span>
+            <span class="value" id="konfirm-gender">—</span>
           </div>
           <div class="konfirmasi-row">
             <span class="label">Program</span>

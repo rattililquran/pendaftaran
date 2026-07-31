@@ -11,7 +11,8 @@ var state = {
   step: 1,
   jadwalList: [],
   jadwalTerpilih: null,
-  clientToken: null
+  clientToken: null,
+  gender: null
 };
 
 // ============================================================================
@@ -21,6 +22,23 @@ var state = {
 document.addEventListener('DOMContentLoaded', function () {
   state.clientToken = generateToken();
   updateStepUI(1);
+
+  // Event listener gender
+  ['gender-putra', 'gender-putri'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', function() {
+      state.gender = this.value;
+      state.jadwalTerpilih = null; // reset jadwal saat gender berubah
+
+      // Update visual selected
+      document.querySelectorAll('.gender-card').forEach(function(c) {
+        c.classList.remove('selected');
+      });
+      el.closest('.gender-card').classList.add('selected');
+      tampilkanError('gender', false);
+    });
+  });
 });
 
 // ============================================================================
@@ -34,6 +52,9 @@ function keStep1() {
 function keStep2() {
   if (!validasiStep1()) return;
   updateStepUI(2);
+  // Tampilkan badge gender di step 2
+  var badgeText = document.getElementById('gender-badge-text');
+  if (badgeText) badgeText.textContent = state.gender || '—';
   muatJadwal();
 }
 
@@ -88,10 +109,10 @@ function updateStepUI(step) {
 function validasiStep1() {
   var valid = true;
 
-  var nama = document.getElementById('nama').value.trim();
-  var hp   = document.getElementById('hp').value.trim();
+  var nama  = document.getElementById('nama').value.trim();
+  var hp    = document.getElementById('hp').value.trim();
   var email = document.getElementById('email').value.trim();
-  var tgl  = document.getElementById('tgl_lahir').value;
+  var tgl   = document.getElementById('tgl_lahir').value;
 
   // Nama
   if (!nama) {
@@ -110,8 +131,8 @@ function validasiStep1() {
     tampilkanError('hp', false);
   }
 
-  // Email (opsional tapi harus valid jika diisi)
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  // Email (wajib diisi dan harus valid)
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     tampilkanError('email', true);
     valid = false;
   } else {
@@ -124,6 +145,16 @@ function validasiStep1() {
     valid = false;
   } else {
     tampilkanError('tgl_lahir', false);
+  }
+
+  // Gender
+  var genderEl = document.querySelector('input[name="gender"]:checked');
+  if (!genderEl) {
+    tampilkanError('gender', true);
+    valid = false;
+  } else {
+    state.gender = genderEl.value;
+    tampilkanError('gender', false);
   }
 
   return valid;
@@ -156,8 +187,11 @@ function tampilkanError(field, tampil) {
 // ============================================================================
 
 function muatJadwal() {
+  // Reset jadwal terpilih saat masuk step 2
+  state.jadwalTerpilih = null;
+
   if (state.jadwalList.length > 0) {
-    renderJadwal(state.jadwalList);
+    renderJadwal(filterJadwalByGender(state.jadwalList));
     return;
   }
 
@@ -169,7 +203,7 @@ function muatJadwal() {
       document.getElementById('jadwal-loading').style.display = 'none';
       if (res.ok && res.data) {
         state.jadwalList = res.data;
-        renderJadwal(res.data);
+        renderJadwal(filterJadwalByGender(res.data));
       } else {
         tampilkanAlert('Gagal memuat jadwal. Silakan muat ulang halaman.');
       }
@@ -178,6 +212,15 @@ function muatJadwal() {
       document.getElementById('jadwal-loading').style.display = 'none';
       tampilkanAlert('Koneksi bermasalah. Periksa internet Anda dan coba lagi.');
     });
+}
+
+function filterJadwalByGender(list) {
+  if (!state.gender) return list;
+  return list.filter(function(j) {
+    // Tampilkan jika gender cocok atau field gender kosong (untuk semua)
+    if (!j.gender) return true;
+    return j.gender.toLowerCase() === state.gender.toLowerCase();
+  });
 }
 
 function renderJadwal(list) {
@@ -260,6 +303,7 @@ function isiKonfirmasi() {
   document.getElementById('konfirm-hp').textContent      = document.getElementById('hp').value.trim();
   document.getElementById('konfirm-email').textContent   = document.getElementById('email').value.trim() || '—';
   document.getElementById('konfirm-tgl').textContent     = formatTanggal(document.getElementById('tgl_lahir').value);
+  document.getElementById('konfirm-gender').textContent  = state.gender || '—';
   document.getElementById('konfirm-program').textContent = j ? j.program : '—';
   document.getElementById('konfirm-jadwal').textContent  = j ? (j.hari + ', ' + j.jam) : '—';
 }
@@ -279,6 +323,7 @@ function submitPendaftaran() {
     hp:           document.getElementById('hp').value.trim(),
     email:        document.getElementById('email').value.trim(),
     tgl_lahir:    document.getElementById('tgl_lahir').value,
+    gender:       state.gender || '',
     jadwal_id:    state.jadwalTerpilih ? state.jadwalTerpilih.jadwal_id : '',
     program:      state.jadwalTerpilih ? state.jadwalTerpilih.program : '',
     client_token: state.clientToken
