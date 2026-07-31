@@ -441,7 +441,7 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
 }
 
 .jadwal-card:hover:not(.penuh) {
-  border-color: var(--primary);
+  border-color: #c0392b;
   transform: translateY(-2px);
   box-shadow: var(--sh);
 }
