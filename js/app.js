@@ -405,22 +405,28 @@ function salinNomor() {
 
 function fetchBackend(method, params) {
   var url = CONFIG.BACKEND_URL;
-  var options = {
-    method: method,
-    headers: { 'Content-Type': 'application/json' }
-  };
 
   if (method === 'GET') {
     var qs = Object.keys(params).map(function(k) {
       return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
     }).join('&');
     url = url + '?' + qs;
-  } else {
-    options.body = JSON.stringify(params);
+    return Promise.race([
+      fetch(url).then(function(r) { return r.json(); }),
+      new Promise(function(_, reject) {
+        setTimeout(function() { reject(new Error('timeout')); }, CONFIG.REQUEST_TIMEOUT || 30000);
+      })
+    ]);
   }
 
+  // POST — kirim sebagai form-encoded agar tidak trigger preflight CORS
+  var formData = new FormData();
+  Object.keys(params).forEach(function(k) {
+    formData.append(k, params[k]);
+  });
+
   return Promise.race([
-    fetch(url, options).then(function(r) { return r.json(); }),
+    fetch(url, { method: 'POST', body: formData }).then(function(r) { return r.json(); }),
     new Promise(function(_, reject) {
       setTimeout(function() { reject(new Error('timeout')); }, CONFIG.REQUEST_TIMEOUT || 30000);
     })
