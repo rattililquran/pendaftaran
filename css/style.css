@@ -421,7 +421,6 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
   box-shadow: 0 0 0 3px rgba(14,165,233,.15);
 }
 
-.gender-icon { font-size: 1.4rem; line-height: 1; }
 .gender-label { font-weight: 700; font-size: 0.9rem; color: var(--ink); }
 
 /* ---- Jadwal Cards ---- */
