@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#3B82F6">
+  <title>Cek Status Pendaftaran — Rattilil Qur'an</title>
+  <meta name="description" content="Cek status pendaftaran murid baru Rattilil Qur'an menggunakan nomor pendaftaran dan tanggal lahir.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="container">
+
+      <!-- Header -->
+      <header class="site-header">
+        <div class="logo">Rattilil <span>Qur'an</span></div>
+        <p class="tagline">Cek Status Pendaftaran</p>
+      </header>
+
+      <!-- Alert Banner -->
+      <div class="alert alert-error" id="alert-banner" role="alert">
+        <span class="alert-icon">⚠</span>
+        <span id="alert-message"></span>
+      </div>
+
+      <!-- Form Cek Status -->
+      <div class="card">
+        <h1 class="card-title">Status Pendaftaran</h1>
+        <p class="card-subtitle">
+          Masukkan nomor pendaftaran dan tanggal lahir untuk melihat status terkini.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" for="no_pendaftaran">
+            Nomor Pendaftaran <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="form-input"
+            type="text"
+            id="no_pendaftaran"
+            placeholder="Contoh: RTL24180001"
+            autocomplete="off"
+            autocapitalize="characters"
+            style="text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-display); font-weight:700"
+            required
+          >
+          <div class="form-hint">Format: RTL2418 diikuti 4 angka</div>
+          <div class="form-error" id="err-no">Nomor pendaftaran wajib diisi.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tgl_verif">
+            Tanggal Lahir <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="form-input"
+            type="date"
+            id="tgl_verif"
+            required
+          >
+          <div class="form-hint">Digunakan sebagai verifikasi identitas.</div>
+          <div class="form-error" id="err-tgl">Tanggal lahir wajib diisi.</div>
+        </div>
+
+        <button class="btn btn-primary" id="btn-cek" onclick="cekStatus()">
+          <div class="spinner" aria-hidden="true"></div>
+          <span class="btn-text">Cek Status</span>
+        </button>
+
+        <!-- Hasil -->
+        <div class="detail-box" id="detail-box">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-4); flex-wrap:wrap; gap:var(--space-2)">
+            <div>
+              <div style="font-size:0.8rem; color:var(--ink-subtle); margin-bottom:4px">Nomor Pendaftaran</div>
+              <div style="font-family:var(--font-display); font-weight:800; font-size:1.2rem; color:var(--ink)" id="hasil-nomor">—</div>
+            </div>
+            <div id="hasil-badge" class="status-badge status-TERDAFTAR">TERDAFTAR</div>
+          </div>
+
+          <div style="background:var(--surface-sunken); border-radius:var(--radius-md); padding:var(--space-4)">
+            <div class="konfirmasi-row" style="border-bottom:1px solid var(--outline); padding-bottom:var(--space-2); margin-bottom:var(--space-2)">
+              <span class="label">Nama</span>
+              <span class="value" id="hasil-nama">—</span>
+            </div>
+            <div class="konfirmasi-row" style="border-bottom:1px solid var(--outline); padding-bottom:var(--space-2); margin-bottom:var(--space-2)">
+              <span class="label">Program</span>
+              <span class="value" id="hasil-program">—</span>
+            </div>
+            <div class="konfirmasi-row" style="border-bottom:1px solid var(--outline); padding-bottom:var(--space-2); margin-bottom:var(--space-2)">
+              <span class="label">Jadwal</span>
+              <span class="value" id="hasil-jadwal">—</span>
+            </div>
+            <div class="konfirmasi-row">
+              <span class="label">Terdaftar sejak</span>
+              <span class="value" id="hasil-tanggal">—</span>
+            </div>
+          </div>
+
+          <!-- Catatan publik jika ada -->
+          <div id="catatan-box" style="display:none; margin-top:var(--space-4); background:var(--sky-soft); border-radius:var(--radius-md); padding:var(--space-4)">
+            <div style="font-size:0.8rem; font-weight:600; color:var(--sky-deep); margin-bottom:4px">Catatan dari Admin</div>
+            <div style="font-size:0.9rem; color:var(--ink)" id="hasil-catatan">—</div>
+          </div>
+
+          <!-- Timeline status -->
+          <div style="margin-top:var(--space-5)">
+            <div style="font-size:0.8rem; font-weight:600; color:var(--ink-muted); margin-bottom:var(--space-3); text-transform:uppercase; letter-spacing:0.5px">Alur Status</div>
+            <div class="status-timeline" id="status-timeline"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center; margin-top:var(--space-5)">
+        <a href="index.html" class="btn btn-ghost">← Kembali ke Form Pendaftaran</a>
+      </div>
+
+    </div><!-- /container -->
+
+    <footer class="site-footer">
+      <p>© 2026 Rattilil Qur'an</p>
+    </footer>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/status.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function() {});
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#3B82F6">
+  <title>Pendaftaran Murid Baru — Rattilil Qur'an</title>
+  <meta name="description" content="Daftar sebagai murid baru Rattilil Qur'an. Isi formulir online dan dapatkan nomor pendaftaran Anda.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="container">
+
+      <!-- Header -->
+      <header class="site-header">
+        <div class="logo">Rattilil <span>Qur'an</span></div>
+        <p class="tagline">Pendaftaran Murid Baru</p>
+      </header>
+
+      <!-- Progress Steps -->
+      <div class="steps" id="steps" aria-label="Langkah pendaftaran">
+        <div class="step active" id="step-ind-1">
+          <div class="step-dot" aria-label="Langkah 1">1</div>
+          <div class="step-label">Data Diri</div>
+        </div>
+        <div class="step-line" id="line-1"></div>
+        <div class="step" id="step-ind-2">
+          <div class="step-dot" aria-label="Langkah 2">2</div>
+          <div class="step-label">Jadwal</div>
+        </div>
+        <div class="step-line" id="line-2"></div>
+        <div class="step" id="step-ind-3">
+          <div class="step-dot" aria-label="Langkah 3">3</div>
+          <div class="step-label">Konfirmasi</div>
+        </div>
+      </div>
+
+      <!-- Alert Banner -->
+      <div class="alert alert-error" id="alert-banner" role="alert">
+        <span class="alert-icon">⚠</span>
+        <span id="alert-message"></span>
+      </div>
+
+      <!-- ==================== STEP 1: DATA DIRI ==================== -->
+      <div class="card" id="step-1">
+        <h1 class="card-title">Data Diri</h1>
+        <p class="card-subtitle">Isi informasi dasar calon murid dengan lengkap dan benar.</p>
+
+        <div class="form-group">
+          <label class="form-label" for="nama">
+            Nama Lengkap <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="form-input"
+            type="text"
+            id="nama"
+            name="nama"
+            placeholder="Contoh: Ahmad Fauzan"
+            autocomplete="name"
+            required
+          >
+          <div class="form-error" id="err-nama">Nama lengkap wajib diisi.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="hp">
+            No. HP / WhatsApp <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="form-input"
+            type="tel"
+            id="hp"
+            name="hp"
+            placeholder="Contoh: 08123456789"
+            autocomplete="tel"
+            inputmode="numeric"
+            required
+          >
+          <div class="form-hint">Pastikan nomor aktif — konfirmasi akan dikirim ke nomor ini.</div>
+          <div class="form-error" id="err-hp">Nomor HP tidak valid. Gunakan format 08xxxxxxxxxx.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">
+            Email <span style="color:var(--ink-subtle);font-weight:400">(opsional)</span>
+          </label>
+          <input
+            class="form-input"
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Contoh: ahmad@email.com"
+            autocomplete="email"
+          >
+          <div class="form-hint">Untuk menerima email konfirmasi dengan nomor pendaftaran.</div>
+          <div class="form-error" id="err-email">Format email tidak valid.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tgl_lahir">
+            Tanggal Lahir <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="form-input"
+            type="date"
+            id="tgl_lahir"
+            name="tgl_lahir"
+            required
+          >
+          <div class="form-hint">Digunakan sebagai data verifikasi saat cek status.</div>
+          <div class="form-error" id="err-tgl_lahir">Tanggal lahir wajib diisi.</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-next-1" onclick="keStep2()">
+            <span class="btn-text">Lanjut →</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== STEP 2: PILIH JADWAL ==================== -->
+      <div class="card" id="step-2" style="display:none">
+        <h2 class="card-title">Pilih Jadwal</h2>
+        <p class="card-subtitle">Pilih jadwal belajar yang sesuai. Jadwal yang penuh tidak dapat dipilih.</p>
+
+        <div id="jadwal-loading">
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+          <div class="skeleton" style="height:60px"></div>
+        </div>
+
+        <div class="jadwal-grid" id="jadwal-grid" role="radiogroup" aria-label="Pilih jadwal"></div>
+
+        <div class="form-error visible" id="err-jadwal" style="display:none; margin-top:8px">
+          Pilih salah satu jadwal terlebih dahulu.
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="keStep1()">← Kembali</button>
+          <button class="btn btn-primary" id="btn-next-2" onclick="keStep3()">
+            <span class="btn-text">Lanjut →</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== STEP 3: KONFIRMASI ==================== -->
+      <div class="card" id="step-3" style="display:none">
+        <h2 class="card-title">Konfirmasi Data</h2>
+        <p class="card-subtitle">Periksa kembali data Anda sebelum mengirim pendaftaran.</p>
+
+        <div class="konfirmasi-box">
+          <div class="konfirmasi-row">
+            <span class="label">Nama Lengkap</span>
+            <span class="value" id="konfirm-nama">—</span>
+          </div>
+          <div class="konfirmasi-row">
+            <span class="label">No. HP</span>
+            <span class="value" id="konfirm-hp">—</span>
+          </div>
+          <div class="konfirmasi-row">
+            <span class="label">Email</span>
+            <span class="value" id="konfirm-email">—</span>
+          </div>
+          <div class="konfirmasi-row">
+            <span class="label">Tanggal Lahir</span>
+            <span class="value" id="konfirm-tgl">—</span>
+          </div>
+          <div class="konfirmasi-row">
+            <span class="label">Program</span>
+            <span class="value" id="konfirm-program">—</span>
+          </div>
+          <div class="konfirmasi-row">
+            <span class="label">Jadwal</span>
+            <span class="value" id="konfirm-jadwal">—</span>
+          </div>
+        </div>
+
+        <p style="font-size:0.82rem; color:var(--ink-subtle); margin-bottom:var(--space-4)">
+          Dengan mengirim formulir ini, Anda menyetujui bahwa data yang diberikan adalah benar dan dapat dipertanggungjawabkan.
+        </p>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="keStep2()">← Kembali</button>
+          <button class="btn btn-primary" id="btn-submit" onclick="submitPendaftaran()">
+            <div class="spinner" aria-hidden="true"></div>
+            <span class="btn-text">Kirim Pendaftaran</span>
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /container -->
+
+    <footer class="site-footer">
+      <p>© 2026 Rattilil Qur'an &nbsp;·&nbsp;
+        <a href="status.html">Cek Status Pendaftaran</a>
+      </p>
+    </footer>
+  </div><!-- /page-wrapper -->
+
+  <!-- ==================== MODAL SUKSES ==================== -->
+  <div class="modal-backdrop" id="modal-sukses" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal-icon" aria-hidden="true">✓</div>
+      <h2 class="modal-title" id="modal-title">Pendaftaran Berhasil!</h2>
+      <p class="modal-subtitle">
+        Simpan nomor pendaftaran Anda. Nomor ini diperlukan untuk memantau status pendaftaran.
+      </p>
+
+      <div class="nomor-box">
+        <div class="nomor-label">Nomor Pendaftaran</div>
+        <div class="nomor-value" id="nomor-pendaftaran">RTL24180001</div>
+      </div>
+
+      <button class="btn-salin" id="btn-salin" onclick="salinNomor()">
+        <span id="salin-icon">⎘</span>
+        <span id="salin-text">Salin Nomor</span>
+      </button>
+
+      <p class="modal-note">
+        Konfirmasi juga dikirim ke email Anda (jika diisi).<br>
+        Pantau status di halaman <a href="status.html" style="color:var(--sky)">Cek Status</a>.
+      </p>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function() {});
+    }
+  </script>
+</body>
+</html>
