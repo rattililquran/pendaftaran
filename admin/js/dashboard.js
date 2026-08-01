@@ -1131,27 +1131,43 @@ function muatQRCode() {
   var urlEl = document.getElementById('qr-url');
   if (!container) return;
 
-  container.innerHTML = '';
+  container.innerHTML = '<div style="color:var(--ink-3);font-size:0.85rem;padding:20px">Memuat QR Code...</div>';
   urlEl.textContent = QR_URL;
 
-  if (typeof QRCode === 'undefined') {
-    container.innerHTML = '<p style="color:var(--ink-3);font-size:0.85rem">QRCode library belum dimuat.</p>';
-    return;
-  }
-
-  QRCode.toCanvas(QR_URL, {
-    width: 220,
-    margin: 2,
-    color: { dark: '#0b1220', light: '#ffffff' }
-  }, function(err, canvas) {
-    if (err) {
-      container.innerHTML = '<p style="color:var(--danger);font-size:0.85rem">Gagal generate QR Code.</p>';
+  // Lazy load QRCode library jika belum ada
+  function generateQR() {
+    if (typeof QRCode === 'undefined') {
+      container.innerHTML = '<p style="color:var(--danger);font-size:0.85rem">Gagal memuat library QR Code.</p>';
       return;
     }
-    canvas.id = 'qr-canvas';
-    canvas.style.borderRadius = '8px';
-    container.appendChild(canvas);
-  });
+    container.innerHTML = '';
+    QRCode.toCanvas(QR_URL, {
+      width: 220,
+      margin: 2,
+      color: { dark: '#0b1220', light: '#ffffff' }
+    }, function(err, canvas) {
+      if (err) {
+        container.innerHTML = '<p style="color:var(--danger);font-size:0.85rem">Gagal generate QR Code.</p>';
+        return;
+      }
+      canvas.id = 'qr-canvas';
+      canvas.style.borderRadius = '8px';
+      container.innerHTML = '';
+      container.appendChild(canvas);
+    });
+  }
+
+  if (typeof QRCode !== 'undefined') {
+    generateQR();
+  } else {
+    var script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+    script.onload = generateQR;
+    script.onerror = function() {
+      container.innerHTML = '<p style="color:var(--danger);font-size:0.85rem">Gagal memuat library QR Code.</p>';
+    };
+    document.head.appendChild(script);
+  }
 }
 
 function downloadQR() {
