@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1f35">
+  <title>404 — Halaman Tidak Ditemukan | Rattilil Quran</title>
+  <meta name="description" content="Halaman yang Anda cari tidak ditemukan. Kembali ke form pendaftaran atau beranda Rattilil Quran.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ---- 404 Page Specific ---- */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes floatUpDown {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-12px); }
+    }
+
+    @keyframes shimmerText {
+      0%   { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+
+    .notfound-wrapper {
+      animation: fadeUp .5s ease both;
+    }
+
+    /* Ilustrasi 404 */
+    .notfound-illustration {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+      animation: floatUpDown 4s ease-in-out infinite;
+    }
+
+    .notfound-number {
+      font-size: clamp(5rem, 20vw, 8rem);
+      font-weight: 800;
+      letter-spacing: -4px;
+      line-height: 1;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1, #0ea5e9);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmerText 4s linear infinite;
+      user-select: none;
+    }
+
+    .notfound-icon {
+      position: absolute;
+      font-size: 2.2rem;
+      top: -8px;
+      right: calc(50% - 130px);
+      filter: drop-shadow(0 4px 12px rgba(99,102,241,.3));
+      animation: floatUpDown 3s ease-in-out infinite reverse;
+    }
+
+    /* Ayat / nuansa Islami */
+    .islamic-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+      border: 1.5px solid rgba(99,102,241,.2);
+      border-radius: 999px;
+      padding: 8px 20px;
+      margin-bottom: 24px;
+      box-shadow: var(--sh-sm);
+    }
+
+    .islamic-badge-icon {
+      font-size: 1.1rem;
+    }
+
+    .islamic-badge-text {
+      font-family: "Amiri", serif;
+      font-size: 1rem;
+      color: var(--primary-3);
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+
+    .islamic-badge-trans {
+      font-size: 0.72rem;
+      color: var(--ink-4);
+      font-weight: 500;
+      font-style: italic;
+    }
+
+    /* Konten utama */
+    .notfound-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r-lg);
+      padding: 36px 28px;
+      box-shadow: var(--sh);
+      text-align: center;
+    }
+
+    .notfound-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 12px;
+      letter-spacing: -.02em;
+      line-height: 1.25;
+    }
+
+    .notfound-desc {
+      font-size: 0.9rem;
+      color: var(--ink-3);
+      margin-bottom: 32px;
+      line-height: 1.7;
+      max-width: 360px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Tombol aksi */
+    .notfound-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-notfound-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 24px;
+      border-radius: 13px;
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      background: var(--grad);
+      color: white;
+      box-shadow: 0 8px 24px rgba(14,165,233,.35);
+      transition: transform .16s, box-shadow .22s;
+      position: relative;
+      overflow: hidden;
+      min-height: 52px;
+    }
+
+    .btn-notfound-primary::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,.18), transparent);
+      transform: translateX(-100%);
+      transition: transform .4s;
+    }
+
+    .btn-notfound-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(14,165,233,.45);
+    }
+
+    .btn-notfound-primary:hover::after { transform: translateX(100%); }
+
+    .btn-notfound-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 24px;
+      border-radius: 13px;
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      background: var(--card);
+      color: var(--ink-2);
+      border: 1.5px solid var(--line);
+      transition: border-color .15s, color .15s, transform .15s;
+      min-height: 52px;
+    }
+
+    .btn-notfound-secondary:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    /* Divider teks */
+    .notfound-or {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--ink-4);
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin: 4px 0;
+    }
+
+    .notfound-or::before,
+    .notfound-or::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    /* Error code kecil */
+    .error-code {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--ink-4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 20px;
+      padding: 4px 12px;
+      background: var(--bg);
+      border-radius: 999px;
+      border: 1px solid var(--line);
+    }
+
+    @media (max-width: 480px) {
+      .notfound-card { padding: 24px 18px; border-radius: var(--r); }
+      .notfound-title { font-size: 1.25rem; }
+      .notfound-icon { right: calc(50% - 100px); font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background orbs -->
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
+  <div class="orb orb-3" aria-hidden="true"></div>
+
+  <div class="page-wrapper">
+    <div class="container">
+
+      <!-- Nav back -->
+      <nav class="site-nav">
+        <a href="https://rattililquran.github.io/" class="nav-back">
+          ← Kembali ke Beranda
+        </a>
+      </nav>
+
+      <!-- Header -->
+      <header class="site-header">
+        <img
+          src="https://raw.githubusercontent.com/rattililquran/rattililquran.github.io/main/assets/images/logo-abu.png"
+          alt="Logo Rattilil Qur'an"
+          class="site-logo"
+        >
+        <p class="site-quote">SEBUAH IKHTIAR MENJADI MANUSIA TERBAIK</p>
+        <p class="tagline">Halaman Tidak Ditemukan</p>
+      </header>
+
+      <!-- 404 Content -->
+      <div class="notfound-wrapper">
+
+        <!-- Ilustrasi 404 -->
+        <div class="notfound-illustration" aria-hidden="true">
+          <div class="notfound-number">404</div>
+          <div class="notfound-icon">📖</div>
+        </div>
+
+        <!-- Badge Islami -->
+        <div style="text-align:center;margin-bottom:8px">
+          <div class="islamic-badge">
+            <span class="islamic-badge-icon">✨</span>
+            <div>
+              <div class="islamic-badge-text">وعسى أن تكرهوا شيئًا وهو خيرٌ لكم</div>
+              <div class="islamic-badge-trans">&ldquo;Boleh jadi kamu tidak menyukai sesuatu, padahal itu baik bagimu&rdquo;</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card utama -->
+        <div class="notfound-card">
+          <h1 class="notfound-title">Halaman Tidak Ditemukan</h1>
+          <p class="notfound-desc">
+            Maaf, halaman yang Anda tuju tidak ada atau telah dipindahkan.
+            Mungkin ini adalah kesempatan untuk kembali ke jalur yang benar —
+            seperti mendaftarkan diri di Rattilil Qur'an.
+          </p>
+
+          <div class="notfound-actions">
+            <a href="index.html" class="btn-notfound-primary">
+              📝 Kembali ke Form Pendaftaran
+            </a>
+
+            <div class="notfound-or">atau</div>
+
+            <a href="https://rattililquran.github.io/" class="btn-notfound-secondary">
+              🏠 Ke Beranda Rattilil Qur'an
+            </a>
+          </div>
+
+          <div style="text-align:center">
+            <span class="error-code">⚠️ HTTP Error 404</span>
+          </div>
+        </div>
+
+      </div><!-- /notfound-wrapper -->
+
+    </div><!-- /container -->
+
+    <footer class="site-footer">
+      <p>&copy; <span id="tahun-footer"></span> Rattilil Qur'an</p>
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('tahun-footer').textContent = new Date().getFullYear();
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(function() {});
+    }
+  </script>
+</body>
+</html>
