@@ -12,7 +12,8 @@ var state = {
   jadwalList: [],
   jadwalTerpilih: null,
   clientToken: null,
-  gender: null
+  gender: null,
+  infoGelombang: null       // data gelombang aktif dari action=info
 };
 
 // ============================================================================
@@ -22,6 +23,9 @@ var state = {
 document.addEventListener('DOMContentLoaded', function () {
   state.clientToken = generateToken();
   updateStepUI(1);
+
+  // Fetch info gelombang aktif
+  muatInfoGelombang();
 
   // Set max date tgl_lahir ke hari ini (tidak bisa pilih masa depan)
   var today = new Date().toISOString().split('T')[0];
@@ -49,6 +53,64 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
+
+// ============================================================================
+// INFO GELOMBANG
+// ============================================================================
+
+function muatInfoGelombang() {
+  fetchBackend('GET', { action: 'info' })
+    .then(function (res) {
+      if (res && res.ok && res.data) {
+        state.infoGelombang = res.data;
+        tampilkanBannerGelombang(res.data);
+      }
+    })
+    .catch(function () {
+      // Gagal fetch info gelombang — tidak blokir form, banner tetap tersembunyi
+    });
+}
+
+function tampilkanBannerGelombang(info) {
+  var bannerGel   = document.getElementById('banner-gelombang');
+  var bannerTutup = document.getElementById('banner-ditutup');
+  var btnLanjut1  = document.getElementById('btn-lanjut-1');
+
+  if (!info) return;
+
+  // Tampilkan banner gelombang jika ada nama
+  if (info.nama) {
+    var elNama    = document.getElementById('banner-nama-gelombang');
+    var elPeriode = document.getElementById('banner-periode-gelombang');
+    var elBadge   = document.getElementById('banner-status-gelombang');
+
+    if (elNama)    elNama.textContent    = info.nama;
+    if (elPeriode) elPeriode.textContent = _labelPeriode(info.tgl_mulai, info.tgl_selesai);
+    if (elBadge) {
+      var st = String(info.status || '').toUpperCase();
+      elBadge.textContent = st === 'AKTIF' ? 'Aktif' : (st === 'SELESAI' ? 'Selesai' : st);
+      elBadge.className   = 'banner-gelombang-badge' + (st === 'AKTIF' ? ' aktif' : st === 'SELESAI' ? ' selesai' : '');
+    }
+    if (bannerGel) bannerGel.style.display = 'block';
+  }
+
+  // Jika pendaftaran ditutup — tampilkan banner merah + nonaktifkan tombol lanjut step 1
+  if (!info.pendaftaran_buka) {
+    if (bannerTutup) bannerTutup.style.display = 'flex';
+    if (btnLanjut1) {
+      btnLanjut1.disabled  = true;
+      btnLanjut1.classList.add('btn-submit-disabled');
+      btnLanjut1.title     = 'Pendaftaran saat ini ditutup.';
+    }
+  }
+}
+
+function _labelPeriode(tglMulai, tglSelesai) {
+  if (!tglMulai && !tglSelesai) return '';
+  if (tglMulai && tglSelesai)   return formatTanggal(tglMulai) + ' – ' + formatTanggal(tglSelesai);
+  if (tglMulai)                 return 'Mulai ' + formatTanggal(tglMulai);
+  return 'Tutup ' + formatTanggal(tglSelesai);
+}
 
 // ============================================================================
 // NAVIGASI ANTAR STEP
