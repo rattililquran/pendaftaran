@@ -24,12 +24,10 @@ function login() {
   sembunyikanAlertLogin();
   setLoading(btn, true);
 
-  // POST: password tidak boleh ada di URL/query string (ekspos di log server)
-  fetch(CONFIG.BACKEND_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({ action: 'admin.login', password: password })
-  })
+  // GAS Web App tidak bisa terima POST cross-origin dari browser (redirect block).
+  // Pakai GET via HTTPS — query string terenkripsi TLS, aman dari sniffing.
+  var url = CONFIG.BACKEND_URL + '?action=admin.login&password=' + encodeURIComponent(password);
+  fetch(url)
     .then(function (r) { return r.json(); })
     .then(function (res) {
       setLoading(btn, false);

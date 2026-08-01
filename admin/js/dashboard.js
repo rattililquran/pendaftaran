@@ -17,9 +17,20 @@ var state = {
 };
 
 /**
- * Helper: kirim POST ke GAS tanpa memicu CORS preflight.
- * GAS tidak handle OPTIONS — pakai Content-Type: text/plain agar browser
- * tidak kirim preflight, tapi body tetap JSON string yang bisa diparse backend.
+ * Helper READ: ambil data admin via GET (GAS tidak support POST cross-origin dari browser).
+ * Token dikirim via query string over HTTPS — query string terenkripsi TLS.
+ */
+function _adminGet(params) {
+  var qs = Object.keys(params).map(function(k) {
+    return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+  }).join('&');
+  return fetch(CONFIG.BACKEND_URL + '?' + qs)
+    .then(function(r) { return r.json(); });
+}
+
+/**
+ * Helper WRITE: kirim POST ke GAS via text/plain (tidak trigger preflight CORS).
+ * Untuk operasi tulis: updateStatus, deleteReg, updateJadwal, dll.
  */
 function _adminPost(params) {
   return fetch(CONFIG.BACKEND_URL, {
@@ -125,7 +136,7 @@ function refresh() {
 // ============================================================================
 
 function muatStats() {
-  _adminPost({ action: 'admin.stats', token: state.token })
+  _adminGet({ action: 'admin.stats', token: state.token })
     .then(function (res) {
       if (!res.ok && res.error === 'UNAUTHORIZED') { logout(); return; }
       if (res.ok && res.data) {
@@ -148,7 +159,7 @@ function muatPendaftar() {
   var tbody = document.getElementById('tbody-pendaftar');
   tbody.innerHTML = '<tr><td colspan="9" class="no-data">Memuat data...</td></tr>';
 
-  _adminPost({ action: 'admin.registrations', token: state.token })
+  _adminGet({ action: 'admin.registrations', token: state.token })
     .then(function (res) {
       if (!res.ok) {
         if (res.error === 'UNAUTHORIZED') {
@@ -291,7 +302,7 @@ function _doFilter() {
 }
 
 function muatJadwalOptions() {
-  _adminPost({ action: 'admin.jadwal', token: state.token })
+  _adminGet({ action: 'admin.jadwal', token: state.token })
     .then(function (res) {
       if (res.ok && res.data) {
         var select = document.getElementById('filter-jadwal');
@@ -420,7 +431,7 @@ function muatJadwal() {
   var tbody = document.getElementById('tbody-jadwal');
   tbody.innerHTML = '<tr><td colspan="9" class="no-data">Memuat data...</td></tr>';
 
-  _adminPost({ action: 'admin.jadwal', token: state.token })
+  _adminGet({ action: 'admin.jadwal', token: state.token })
     .then(function (res) {
       if (!res.ok) {
         tbody.innerHTML = '<tr><td colspan="9" class="no-data">Gagal memuat data.</td></tr>';
@@ -766,9 +777,7 @@ function muatGelombang() {
   var tbody = document.getElementById('tbody-gelombang');
   tbody.innerHTML = '<tr><td colspan="8" class="no-data">Memuat data...</td></tr>';
 
-  var url = CONFIG.BACKEND_URL + '?action=admin.gelombang&token=' + encodeURIComponent(state.token);
-  fetch(url)
-    .then(function(r) { return r.json(); })
+  _adminGet({ action: 'admin.gelombang', token: state.token })
     .then(function(res) {
       if (!res.ok) { tbody.innerHTML = '<tr><td colspan="8" class="no-data">Gagal memuat data.</td></tr>'; return; }
 
@@ -899,7 +908,7 @@ function muatFormFields() {
   var tbody = document.getElementById('tbody-formfields');
   tbody.innerHTML = '<tr><td colspan="7" class="no-data">Memuat data...</td></tr>';
 
-  _adminPost({ action: 'admin.formfields', token: state.token })
+  _adminGet({ action: 'admin.formfields', token: state.token })
     .then(function(res) {
       if (!res.ok) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Gagal memuat data.</td></tr>'; return; }
       state.formFields = res.data || [];
@@ -986,7 +995,7 @@ function simpanFormField() {
     active:    document.getElementById('edit-catatan-publik').value
   };
 
-  fetch(CONFIG.BACKEND_URL, { method: 'POST', body: new URLSearchParams(body) })
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(body) })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       setLoading(btn, false);
@@ -1014,9 +1023,7 @@ function simpanFormField() {
 var _charts = {};
 
 function muatCharts() {
-  var url = CONFIG.BACKEND_URL + '?action=admin.stats&token=' + encodeURIComponent(state.token);
-  fetch(url)
-    .then(function(r) { return r.json(); })
+  _adminGet({ action: 'admin.stats', token: state.token })
     .then(function(res) {
       if (!res.ok) return;
       var stats = res.data;
