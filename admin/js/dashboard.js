@@ -16,6 +16,19 @@ var state = {
   pageSize: 20
 };
 
+/**
+ * Helper: semua admin GET yang butuh token dikirim via POST JSON
+ * agar token tidak terekspos di URL / server access log.
+ * GAS Web App membaca body JSON di doPost, bukan query string.
+ */
+function _adminPost(params) {
+  return fetch(CONFIG.BACKEND_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params)
+  }).then(function(r) { return r.json(); });
+}
+
 // Cek auth & init
 (function () {
   var token = sessionStorage.getItem('admin_token');
@@ -112,9 +125,7 @@ function refresh() {
 // ============================================================================
 
 function muatStats() {
-  var url = CONFIG.BACKEND_URL + '?action=admin.stats&token=' + encodeURIComponent(state.token);
-  fetch(url)
-    .then(function (r) { return r.json(); })
+  _adminPost({ action: 'admin.stats', token: state.token })
     .then(function (res) {
       if (!res.ok && res.error === 'UNAUTHORIZED') { logout(); return; }
       if (res.ok && res.data) {
@@ -137,9 +148,7 @@ function muatPendaftar() {
   var tbody = document.getElementById('tbody-pendaftar');
   tbody.innerHTML = '<tr><td colspan="9" class="no-data">Memuat data...</td></tr>';
 
-  var url = CONFIG.BACKEND_URL + '?action=admin.registrations&token=' + encodeURIComponent(state.token);
-  fetch(url)
-    .then(function (r) { return r.json(); })
+  _adminPost({ action: 'admin.registrations', token: state.token })
     .then(function (res) {
       if (!res.ok) {
         if (res.error === 'UNAUTHORIZED') {
@@ -282,9 +291,7 @@ function _doFilter() {
 }
 
 function muatJadwalOptions() {
-  var url = CONFIG.BACKEND_URL + '?action=admin.jadwal&token=' + encodeURIComponent(state.token);
-  fetch(url)
-    .then(function (r) { return r.json(); })
+  _adminPost({ action: 'admin.jadwal', token: state.token })
     .then(function (res) {
       if (res.ok && res.data) {
         var select = document.getElementById('filter-jadwal');
@@ -352,7 +359,8 @@ function simpanStatus() {
 
   fetch(CONFIG.BACKEND_URL, {
     method: 'POST',
-    body: new URLSearchParams(body)
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
   })
     .then(function (r) { return r.json(); })
     .then(function (res) {
@@ -386,7 +394,8 @@ function arsipPendaftar() {
 
   fetch(CONFIG.BACKEND_URL, {
     method: 'POST',
-    body: new URLSearchParams(body)
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
   })
     .then(function (r) { return r.json(); })
     .then(function (res) {
@@ -411,9 +420,7 @@ function muatJadwal() {
   var tbody = document.getElementById('tbody-jadwal');
   tbody.innerHTML = '<tr><td colspan="9" class="no-data">Memuat data...</td></tr>';
 
-  var url = CONFIG.BACKEND_URL + '?action=admin.jadwal&token=' + encodeURIComponent(state.token);
-  fetch(url)
-    .then(function (r) { return r.json(); })
+  _adminPost({ action: 'admin.jadwal', token: state.token })
     .then(function (res) {
       if (!res.ok) {
         tbody.innerHTML = '<tr><td colspan="9" class="no-data">Gagal memuat data.</td></tr>';
@@ -520,7 +527,7 @@ function simpanJadwalBaru() {
     active:      'true'
   };
 
-  fetch(CONFIG.BACKEND_URL, { method: 'POST', body: new URLSearchParams(body) })
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       setLoading(btn, false);
@@ -599,7 +606,7 @@ function simpanFieldBaru() {
     is_new:    'true'
   };
 
-  fetch(CONFIG.BACKEND_URL, { method: 'POST', body: new URLSearchParams(body) })
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       setLoading(btn, false);
@@ -637,11 +644,7 @@ function simpanJadwal() {
     active: active
   };
 
-  fetch(CONFIG.BACKEND_URL, {
-    method: 'POST',
-    body: new URLSearchParams(body)
-  })
-    .then(function (r) { return r.json(); })
+  _adminPost(body)
     .then(function (res) {
       setLoading(btn, false);
       if (res.ok) {
@@ -816,7 +819,7 @@ function togglePendaftaran() {
   setLoading(btn, true);
 
   var body = { action: 'admin.updateGelombang', token: state.token, pendaftaran_buka: buka ? 'true' : 'false' };
-  fetch(CONFIG.BACKEND_URL, { method: 'POST', body: new URLSearchParams(body) })
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       setLoading(btn, false);
@@ -877,7 +880,7 @@ function simpanGelombang() {
 
   if (!isNew) body.wave_id = state.selectedGelombang.wave_id;
 
-  fetch(CONFIG.BACKEND_URL, { method: 'POST', body: new URLSearchParams(body) })
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       setLoading(btn, false);
@@ -896,9 +899,7 @@ function muatFormFields() {
   var tbody = document.getElementById('tbody-formfields');
   tbody.innerHTML = '<tr><td colspan="7" class="no-data">Memuat data...</td></tr>';
 
-  var url = CONFIG.BACKEND_URL + '?action=admin.formfields&token=' + encodeURIComponent(state.token);
-  fetch(url)
-    .then(function(r) { return r.json(); })
+  _adminPost({ action: 'admin.formfields', token: state.token })
     .then(function(res) {
       if (!res.ok) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Gagal memuat data.</td></tr>'; return; }
       state.formFields = res.data || [];

@@ -24,9 +24,12 @@ function login() {
   sembunyikanAlertLogin();
   setLoading(btn, true);
 
-  var url = CONFIG.BACKEND_URL + '?action=admin.login&password=' + encodeURIComponent(password);
-
-  fetch(url)
+  // POST: password tidak boleh ada di URL/query string (ekspos di log server)
+  fetch(CONFIG.BACKEND_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'admin.login', password: password })
+  })
     .then(function (r) { return r.json(); })
     .then(function (res) {
       setLoading(btn, false);
