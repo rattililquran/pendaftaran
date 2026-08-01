@@ -3,23 +3,30 @@
  * Rattilil Qur'an PMB
  */
 
-var CACHE_NAME = 'rattilil-pmb-v2';
+var CACHE_NAME = 'rattilil-pmb-v3';
 var ASSETS = [
-  '/',
-  '/index.html',
-  '/status.html',
-  '/css/style.css',
-  '/js/config.js',
-  '/js/app.js',
-  '/js/status.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './status.html',
+  './css/style.css',
+  './js/config.js',
+  './js/app.js',
+  './js/status.js',
+  './manifest.json'
 ];
 
-// Install — cache semua asset static
+// Install — cache semua asset static, abaikan file yang gagal
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(ASSETS);
+      // addAll gagal total jika satu file 404 — pakai add satu per satu
+      return Promise.all(
+        ASSETS.map(function(url) {
+          return cache.add(url).catch(function(err) {
+            console.warn('SW: gagal cache ' + url, err);
+          });
+        })
+      );
     })
   );
   self.skipWaiting();
