@@ -1141,30 +1141,34 @@ function muatQRCode() {
       return;
     }
     container.innerHTML = '';
-    QRCode.toCanvas(QR_URL, {
-      width: 220,
-      margin: 2,
-      color: { dark: '#0b1220', light: '#ffffff' }
-    }, function(err, canvas) {
-      if (err) {
-        container.innerHTML = '<p style="color:var(--danger);font-size:0.85rem">Gagal generate QR Code.</p>';
-        return;
-      }
-      canvas.id = 'qr-canvas';
-      canvas.style.borderRadius = '8px';
-      container.innerHTML = '';
-      container.appendChild(canvas);
-    });
+    try {
+      var qr = new QRCode(container, {
+        text: QR_URL,
+        width: 220,
+        height: 220,
+        colorDark: '#0b1220',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+      // Set id canvas untuk download
+      setTimeout(function() {
+        var canvas = container.querySelector('canvas');
+        if (canvas) { canvas.id = 'qr-canvas'; canvas.style.borderRadius = '8px'; }
+      }, 300);
+    } catch(e) {
+      container.innerHTML = '<p style="color:var(--danger);font-size:0.85rem">Gagal generate QR Code.</p>';
+    }
   }
 
   if (typeof QRCode !== 'undefined') {
     generateQR();
   } else {
     var script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+    // qrcodejs — library QR Code untuk browser
+    script.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
     script.onload = generateQR;
     script.onerror = function() {
-      container.innerHTML = '<p style="color:var(--danger);font-size:0.85rem">Gagal memuat library QR Code.</p>';
+      container.innerHTML = '<p style="color:var(--danger);font-size:0.85rem">Gagal memuat library QR Code. Periksa koneksi internet.</p>';
     };
     document.head.appendChild(script);
   }
