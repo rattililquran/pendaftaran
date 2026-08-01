@@ -9,6 +9,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap">
   <link rel="stylesheet" href="css/style.css">
+  <script>
+    (function() {
+      var saved = localStorage.getItem('rattilil-theme');
+      if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('theme-dark');
+      }
+    })();
+  </script>
   <style>
     .share-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-xl);padding:32px 28px;box-shadow:var(--sh)}
     .hadits-box{background:linear-gradient(135deg,#fff8f0,#fff3e0);border:1.5px solid #fde68a;border-radius:var(--r);padding:20px;margin:20px 0;text-align:center}

@@ -34,7 +34,16 @@ function init() {
 }
 
 function logout() {
+  var token = state.token || sessionStorage.getItem('admin_token');
   sessionStorage.removeItem('admin_token');
+
+  // Hapus session token dari server (fire-and-forget)
+  if (token) {
+    try {
+      fetch(CONFIG.BACKEND_URL + '?action=admin.logout&token=' + encodeURIComponent(token));
+    } catch (e) { /* abaikan error jaringan saat logout */ }
+  }
+
   window.location.href = 'index.html';
 }
 
@@ -49,7 +58,7 @@ function switchTab(tab) {
   });
   document.getElementById('nav-' + tab).classList.add('active');
 
-  var tabs = ['pendaftar', 'jadwal', 'gelombang', 'formfields'];
+  var tabs = ['pendaftar', 'jadwal', 'gelombang', 'formfields', 'statistik', 'qrcode'];
   tabs.forEach(function(t) {
     var el = document.getElementById('tab-' + t);
     if (el) el.style.display = t === tab ? 'block' : 'none';
@@ -59,7 +68,9 @@ function switchTab(tab) {
     'pendaftar':  ['Pendaftar',       'Kelola data pendaftar murid baru'],
     'jadwal':     ['Jadwal & Kuota',  'Kelola jadwal dan kuota per program'],
     'gelombang':  ['Gelombang',       'Kelola gelombang dan status pendaftaran'],
-    'formfields': ['Form Fields',     'Konfigurasi pertanyaan form pendaftaran']
+    'formfields': ['Form Fields',     'Konfigurasi pertanyaan form pendaftaran'],
+    'statistik':  ['Statistik',        'Visualisasi data pendaftaran'],
+    'qrcode':     ['QR Code',          'QR Code link pendaftaran']
   };
 
   if (titles[tab]) {
@@ -70,6 +81,8 @@ function switchTab(tab) {
   if (tab === 'jadwal')     muatJadwal();
   if (tab === 'gelombang')  muatGelombang();
   if (tab === 'formfields') muatFormFields();
+  if (tab === 'statistik')  muatCharts();
+  if (tab === 'qrcode')     muatQRCode();
 
   tutupSidebar();
 }
@@ -90,6 +103,8 @@ function refresh() {
   else if (tab === 'jadwal')     muatJadwal();
   else if (tab === 'gelombang')  muatGelombang();
   else if (tab === 'formfields') muatFormFields();
+  else if (tab === 'statistik')  muatCharts();
+  else if (tab === 'qrcode')     muatQRCode();
 }
 
 // ============================================================================
@@ -989,3 +1004,192 @@ function simpanFormField() {
     })
     .catch(function() { setLoading(btn, false); tampilkanToast('Koneksi bermasalah.', 'error'); });
 }
+
+
+// ============================================================================
+// #4 CHART STATISTIK
+// ============================================================================
+
+var _charts = {};
+
+function muatCharts() {
+  var url = CONFIG.BACKEND_URL + '?action=admin.stats&token=' + encodeURIComponent(state.token);
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (!res.ok) return;
+      var stats = res.data;
+      renderChartStatus(stats.per_status || {});
+      renderChartJadwal(stats.per_jadwal || {});
+      renderChartGender(stats);
+    })
+    .catch(function() { tampilkanToast('Gagal memuat statistik.', 'error'); });
+}
+
+function renderChartStatus(perStatus) {
+  var ctx = document.getElementById('chart-status');
+  if (!ctx) return;
+  if (_charts['status']) { _charts['status'].destroy(); }
+
+  var labels = { 'TERDAFTAR': 'Terdaftar', 'BERKAS_OK': 'Berkas OK', 'WAWANCARA': 'Wawancara', 'DITERIMA': 'Diterima', 'DITOLAK': 'Ditolak' };
+  var colors = ['#0ea5e9', '#6366f1', '#f59e0b', '#10b981', '#ef4444'];
+  var keys = Object.keys(perStatus);
+  var vals = keys.map(function(k) { return perStatus[k]; });
+  var lbls = keys.map(function(k) { return labels[k] || k; });
+
+  _charts['status'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: lbls,
+      datasets: [{ data: vals, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'Plus Jakarta Sans', size: 11 } } }
+      }
+    }
+  });
+}
+
+function renderChartJadwal(perJadwal) {
+  var ctx = document.getElementById('chart-jadwal');
+  if (!ctx) return;
+  if (_charts['jadwal']) { _charts['jadwal'].destroy(); }
+
+  var keys = Object.keys(perJadwal);
+  var vals = keys.map(function(k) { return perJadwal[k]; });
+
+  _charts['jadwal'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: keys,
+      datasets: [{
+        label: 'Pendaftar',
+        data: vals,
+        backgroundColor: 'rgba(14,165,233,.75)',
+        borderColor: '#0ea5e9',
+        borderWidth: 1.5,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+        x: { ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } } }
+      }
+    }
+  });
+}
+
+function renderChartGender(stats) {
+  var ctx = document.getElementById('chart-gender');
+  if (!ctx) return;
+  if (_charts['gender']) { _charts['gender'].destroy(); }
+
+  // Hitung dari data pendaftar
+  var lk = 0, pr = 0;
+  (state.pendaftar || []).forEach(function(r) {
+    if ((r.gender || '').toLowerCase().indexOf('laki') !== -1) lk++;
+    else if ((r.gender || '').toLowerCase().indexOf('perempuan') !== -1) pr++;
+  });
+
+  _charts['gender'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Laki-laki', 'Perempuan'],
+      datasets: [{
+        data: [lk, pr],
+        backgroundColor: ['rgba(99,102,241,.75)', 'rgba(236,72,153,.75)'],
+        borderColor: ['#6366f1', '#ec4899'],
+        borderWidth: 1.5,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { beginAtZero: true, ticks: { stepSize: 1 } }
+      }
+    }
+  });
+}
+
+
+// ============================================================================
+// #7 QR CODE
+// ============================================================================
+
+var QR_URL = 'https://rattililquran.github.io/pendaftaran/';
+
+function muatQRCode() {
+  var container = document.getElementById('qrcode-container');
+  var urlEl = document.getElementById('qr-url');
+  if (!container) return;
+
+  container.innerHTML = '';
+  urlEl.textContent = QR_URL;
+
+  if (typeof QRCode === 'undefined') {
+    container.innerHTML = '<p style="color:var(--ink-3);font-size:0.85rem">QRCode library belum dimuat.</p>';
+    return;
+  }
+
+  QRCode.toCanvas(QR_URL, {
+    width: 220,
+    margin: 2,
+    color: { dark: '#0b1220', light: '#ffffff' }
+  }, function(err, canvas) {
+    if (err) {
+      container.innerHTML = '<p style="color:var(--danger);font-size:0.85rem">Gagal generate QR Code.</p>';
+      return;
+    }
+    canvas.id = 'qr-canvas';
+    canvas.style.borderRadius = '8px';
+    container.appendChild(canvas);
+  });
+}
+
+function downloadQR() {
+  var canvas = document.getElementById('qr-canvas');
+  if (!canvas) { tampilkanToast('Generate QR Code dulu.', 'error'); return; }
+  var link = document.createElement('a');
+  link.download = 'rattilil-qr-pendaftaran.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  tampilkanToast('QR Code diunduh.', 'success');
+}
+
+function copyQRLink() {
+  navigator.clipboard.writeText(QR_URL).then(function() {
+    var el = document.getElementById('qr-copy-text');
+    el.textContent = '✓ Link Tersalin!';
+    setTimeout(function() { el.textContent = '⎘ Salin Link'; }, 2500);
+  });
+}
+
+
+// ============================================================================
+// #8 DARK MODE
+// ============================================================================
+
+function initDarkMode() {
+  var saved = localStorage.getItem('rattilil-theme');
+  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('theme-dark');
+  }
+}
+
+function toggleDarkMode() {
+  var isDark = document.documentElement.classList.toggle('theme-dark');
+  localStorage.setItem('rattilil-theme', isDark ? 'dark' : 'light');
+  var btn = document.getElementById('btn-theme-toggle');
+  if (btn) btn.textContent = isDark ? '☀' : '🌙';
+}
+
+// Init dark mode on load
+initDarkMode();
