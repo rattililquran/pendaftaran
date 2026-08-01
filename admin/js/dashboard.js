@@ -812,8 +812,8 @@ function renderTabelGelombang() {
     tr.innerHTML =
       '<td style="font-weight:700">' + esc(String(g.wave_id)) + '</td>' +
       '<td>' + esc(g.nama) + '</td>' +
-      '<td>' + (g.tgl_mulai || '—') + '</td>' +
-      '<td>' + (g.tgl_selesai || '—') + '</td>' +
+      '<td>' + (g.tgl_mulai   ? formatTanggal(g.tgl_mulai)   : '—') + '</td>' +
+      '<td>' + (g.tgl_selesai ? formatTanggal(g.tgl_selesai) : '—') + '</td>' +
       '<td>' + esc(g.tahun_ajaran || '—') + '</td>' +
       '<td><span class="badge ' + (aktif ? 'badge-DITERIMA' : 'badge-DITOLAK') + '">' + esc(g.status) + '</span></td>' +
       '<td>' + (aktif ? '✅' : '❌') + '</td>' +
