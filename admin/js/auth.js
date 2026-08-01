@@ -27,7 +27,7 @@ function login() {
   // POST: password tidak boleh ada di URL/query string (ekspos di log server)
   fetch(CONFIG.BACKEND_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify({ action: 'admin.login', password: password })
   })
     .then(function (r) { return r.json(); })

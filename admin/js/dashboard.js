@@ -17,14 +17,14 @@ var state = {
 };
 
 /**
- * Helper: semua admin GET yang butuh token dikirim via POST JSON
- * agar token tidak terekspos di URL / server access log.
- * GAS Web App membaca body JSON di doPost, bukan query string.
+ * Helper: kirim POST ke GAS tanpa memicu CORS preflight.
+ * GAS tidak handle OPTIONS — pakai Content-Type: text/plain agar browser
+ * tidak kirim preflight, tapi body tetap JSON string yang bisa diparse backend.
  */
 function _adminPost(params) {
   return fetch(CONFIG.BACKEND_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify(params)
   }).then(function(r) { return r.json(); });
 }
@@ -359,7 +359,7 @@ function simpanStatus() {
 
   fetch(CONFIG.BACKEND_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify(body)
   })
     .then(function (r) { return r.json(); })
@@ -394,7 +394,7 @@ function arsipPendaftar() {
 
   fetch(CONFIG.BACKEND_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify(body)
   })
     .then(function (r) { return r.json(); })
@@ -527,7 +527,7 @@ function simpanJadwalBaru() {
     active:      'true'
   };
 
-  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(body) })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       setLoading(btn, false);
@@ -606,7 +606,7 @@ function simpanFieldBaru() {
     is_new:    'true'
   };
 
-  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(body) })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       setLoading(btn, false);
@@ -819,7 +819,7 @@ function togglePendaftaran() {
   setLoading(btn, true);
 
   var body = { action: 'admin.updateGelombang', token: state.token, pendaftaran_buka: buka ? 'true' : 'false' };
-  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(body) })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       setLoading(btn, false);
@@ -880,7 +880,7 @@ function simpanGelombang() {
 
   if (!isNew) body.wave_id = state.selectedGelombang.wave_id;
 
-  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(body) })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       setLoading(btn, false);
