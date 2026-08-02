@@ -102,7 +102,8 @@ function muatInfoGelombang() {
 function tampilkanBannerGelombang(info) {
   var bannerGel   = document.getElementById('banner-gelombang');
   var bannerTutup = document.getElementById('banner-ditutup');
-  var btnLanjut1  = document.getElementById('btn-lanjut-1');
+  // FIX #5: tombol di index.html pakai id="btn-next-1", bukan "btn-lanjut-1"
+  var btnLanjut1  = document.getElementById('btn-next-1');
 
   if (!info) return;
 
@@ -408,15 +409,19 @@ function renderJadwal(list) {
       '</div>';
 
     if (!penuh) {
-      card.addEventListener('click', function () {
-        pilihJadwal(j, card);
-      });
-      card.addEventListener('keydown', function(e) {
-        if (e.key === ' ' || e.key === 'Enter') {
-          e.preventDefault();
-          pilihJadwal(j, card);
-        }
-      });
+      // FIX #1: Wrap dalam IIFE agar j dan card ter-capture dengan benar
+      // tanpa IIFE, semua listener akan pakai nilai j dan card dari iterasi terakhir
+      (function(jadwal, cardEl) {
+        cardEl.addEventListener('click', function () {
+          pilihJadwal(jadwal, cardEl);
+        });
+        cardEl.addEventListener('keydown', function(e) {
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            pilihJadwal(jadwal, cardEl);
+          }
+        });
+      })(j, card);
     }
 
     grid.appendChild(card);
@@ -441,7 +446,7 @@ function pilihJadwal(jadwal, cardEl) {
 }
 
 // ============================================================================
-// KONFIRMASI (Step 3)
+// KONFIRMASI (Step 4)
 // ============================================================================
 
 function isiKonfirmasi() {
@@ -478,6 +483,13 @@ function isiKonfirmasi() {
 
 function submitPendaftaran() {
   var btn = document.getElementById('btn-submit');
+
+  // FIX #3: guard jika jadwalTerpilih null (user submit tanpa melalui step 3)
+  if (!state.jadwalTerpilih) {
+    tampilkanAlert('Pilih jadwal terlebih dahulu.');
+    return;
+  }
+
   setLoading(btn, true);
   sembunyikanAlert();
 
@@ -556,19 +568,37 @@ function salinNomor() {
       redirectKeShare();
     });
   } else {
-    var el = document.createElement('textarea');
-    el.value = nomor;
-    el.style.position = 'fixed';
-    el.style.opacity = '0';
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-    btn.classList.add('copied');
-    document.getElementById('salin-text').textContent = 'Tersalin! Mengalihkan...';
-    redirectKeShare();
+    // FIX #7: execCommand('copy') deprecated — pakai modern clipboard API dengan fallback
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(nomor).then(function() {
+          btn.classList.add('copied');
+          document.getElementById('salin-text').textContent = 'Tersalin! Mengalihkan...';
+          redirectKeShare();
+        }).catch(function() {
+          _fallbackCopy(nomor, btn);
+        });
+      } else {
+        _fallbackCopy(nomor, btn);
+      }
+    } catch (err) {
+      _fallbackCopy(nomor, btn);
+    }
   }
 }
+
+function _fallbackCopy(nomor, btn) {
+  var el = document.createElement('textarea');
+  el.value = nomor;
+  el.style.position = 'fixed';
+  el.style.opacity = '0';
+  document.body.appendChild(el);
+  el.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(el);
+  btn.classList.add('copied');
+  document.getElementById('salin-text').textContent = 'Tersalin! Mengalihkan...';
+  redirectKeShare();
 
 // ============================================================================
 // FETCH HELPER

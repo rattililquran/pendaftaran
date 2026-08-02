@@ -234,10 +234,8 @@ function deskripsiStatus(status) {
   return map[status] || '';
 }
 
-function statusClass(status) {
-  var valid = ['TERDAFTAR','BERKAS_OK','DITERIMA','DITOLAK','WAWANCARA'];
-  return valid.indexOf(status) !== -1 ? 'status-' + status : 'status-default';
-}
+// FIX #8: statusClass dihapus — fungsi tidak pernah dipanggil (dead code)
+// CSS class status ditangani langsung di tampilkanHasil() via 'status-' + status
 
 function formatTanggal(val) {
   if (!val) return '—';
