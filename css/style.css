@@ -996,6 +996,224 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
   .btn-row { gap: 8px; }
 }
 
+/* ============================================================
+   MOBILE ENHANCEMENT — Optimasi layar HP (≤ 520px)
+   ============================================================ */
+
+/* ---- Base & Layout ---- */
+@media (max-width: 520px) {
+  html { font-size: 15px; }
+
+  .page-wrapper {
+    padding: 20px 0 56px;
+    align-items: stretch;
+  }
+
+  .container,
+  .site-nav {
+    max-width: 100%;
+    padding: 0 14px;
+  }
+
+  /* Card: full-bleed di mobile, hapus side radius */
+  .card {
+    border-radius: 20px;
+    padding: 20px 16px 24px;
+    margin-bottom: 12px;
+    border-left: none;
+    border-right: none;
+    border-radius: 20px;
+  }
+}
+
+/* ---- Header ---- */
+@media (max-width: 520px) {
+  .site-header { margin-bottom: 20px; }
+  .site-logo   { width: 110px; }
+  .site-quote  { font-size: 0.68rem; letter-spacing: 1.2px; }
+  .site-header .tagline { font-size: 0.82rem; }
+}
+
+/* ---- Step Indicator ---- */
+@media (max-width: 520px) {
+  .step-tracker { margin-bottom: 16px; }
+  .step-dot     { width: 28px; height: 28px; font-size: 0.72rem; }
+  .step-line    { min-width: 20px; }
+}
+
+/* ---- Form fields ---- */
+@media (max-width: 520px) {
+  .form-group { margin-bottom: 16px; }
+
+  .form-label {
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+  }
+
+  /* Input & select: lebih tinggi untuk tap target yang nyaman */
+  .form-input,
+  .form-select {
+    font-size: 1rem;        /* cegah iOS auto-zoom */
+    min-height: 52px;
+    padding: 13px 14px;
+  }
+
+  textarea.form-input {
+    min-height: 80px;
+    font-size: 1rem;
+  }
+
+  .form-hint  { font-size: 0.78rem; }
+  .form-error { font-size: 0.78rem; }
+}
+
+/* ---- Card & Gender selector ---- */
+@media (max-width: 520px) {
+  .gender-row   { gap: 10px; }
+
+  .gender-card {
+    padding: 14px 10px;
+    border-radius: 14px;
+    min-height: 60px;
+    gap: 6px;
+  }
+
+  .gender-label { font-size: 0.88rem; }
+}
+
+/* ---- Form Section Divider ---- */
+@media (max-width: 520px) {
+  .form-section-divider {
+    margin: 18px 0 14px;
+    font-size: 0.72rem;
+  }
+}
+
+/* ---- Consent checkbox ---- */
+@media (max-width: 520px) {
+  .form-label-consent {
+    font-size: 0.875rem;
+    padding: 12px 12px;
+    gap: 10px;
+  }
+
+  .form-label-consent input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+}
+
+/* ---- Buttons ---- */
+@media (max-width: 520px) {
+  .btn {
+    min-height: 50px;   /* tap target minimum 48px */
+    font-size: 0.9rem;
+    padding: 13px 18px;
+    border-radius: 14px;
+  }
+
+  .btn-row {
+    gap: 10px;
+    margin-top: 20px;
+  }
+}
+
+/* ---- Konfirmasi box ---- */
+@media (max-width: 520px) {
+  .konfirmasi-box {
+    padding: 14px 12px;
+    border-radius: 14px;
+  }
+
+  .konfirmasi-row {
+    padding: 7px 0;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* Di HP sempit, label di atas value */
+  .konfirmasi-row .label {
+    font-size: 0.75rem;
+    flex-basis: 100%;
+    color: var(--ink-4);
+  }
+
+  .konfirmasi-row .value {
+    font-size: 0.9rem;
+    text-align: left;
+    flex-basis: 100%;
+    padding-left: 2px;
+  }
+}
+
+/* ---- Jadwal cards ---- */
+@media (max-width: 520px) {
+  .jadwal-card { padding: 14px 12px; }
+  .jadwal-nama { font-size: 0.88rem; }
+  .jadwal-meta { font-size: 0.76rem; gap: 6px; }
+  .jadwal-kuota {
+    top: 10px;
+    right: 10px;
+    font-size: 0.68rem;
+    padding: 2px 8px;
+  }
+}
+
+/* ---- Modal sukses ---- */
+@media (max-width: 520px) {
+  .modal {
+    padding: 22px 16px 26px;
+    border-radius: 22px;
+  }
+
+  .nomor-value {
+    font-size: 1.35rem;
+    letter-spacing: .5px;
+  }
+
+  .btn-salin {
+    width: 100%;
+    justify-content: center;
+    padding: 13px 20px;
+  }
+
+  .modal-note { font-size: 0.78rem; }
+}
+
+/* ---- Banner gelombang ---- */
+@media (max-width: 520px) {
+  .banner-gelombang-inner { padding: 11px 12px; gap: 8px; }
+  .banner-gelombang-nama  { font-size: 0.85rem; }
+  .banner-gelombang-periode { font-size: 0.72rem; }
+}
+
+/* ---- Card title & subtitle ---- */
+@media (max-width: 520px) {
+  .card-title    { font-size: 1.15rem; margin-bottom: 4px; }
+  .card-subtitle { font-size: 0.82rem; margin-bottom: 16px; }
+}
+
+/* ---- Nav back ---- */
+@media (max-width: 520px) {
+  .site-nav { margin-bottom: 18px; }
+  .nav-back  { font-size: 0.82rem; padding: 7px 12px; }
+}
+
+/* ---- Cegah iOS auto-zoom pada input focus ---- */
+@media (max-width: 520px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="date"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px !important; /* iOS tidak zoom jika ≥ 16px */
+  }
+}
+
+
 
 /* ---- Dark Mode Toggle Button ---- */
 .theme-toggle {
