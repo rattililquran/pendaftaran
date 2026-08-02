@@ -601,7 +601,7 @@ function _fallbackCopy(nomor, btn) {
   btn.classList.add('copied');
   document.getElementById('salin-text').textContent = 'Tersalin! Mengalihkan...';
   redirectKeShare();
-
+}
 // ============================================================================
 // FETCH HELPER
 // ============================================================================
