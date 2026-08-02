@@ -67,6 +67,19 @@ document.addEventListener('DOMContentLoaded', function () {
       tampilkanError('jenis_biaya', false);
     });
   });
+
+  // Event listener pernah_tahsin card — pola sama dengan gender
+  ['pernah_tahsin-ya', 'pernah_tahsin-tidak'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', function() {
+      el.closest('.gender-row').querySelectorAll('.gender-card').forEach(function(c) {
+        c.classList.remove('selected');
+      });
+      el.closest('.gender-card').classList.add('selected');
+      tampilkanError('pernah_tahsin', false);
+    });
+  });
 });
 
 // ============================================================================

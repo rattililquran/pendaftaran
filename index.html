@@ -228,12 +228,14 @@
           <label class="form-label">
             Pernah Mengikuti Tahsin Sebelumnya? <span class="required" aria-hidden="true">*</span>
           </label>
-          <div class="radio-group" id="pernah_tahsin" role="radiogroup">
-            <label class="radio-label">
-              <input type="radio" name="pernah_tahsin" value="Ya"> Ya
+          <div class="gender-row" id="pernah_tahsin" role="radiogroup" aria-label="Pernah tahsin">
+            <label class="gender-card" id="label-pernah-ya">
+              <input type="radio" name="pernah_tahsin" id="pernah_tahsin-ya" value="Ya">
+              <span class="gender-label">Ya</span>
             </label>
-            <label class="radio-label">
-              <input type="radio" name="pernah_tahsin" value="Tidak"> Tidak
+            <label class="gender-card" id="label-pernah-tidak">
+              <input type="radio" name="pernah_tahsin" id="pernah_tahsin-tidak" value="Tidak">
+              <span class="gender-label">Tidak</span>
             </label>
           </div>
           <div class="form-error" id="err-pernah_tahsin">Pilihan wajib dipilih.</div>
