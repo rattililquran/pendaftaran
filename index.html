@@ -68,7 +68,7 @@
         </div>
       </div>
 
-      <!-- Progress Steps -->
+      <!-- Progress Steps — 4 langkah -->
       <div class="steps" id="steps" aria-label="Langkah pendaftaran">
         <div class="step-ind active" id="step-ind-1">
           <div class="step-dot" aria-label="Langkah 1">1</div>
@@ -77,11 +77,16 @@
         <div class="step-line" id="line-1"></div>
         <div class="step-ind" id="step-ind-2">
           <div class="step-dot" aria-label="Langkah 2">2</div>
-          <div class="step-label">Jadwal</div>
+          <div class="step-label">Kesiapan</div>
         </div>
         <div class="step-line" id="line-2"></div>
         <div class="step-ind" id="step-ind-3">
           <div class="step-dot" aria-label="Langkah 3">3</div>
+          <div class="step-label">Jadwal</div>
+        </div>
+        <div class="step-line" id="line-3"></div>
+        <div class="step-ind" id="step-ind-4">
+          <div class="step-dot" aria-label="Langkah 4">4</div>
           <div class="step-label">Konfirmasi</div>
         </div>
       </div>
@@ -180,6 +185,18 @@
           <div class="form-error" id="err-gender">Jenis kelamin wajib dipilih.</div>
         </div>
 
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-next-1" onclick="keStep2()">
+            <span class="btn-text">Lanjut →</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== STEP 2: KESIAPAN ==================== -->
+      <div class="card" id="step-2" style="display:none">
+        <h2 class="card-title">Kesiapan &amp; Komitmen</h2>
+        <p class="card-subtitle">Ceritakan latar belakang dan komitmen Anda.</p>
+
         <!-- Seksi: Jenis Biaya Program -->
         <div class="form-section-divider"><span>Jenis Biaya Program</span></div>
 
@@ -207,8 +224,8 @@
           <div class="form-error" id="err-jenis_biaya">Jenis biaya wajib dipilih.</div>
         </div>
 
-        <!-- Seksi B: Kesiapan & Komitmen -->
-        <div class="form-section-divider"><span>Kesiapan &amp; Komitmen</span></div>
+        <!-- Seksi: Kesiapan -->
+        <div class="form-section-divider"><span>Kesiapan Belajar</span></div>
 
         <div class="form-group">
           <label class="form-label" for="kemampuan_awal">
@@ -285,14 +302,15 @@
         </div>
 
         <div class="btn-row">
-          <button class="btn btn-primary" id="btn-next-1" onclick="keStep2()">
+          <button class="btn btn-secondary" onclick="keStep1()">← Kembali</button>
+          <button class="btn btn-primary" onclick="keStep3()">
             <span class="btn-text">Lanjut →</span>
           </button>
         </div>
       </div>
 
-      <!-- ==================== STEP 2: PILIH JADWAL ==================== -->
-      <div class="card" id="step-2" style="display:none">
+      <!-- ==================== STEP 3: PILIH JADWAL ==================== -->
+      <div class="card" id="step-3" style="display:none">
         <h2 class="card-title">Pilih Jadwal</h2>
         <p class="card-subtitle">Jadwal ditampilkan sesuai jenis kelamin yang dipilih.</p>
         <div class="gender-info-badge" id="gender-badge">👤 <span id="gender-badge-text">—</span></div>
@@ -310,15 +328,15 @@
         </div>
 
         <div class="btn-row">
-          <button class="btn btn-secondary" onclick="keStep1()">← Kembali</button>
-          <button class="btn btn-primary" id="btn-next-2" onclick="keStep3()">
+          <button class="btn btn-secondary" onclick="keStep2()">← Kembali</button>
+          <button class="btn btn-primary" id="btn-next-2" onclick="keStep4()">
             <span class="btn-text">Lanjut →</span>
           </button>
         </div>
       </div>
 
-      <!-- ==================== STEP 3: KONFIRMASI ==================== -->
-      <div class="card" id="step-3" style="display:none">
+      <!-- ==================== STEP 4: KONFIRMASI ==================== -->
+      <div class="card" id="step-4" style="display:none">
         <h2 class="card-title">Konfirmasi Data</h2>
         <p class="card-subtitle">Periksa kembali data Anda sebelum mengirim pendaftaran.</p>
 
@@ -370,7 +388,7 @@
         </p>
 
         <div class="btn-row">
-          <button class="btn btn-secondary" onclick="keStep2()">← Kembali</button>
+          <button class="btn btn-secondary" onclick="keStep3()">← Kembali</button>
           <button class="btn btn-primary" id="btn-submit" onclick="submitPendaftaran()">
             <div class="spinner" aria-hidden="true"></div>
             <span class="btn-text">Kirim Pendaftaran</span>

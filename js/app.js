@@ -151,32 +151,38 @@ function keStep1() {
 function keStep2() {
   if (!validasiStep1()) return;
   updateStepUI(2);
-  // Tampilkan badge gender di step 2
+}
+
+function keStep3() {
+  if (!validasiStep2()) return;
+  updateStepUI(3);
+  // Tampilkan badge gender di step 3 (jadwal)
   var badgeText = document.getElementById('gender-badge-text');
   if (badgeText) badgeText.textContent = state.gender || '—';
   muatJadwal();
 }
 
-function keStep3() {
+function keStep4() {
   if (!state.jadwalTerpilih) {
     document.getElementById('err-jadwal').style.display = 'block';
     return;
   }
   document.getElementById('err-jadwal').style.display = 'none';
   isiKonfirmasi();
-  updateStepUI(3);
+  updateStepUI(4);
 }
 
 function updateStepUI(step) {
   state.step = step;
 
-  // Tampilkan/sembunyikan card
+  // Tampilkan/sembunyikan card — 4 step
   document.getElementById('step-1').style.display = step === 1 ? 'block' : 'none';
   document.getElementById('step-2').style.display = step === 2 ? 'block' : 'none';
   document.getElementById('step-3').style.display = step === 3 ? 'block' : 'none';
+  document.getElementById('step-4').style.display = step === 4 ? 'block' : 'none';
 
-  // Update indikator step
-  for (var i = 1; i <= 3; i++) {
+  // Update indikator step — loop 1..4
+  for (var i = 1; i <= 4; i++) {
     var indEl = document.getElementById('step-ind-' + i);
     indEl.classList.remove('active', 'done');
     if (i < step)  indEl.classList.add('done');
@@ -187,8 +193,8 @@ function updateStepUI(step) {
     dot.textContent = i < step ? '✓' : String(i);
   }
 
-  // Update garis
-  for (var j = 1; j <= 2; j++) {
+  // Update garis — loop 1..3
+  for (var j = 1; j <= 3; j++) {
     var line = document.getElementById('line-' + j);
     if (j < step) {
       line.classList.add('done');
@@ -202,7 +208,7 @@ function updateStepUI(step) {
 }
 
 // ============================================================================
-// VALIDASI STEP 1
+// VALIDASI STEP 1 — Data Diri (5 field)
 // ============================================================================
 
 function validasiStep1() {
@@ -256,6 +262,16 @@ function validasiStep1() {
     tampilkanError('gender', false);
   }
 
+  return valid;
+}
+
+// ============================================================================
+// VALIDASI STEP 2 — Kesiapan & Komitmen (6 field)
+// ============================================================================
+
+function validasiStep2() {
+  var valid = true;
+
   // Jenis Biaya Program
   var jenisBiayaEl = document.querySelector('input[name="jenis_biaya"]:checked');
   if (!jenisBiayaEl) {
@@ -308,7 +324,7 @@ function tampilkanError(field, tampil) {
 // ============================================================================
 
 function muatJadwal() {
-  // Reset jadwal terpilih saat masuk step 2
+  // Reset jadwal terpilih saat masuk step 3
   state.jadwalTerpilih = null;
 
   if (state.jadwalList.length > 0) {

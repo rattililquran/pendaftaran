@@ -1215,6 +1215,13 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
 
 
 
+/* ---- Progress indicator 4 step — label lebih kecil agar tidak overflow ---- */
+@media (max-width: 520px) {
+  .step-label { font-size: 0.62rem; }
+  .step-dot   { width: 26px; height: 26px; font-size: 0.7rem; }
+  .step-line  { min-width: 12px; }
+}
+
 /* ---- Dark Mode Toggle Button ---- */
 .theme-toggle {
   background: none;
