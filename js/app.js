@@ -36,49 +36,51 @@ document.addEventListener('DOMContentLoaded', function () {
   var tahunEl = document.getElementById('tahun-footer');
   if (tahunEl) tahunEl.textContent = new Date().getFullYear();
 
-  // Event listener gender — scope querySelectorAll ke wrapper agar tidak
-  // menghapus class 'selected' dari card jenis_biaya (BUG FIX)
+  // Event listener gender — IIFE untuk fix closure bug (el ter-capture dari scope luar)
   ['gender-putra', 'gender-putri'].forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('change', function() {
-      state.gender = this.value;
-      state.jadwalTerpilih = null; // reset jadwal saat gender berubah
-
-      // Update visual selected — scope ke wrapper #gender saja
-      el.closest('.gender-row').querySelectorAll('.gender-card').forEach(function(c) {
-        c.classList.remove('selected');
+    (function(inputEl) {
+      inputEl.addEventListener('change', function() {
+        state.gender = this.value;
+        state.jadwalTerpilih = null;
+        inputEl.closest('.gender-row').querySelectorAll('.gender-card').forEach(function(c) {
+          c.classList.remove('selected');
+        });
+        inputEl.closest('.gender-card').classList.add('selected');
+        tampilkanError('gender', false);
       });
-      el.closest('.gender-card').classList.add('selected');
-      tampilkanError('gender', false);
-    });
+    })(el);
   });
 
-  // Event listener jenis_biaya card — pola sama dengan gender
+  // Event listener jenis_biaya card — IIFE untuk fix closure bug
   ['jenis_biaya-reguler', 'jenis_biaya-beasiswa'].forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('change', function() {
-      // Scope ke wrapper #jenis_biaya agar tidak ganggu gender cards
-      el.closest('.gender-row').querySelectorAll('.gender-card').forEach(function(c) {
-        c.classList.remove('selected');
+    (function(inputEl) {
+      inputEl.addEventListener('change', function() {
+        inputEl.closest('.gender-row').querySelectorAll('.gender-card').forEach(function(c) {
+          c.classList.remove('selected');
+        });
+        inputEl.closest('.gender-card').classList.add('selected');
+        tampilkanError('jenis_biaya', false);
       });
-      el.closest('.gender-card').classList.add('selected');
-      tampilkanError('jenis_biaya', false);
-    });
+    })(el);
   });
 
-  // Event listener pernah_tahsin card — pola sama dengan gender
+  // Event listener pernah_tahsin card — IIFE untuk fix closure bug
   ['pernah_tahsin-ya', 'pernah_tahsin-tidak'].forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('change', function() {
-      el.closest('.gender-row').querySelectorAll('.gender-card').forEach(function(c) {
-        c.classList.remove('selected');
+    (function(inputEl) {
+      inputEl.addEventListener('change', function() {
+        inputEl.closest('.gender-row').querySelectorAll('.gender-card').forEach(function(c) {
+          c.classList.remove('selected');
+        });
+        inputEl.closest('.gender-card').classList.add('selected');
+        tampilkanError('pernah_tahsin', false);
       });
-      el.closest('.gender-card').classList.add('selected');
-      tampilkanError('pernah_tahsin', false);
-    });
+    })(el);
   });
 });
 
