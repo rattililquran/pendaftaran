@@ -36,7 +36,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var tahunEl = document.getElementById('tahun-footer');
   if (tahunEl) tahunEl.textContent = new Date().getFullYear();
 
-  // Event listener gender
+  // Event listener gender — scope querySelectorAll ke wrapper agar tidak
+  // menghapus class 'selected' dari card jenis_biaya (BUG FIX)
   ['gender-putra', 'gender-putri'].forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
@@ -44,12 +45,26 @@ document.addEventListener('DOMContentLoaded', function () {
       state.gender = this.value;
       state.jadwalTerpilih = null; // reset jadwal saat gender berubah
 
-      // Update visual selected
-      document.querySelectorAll('.gender-card').forEach(function(c) {
+      // Update visual selected — scope ke wrapper #gender saja
+      el.closest('.gender-row').querySelectorAll('.gender-card').forEach(function(c) {
         c.classList.remove('selected');
       });
       el.closest('.gender-card').classList.add('selected');
       tampilkanError('gender', false);
+    });
+  });
+
+  // Event listener jenis_biaya card — pola sama dengan gender
+  ['jenis_biaya-reguler', 'jenis_biaya-beasiswa'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', function() {
+      // Scope ke wrapper #jenis_biaya agar tidak ganggu gender cards
+      el.closest('.gender-row').querySelectorAll('.gender-card').forEach(function(c) {
+        c.classList.remove('selected');
+      });
+      el.closest('.gender-card').classList.add('selected');
+      tampilkanError('jenis_biaya', false);
     });
   });
 });
@@ -228,6 +243,36 @@ function validasiStep1() {
     tampilkanError('gender', false);
   }
 
+  // Jenis Biaya Program
+  var jenisBiayaEl = document.querySelector('input[name="jenis_biaya"]:checked');
+  if (!jenisBiayaEl) {
+    tampilkanError('jenis_biaya', true); valid = false;
+  } else { tampilkanError('jenis_biaya', false); }
+
+  // Kemampuan Awal
+  var kemampuanEl = document.getElementById('kemampuan_awal');
+  if (!kemampuanEl || !kemampuanEl.value) {
+    tampilkanError('kemampuan_awal', true); valid = false;
+  } else { tampilkanError('kemampuan_awal', false); }
+
+  // Pernah Tahsin
+  var pernahEl = document.querySelector('input[name="pernah_tahsin"]:checked');
+  if (!pernahEl) {
+    tampilkanError('pernah_tahsin', true); valid = false;
+  } else { tampilkanError('pernah_tahsin', false); }
+
+  // Motivasi
+  var motivasiEl = document.getElementById('motivasi');
+  if (!motivasiEl || motivasiEl.value.trim().length < 10) {
+    tampilkanError('motivasi', true); valid = false;
+  } else { tampilkanError('motivasi', false); }
+
+  // Komitmen
+  var komitmenInput = document.getElementById('komitmen-input');
+  if (!komitmenInput || !komitmenInput.checked) {
+    tampilkanError('komitmen', true); valid = false;
+  } else { tampilkanError('komitmen', false); }
+
   return valid;
 }
 
@@ -244,14 +289,6 @@ function tampilkanError(field, tampil) {
     err.classList.remove('visible');
   }
 }
-
-// Hapus error saat user mulai mengetik
-['nama','hp','email','tgl_lahir'].forEach(function(id) {
-  var el = document.getElementById(id);
-  if (el) {
-    el.addEventListener('input', function() { tampilkanError(id, false); });
-  }
-});
 
 // ============================================================================
 // MUAT JADWAL DARI BACKEND (Step 2)
@@ -388,6 +425,22 @@ function isiKonfirmasi() {
   document.getElementById('konfirm-gender').textContent  = state.gender || '—';
   document.getElementById('konfirm-program').textContent = j ? j.program : '—';
   document.getElementById('konfirm-jadwal').textContent  = j ? (j.hari + ', ' + j.jam) : '—';
+
+  // Field baru
+  var konfBiaya = document.getElementById('konfirm-jenis_biaya');
+  if (konfBiaya) {
+    var biayaCk = document.querySelector('input[name="jenis_biaya"]:checked');
+    konfBiaya.textContent = biayaCk ? biayaCk.value : '—';
+  }
+
+  var konfKemampuan = document.getElementById('konfirm-kemampuan');
+  if (konfKemampuan) konfKemampuan.textContent = document.getElementById('kemampuan_awal').value || '—';
+
+  var konfPernah = document.getElementById('konfirm-pernah_tahsin');
+  if (konfPernah) {
+    var pernahCk = document.querySelector('input[name="pernah_tahsin"]:checked');
+    konfPernah.textContent = pernahCk ? pernahCk.value : '—';
+  }
 }
 
 // ============================================================================
@@ -408,7 +461,14 @@ function submitPendaftaran() {
     gender:       state.gender || '',
     jadwal_id:    state.jadwalTerpilih ? state.jadwalTerpilih.jadwal_id : '',
     program:      state.jadwalTerpilih ? state.jadwalTerpilih.program : '',
-    client_token: state.clientToken
+    client_token: state.clientToken,
+    jenis_biaya:    (document.querySelector('input[name="jenis_biaya"]:checked') || {}).value || '',
+    kemampuan_awal: document.getElementById('kemampuan_awal').value,
+    pernah_tahsin:  (document.querySelector('input[name="pernah_tahsin"]:checked') || {}).value || '',
+    motivasi:       document.getElementById('motivasi').value.trim(),
+    komitmen:       document.getElementById('komitmen-input').checked ? 'true' : 'false',
+    saran_masukan:  (document.getElementById('saran_masukan') || {}).value
+                      ? document.getElementById('saran_masukan').value.trim() : ''
   };
 
   fetchBackend('POST', body)

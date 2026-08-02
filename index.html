@@ -167,7 +167,7 @@
           <label class="form-label">
             Jenis Kelamin <span class="required" aria-hidden="true">*</span>
           </label>
-          <div class="gender-row" role="radiogroup" aria-label="Pilih jenis kelamin">
+          <div class="gender-row" id="gender" role="radiogroup" aria-label="Pilih jenis kelamin">
             <label class="gender-card" id="label-putra">
               <input type="radio" name="gender" id="gender-putra" value="Laki-laki">
               <span class="gender-label">Laki-laki</span>
@@ -178,6 +178,108 @@
             </label>
           </div>
           <div class="form-error" id="err-gender">Jenis kelamin wajib dipilih.</div>
+        </div>
+
+        <!-- Seksi: Jenis Biaya Program -->
+        <div class="form-section-divider"><span>Jenis Biaya Program</span></div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Pilih Jenis Biaya <span class="required" aria-hidden="true">*</span>
+          </label>
+          <div class="gender-row" id="jenis_biaya" role="radiogroup" aria-label="Pilih jenis biaya">
+            <label class="gender-card" id="label-reguler">
+              <input type="radio" name="jenis_biaya" id="jenis_biaya-reguler" value="Reguler">
+              <span class="gender-label">Reguler</span>
+            </label>
+            <label class="gender-card" id="label-beasiswa">
+              <input type="radio" name="jenis_biaya" id="jenis_biaya-beasiswa" value="Beasiswa">
+              <span class="gender-label">Beasiswa</span>
+            </label>
+          </div>
+          <div class="form-hint">
+            Memilih Beasiswa? Pastikan Anda memenuhi persyaratan.
+            <a href="#syarat-beasiswa" target="_blank" rel="noopener noreferrer"
+               style="color:var(--primary);font-weight:600">
+              Lihat syarat &amp; ketentuan beasiswa &rarr;
+            </a>
+          </div>
+          <div class="form-error" id="err-jenis_biaya">Jenis biaya wajib dipilih.</div>
+        </div>
+
+        <!-- Seksi B: Kesiapan & Komitmen -->
+        <div class="form-section-divider"><span>Kesiapan &amp; Komitmen</span></div>
+
+        <div class="form-group">
+          <label class="form-label" for="kemampuan_awal">
+            Kemampuan Membaca Al-Qur'an Saat Ini <span class="required" aria-hidden="true">*</span>
+          </label>
+          <select class="form-select" id="kemampuan_awal" name="kemampuan_awal" required>
+            <option value="">-- Pilih --</option>
+            <option value="Belum bisa baca">Belum bisa baca</option>
+            <option value="Bisa baca tapi belum lancar">Bisa baca tapi belum lancar</option>
+            <option value="Sudah lancar tapi belum tartil">Sudah lancar tapi belum tartil</option>
+            <option value="Sudah tartil">Sudah tartil</option>
+          </select>
+          <div class="form-error" id="err-kemampuan_awal">Pilihan wajib dipilih.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Pernah Mengikuti Tahsin Sebelumnya? <span class="required" aria-hidden="true">*</span>
+          </label>
+          <div class="radio-group" id="pernah_tahsin" role="radiogroup">
+            <label class="radio-label">
+              <input type="radio" name="pernah_tahsin" value="Ya"> Ya
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="pernah_tahsin" value="Tidak"> Tidak
+            </label>
+          </div>
+          <div class="form-error" id="err-pernah_tahsin">Pilihan wajib dipilih.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="motivasi">
+            Motivasi Mengikuti Program Ini <span class="required" aria-hidden="true">*</span>
+          </label>
+          <textarea
+            class="form-input"
+            id="motivasi"
+            name="motivasi"
+            rows="3"
+            placeholder="Ceritakan motivasi Anda..."
+            required
+          ></textarea>
+          <div class="form-error" id="err-motivasi">Motivasi wajib diisi (minimal 10 karakter).</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label-consent" id="komitmen">
+            <input type="checkbox" id="komitmen-input" name="komitmen">
+            <span>
+              Saya bersedia mengikuti program dengan serius, hadir tepat waktu, dan menjalankan tugas yang diberikan.
+              <span class="required" aria-hidden="true">*</span>
+            </span>
+          </label>
+          <div class="form-error" id="err-komitmen">Pernyataan komitmen wajib disetujui.</div>
+        </div>
+
+        <!-- Seksi: Saran & Masukan (opsional) -->
+        <div class="form-section-divider"><span>Saran &amp; Masukan</span></div>
+
+        <div class="form-group">
+          <label class="form-label" for="saran_masukan">
+            Saran &amp; Masukan untuk Rattilil Qur'an
+            <span style="font-weight:400;color:var(--ink-3);font-size:0.8rem">(opsional)</span>
+          </label>
+          <textarea
+            class="form-input"
+            id="saran_masukan"
+            name="saran_masukan"
+            rows="3"
+            placeholder="Tuliskan saran, harapan, atau masukan Anda untuk kami..."
+          ></textarea>
         </div>
 
         <div class="btn-row">
@@ -246,6 +348,18 @@
           <div class="konfirmasi-row">
             <span class="label">Jadwal</span>
             <span class="value" id="konfirm-jadwal">—</span>
+          </div>
+          <div class="konfirmasi-row">
+            <span class="label">Jenis Biaya</span>
+            <span class="value" id="konfirm-jenis_biaya">—</span>
+          </div>
+          <div class="konfirmasi-row">
+            <span class="label">Kemampuan Awal</span>
+            <span class="value" id="konfirm-kemampuan">—</span>
+          </div>
+          <div class="konfirmasi-row">
+            <span class="label">Pernah Tahsin</span>
+            <span class="value" id="konfirm-pernah_tahsin">—</span>
           </div>
         </div>
 
