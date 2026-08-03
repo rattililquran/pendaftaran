@@ -13,7 +13,9 @@ var state = {
   selectedPendaftar: null,
   selectedJadwal: null,
   page: 1,
-  pageSize: 20
+  pageSize: 20,
+  selected: {},              // no_pendaftaran -> true (aksi massal)
+  sort: { key: '', dir: 1 }  // dir 1 = asc, -1 = desc
 };
 
 /**
@@ -83,7 +85,7 @@ function switchTab(tab) {
   });
   document.getElementById('nav-' + tab).classList.add('active');
 
-  var tabs = ['pendaftar', 'jadwal', 'gelombang', 'formfields', 'statistik', 'qrcode'];
+  var tabs = ['pendaftar', 'jadwal', 'gelombang', 'formfields', 'statistik', 'watemplate', 'qrcode'];
   tabs.forEach(function(t) {
     var el = document.getElementById('tab-' + t);
     if (el) el.style.display = t === tab ? 'block' : 'none';
@@ -95,6 +97,7 @@ function switchTab(tab) {
     'gelombang':  ['Gelombang',       'Kelola gelombang dan status pendaftaran'],
     'formfields': ['Form Fields',     'Konfigurasi pertanyaan form pendaftaran'],
     'statistik':  ['Statistik',        'Visualisasi data pendaftaran'],
+    'watemplate': ['Template WA',      'Kelola template pesan WhatsApp'],
     'qrcode':     ['QR Code',          'QR Code link pendaftaran']
   };
 
@@ -107,6 +110,7 @@ function switchTab(tab) {
   if (tab === 'gelombang')  muatGelombang();
   if (tab === 'formfields') muatFormFields();
   if (tab === 'statistik')  muatCharts();
+  if (tab === 'watemplate') muatWaTemplateAdmin();
   if (tab === 'qrcode')     muatQRCode();
 
   tutupSidebar();
@@ -158,7 +162,7 @@ function muatStats() {
 
 function muatPendaftar() {
   var tbody = document.getElementById('tbody-pendaftar');
-  tbody.innerHTML = '<tr><td colspan="10" class="no-data">Memuat data...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="11" class="no-data">Memuat data...</td></tr>';
 
   _adminGet({ action: 'admin.registrations', token: state.token })
     .then(function (res) {
@@ -167,7 +171,7 @@ function muatPendaftar() {
           tampilkanToast('Sesi habis, silakan login ulang.', 'error');
           setTimeout(function () { logout(); }, 2000);
         } else {
-          tbody.innerHTML = '<tr><td colspan="10" class="no-data">Gagal memuat data.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="11" class="no-data">Gagal memuat data.</td></tr>';
         }
         return;
       }
@@ -176,17 +180,47 @@ function muatPendaftar() {
       renderTabelPendaftar();
     })
     .catch(function () {
-      tbody.innerHTML = '<tr><td colspan="10" class="no-data">Koneksi bermasalah.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="11" class="no-data">Koneksi bermasalah.</td></tr>';
     });
 }
 
 function renderTabelPendaftar() {
   var tbody = document.getElementById('tbody-pendaftar');
-  var data = state.filteredData;
+  var pag = document.getElementById('pagination');
+
+  // Empty state: benar-benar belum ada pendaftar (bukan hasil filter kosong).
+  if (state.pendaftar.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="11" class="no-data">' +
+      '<div style="font-size:2.4rem;margin-bottom:8px">📭</div>' +
+      '<div style="font-weight:700;color:var(--ink-2);margin-bottom:6px">Belum ada pendaftar</div>' +
+      '<div style="font-size:0.82rem;color:var(--ink-4);margin-bottom:14px">Bagikan link pendaftaran untuk mulai menerima calon murid.</div>' +
+      '<button class="btn btn-primary btn-sm" onclick="switchTab(\'qrcode\')">Buka QR &amp; Link</button>' +
+      '</div></td></tr>';
+    pag.style.display = 'none';
+    updateBulkBar();
+    return;
+  }
+
+  // Salin lalu urutkan sesuai state.sort (biarkan filteredData asli utuh).
+  var data = state.filteredData.slice();
+  if (state.sort.key) {
+    var k = state.sort.key, dir = state.sort.dir;
+    data.sort(function (a, b) {
+      var va, vb;
+      if (k === 'timestamp') {
+        va = new Date(a[k]).getTime() || 0; vb = new Date(b[k]).getTime() || 0;
+      } else {
+        va = String(a[k] || '').toLowerCase(); vb = String(b[k] || '').toLowerCase();
+      }
+      return va < vb ? -dir : va > vb ? dir : 0;
+    });
+  }
 
   if (data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" class="no-data">Tidak ada data.</td></tr>';
-    document.getElementById('pagination').style.display = 'none';
+    tbody.innerHTML = '<tr><td colspan="11" class="no-data">Tidak ada data yang cocok dengan filter.</td></tr>';
+    pag.style.display = 'none';
+    updateSortIndicators();
+    updateBulkBar();
     return;
   }
 
@@ -197,8 +231,10 @@ function renderTabelPendaftar() {
   tbody.innerHTML = '';
   pageData.forEach(function (row, i) {
     var urut = start + i + 1;
+    var checked = state.selected[row.no_pendaftaran] ? ' checked' : '';
     var tr = document.createElement('tr');
     tr.innerHTML =
+      '<td style="text-align:center"><input type="checkbox" class="row-chk" data-no="' + esc(row.no_pendaftaran) + '"' + checked + ' onclick="toggleSelect(this)"></td>' +
       '<td style="text-align:right;color:var(--ink-4);font-size:0.8rem;font-variant-numeric:tabular-nums">' + urut + '</td>' +
       '<td style="font-weight:700;font-size:0.82rem;font-family:monospace">' + esc(row.no_pendaftaran) + '</td>' +
       '<td>' + esc(row.nama) + '</td>' +
@@ -215,7 +251,107 @@ function renderTabelPendaftar() {
     tbody.appendChild(tr);
   });
 
+  updateSortIndicators();
+  syncSelectAll();
+  updateBulkBar();
   renderPaginasi(data.length);
+}
+
+// ---- Sort ----
+function sortBy(key) {
+  if (state.sort.key === key) state.sort.dir *= -1;
+  else { state.sort.key = key; state.sort.dir = 1; }
+  state.page = 1;
+  renderTabelPendaftar();
+}
+
+function updateSortIndicators() {
+  var ths = document.querySelectorAll('#table-pendaftar th[data-sort]');
+  for (var i = 0; i < ths.length; i++) {
+    var ind = ths[i].querySelector('.sort-ind');
+    if (!ind) continue;
+    ind.textContent = (ths[i].getAttribute('data-sort') === state.sort.key)
+      ? (state.sort.dir > 0 ? ' ▲' : ' ▼') : '';
+  }
+}
+
+// ---- Seleksi & aksi massal ----
+function toggleSelect(cb) {
+  var no = cb.getAttribute('data-no');
+  if (cb.checked) state.selected[no] = true; else delete state.selected[no];
+  updateBulkBar();
+  syncSelectAll();
+}
+
+function toggleSelectAll(cb) {
+  state.selected = {};
+  if (cb.checked) {
+    state.filteredData.forEach(function (r) { state.selected[r.no_pendaftaran] = true; });
+  }
+  renderTabelPendaftar();
+}
+
+function syncSelectAll() {
+  var all = document.getElementById('chk-all');
+  if (!all) return;
+  var total = state.filteredData.length;
+  var sel = state.filteredData.filter(function (r) { return state.selected[r.no_pendaftaran]; }).length;
+  all.checked = total > 0 && sel === total;
+  all.indeterminate = sel > 0 && sel < total;
+}
+
+function updateBulkBar() {
+  var bar = document.getElementById('bulk-bar');
+  if (!bar) return;
+  var n = Object.keys(state.selected).length;
+  var cnt = document.getElementById('bulk-count');
+  if (cnt) cnt.textContent = n + ' dipilih';
+  bar.style.display = n > 0 ? 'flex' : 'none';
+}
+
+function bulkClear() {
+  state.selected = {};
+  renderTabelPendaftar();
+}
+
+function bulkUpdateStatus() {
+  var status = document.getElementById('bulk-status').value;
+  if (!status) { tampilkanToast('Pilih status tujuan dulu.', 'error'); return; }
+  var nos = Object.keys(state.selected);
+  if (!nos.length) return;
+  if (!confirm('Ubah status ' + nos.length + ' pendaftar menjadi ' + labelStatus(status) + '?')) return;
+  _bulkRun(nos, function (no) {
+    return _adminPost({ action: 'admin.updateStatus', token: state.token, no_pendaftaran: no, status: status });
+  }, 'Status diperbarui');
+}
+
+function bulkArsip() {
+  var nos = Object.keys(state.selected);
+  if (!nos.length) return;
+  if (!confirm('Arsipkan ' + nos.length + ' pendaftar?')) return;
+  _bulkRun(nos, function (no) {
+    return _adminPost({ action: 'admin.deleteReg', token: state.token, no_pendaftaran: no, mode: 'arsip' });
+  }, 'Data diarsipkan');
+}
+
+// Jalankan aksi berurutan (hindari membebani LockService GAS).
+function _bulkRun(nos, fn, okMsg) {
+  tampilkanToast('Memproses ' + nos.length + ' data…', 'info');
+  var i = 0, ok = 0, fail = 0;
+  function next() {
+    if (i >= nos.length) {
+      tampilkanToast(okMsg + ': ' + ok + ' berhasil' + (fail ? ', ' + fail + ' gagal' : ''), fail ? 'error' : 'success');
+      state.selected = {};
+      muatStats();
+      muatPendaftar();
+      return;
+    }
+    fn(nos[i])
+      .then(function (res) { if (res && res.ok) ok++; else fail++; })
+      .catch(function () { fail++; })
+      .then(function () { i++; next(); });
+  }
+  next();
 }
 
 function renderPaginasi(total) {
@@ -345,7 +481,18 @@ function bukaDetal(no) {
     '<div class="detail-item"><div class="detail-label">Tanggal Lahir</div><div class="detail-value">' + (row.tgl_lahir || '—') + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Gender</div><div class="detail-value">' + (row.gender || '—') + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Program</div><div class="detail-value">' + esc(row.program) + '</div></div>' +
-    '<div class="detail-item"><div class="detail-label">Jadwal</div><div class="detail-value">' + esc(row.jadwal_id) + '</div></div>';
+    '<div class="detail-item"><div class="detail-label">Jadwal</div><div class="detail-value">' + esc(row.jadwal_id) + '</div></div>' +
+    // ---- Data kesiapan & komitmen (baru terlihat oleh admin) ----
+    '<div class="detail-item"><div class="detail-label">Jenis Biaya</div><div class="detail-value">' + (esc(row.jenis_biaya) || '—') + '</div></div>' +
+    '<div class="detail-item"><div class="detail-label">Pernah Tahsin</div><div class="detail-value">' + (esc(row.pernah_tahsin) || '—') + '</div></div>' +
+    '<div class="detail-item full"><div class="detail-label">Kemampuan Awal</div><div class="detail-value">' + (esc(row.kemampuan_awal) || '—') + '</div></div>' +
+    '<div class="detail-item full"><div class="detail-label">Motivasi</div><div class="detail-value" style="white-space:pre-wrap">' + (esc(row.motivasi) || '—') + '</div></div>' +
+    (row.saran_masukan ? '<div class="detail-item full"><div class="detail-label">Saran / Masukan</div><div class="detail-value" style="white-space:pre-wrap">' + esc(row.saran_masukan) + '</div></div>' : '');
+
+  // Riwayat status (timeline) — dimuat async
+  var rwPanel = document.getElementById('riwayat-panel');
+  if (rwPanel) rwPanel.style.display = '';
+  muatRiwayatStatus(row.no_pendaftaran);
 
   document.getElementById('edit-status').value = row.status;
   document.getElementById('edit-catatan-publik').value = row.catatan_publik || '';
@@ -366,6 +513,35 @@ function bukaDetal(no) {
   }
 
   bukaModal('modal-detail');
+}
+
+// Muat & render timeline riwayat status untuk satu pendaftar.
+function muatRiwayatStatus(no) {
+  var box = document.getElementById('riwayat-status');
+  if (!box) return;
+  box.innerHTML = '<div style="color:var(--ink-4);font-size:0.8rem">Memuat riwayat…</div>';
+
+  _adminGet({ action: 'admin.statuslog', token: state.token, no_pendaftaran: no })
+    .then(function (res) {
+      if (!res.ok || !res.data || res.data.length === 0) {
+        box.innerHTML = '<div style="color:var(--ink-4);font-size:0.8rem">Belum ada perubahan status.</div>';
+        return;
+      }
+      box.innerHTML = res.data.map(function (r) {
+        var ket = r.status_lama
+          ? labelStatus(r.status_lama) + ' → <strong>' + labelStatus(r.status_baru) + '</strong>'
+          : '<strong>' + labelStatus(r.status_baru) + '</strong>';
+        return '<div class="timeline-item">' +
+          '<div class="timeline-dot badge-' + esc(r.status_baru) + '"></div>' +
+          '<div class="timeline-body">' +
+            '<div class="timeline-head">' + ket + '<span class="timeline-time">' + formatTanggalJam(r.timestamp) + '</span></div>' +
+            (r.catatan ? '<div class="timeline-note">' + esc(r.catatan) + '</div>' : '') +
+          '</div></div>';
+      }).join('');
+    })
+    .catch(function () {
+      box.innerHTML = '<div style="color:var(--ink-4);font-size:0.8rem">Gagal memuat riwayat.</div>';
+    });
 }
 
 function simpanStatus() {
@@ -614,6 +790,7 @@ function bukaModalTambahField() {
   document.getElementById('edit-catatan-internal').style.display = 'none';
   document.getElementById('edit-catatan-internal').previousElementSibling.style.display = 'none';
   var waP1 = document.getElementById('wa-panel'); if (waP1) waP1.style.display = 'none';
+  var rwP1 = document.getElementById('riwayat-panel'); if (rwP1) rwP1.style.display = 'none';
   document.getElementById('btn-arsip').style.display = 'none';
   document.getElementById('btn-simpan-status').onclick = simpanFieldBaru;
   bukaModal('modal-detail');
@@ -698,7 +875,7 @@ function simpanJadwal() {
 // ============================================================================
 
 function exportCSV() {
-  var csv = 'No. Pendaftaran,Nama,HP,Email,Tgl. Lahir,Gender,Program,Jadwal,Status,Tgl. Daftar\n';
+  var csv = 'No. Pendaftaran,Nama,HP,Email,Tgl. Lahir,Gender,Program,Jadwal,Status,Tgl. Daftar,Jenis Biaya,Kemampuan Awal,Pernah Tahsin,Motivasi,Saran/Masukan\n';
   function csvSafe(v) {
     var s = String(v || '');
     // Cegah CSV injection
@@ -717,7 +894,12 @@ function exportCSV() {
       csvSafe(r.program),
       csvSafe(r.jadwal_id),
       csvSafe(r.status),
-      csvSafe(formatTanggal(r.timestamp))
+      csvSafe(formatTanggal(r.timestamp)),
+      csvSafe(r.jenis_biaya),
+      csvSafe(r.kemampuan_awal),
+      csvSafe(r.pernah_tahsin),
+      csvSafe(r.motivasi),
+      csvSafe(r.saran_masukan)
     ].join(',') + '\n';
   });
 
@@ -779,6 +961,15 @@ function formatTanggal(iso) {
   var mm = ('0' + (d.getMonth() + 1)).slice(-2);
   var yy = d.getFullYear();
   return dd + '/' + mm + '/' + yy;
+}
+
+function formatTanggalJam(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return String(iso);
+  var hh = ('0' + d.getHours()).slice(-2);
+  var mi = ('0' + d.getMinutes()).slice(-2);
+  return formatTanggal(iso) + ' ' + hh + ':' + mi;
 }
 
 function esc(str) {
@@ -847,10 +1038,17 @@ function _daftarTemplateUntuk(row) {
   return list;
 }
 
-function _bukaWa(hp, pesan) {
+function _bukaWa(hp, pesan, ctx) {
   var no = _hpWa(hp);
   if (!no || no.length < 8) { tampilkanToast('Nomor HP tidak valid untuk WhatsApp.', 'error'); return; }
   window.open('https://wa.me/' + no + '?text=' + encodeURIComponent(pesan), '_blank');
+  // Catat aktivitas (fire-and-forget; kegagalan tidak mengganggu admin).
+  if (ctx && ctx.no_pendaftaran) {
+    try {
+      _adminPost({ action: 'admin.logWa', token: state.token,
+                   no_pendaftaran: ctx.no_pendaftaran, nama: ctx.nama || '', template: ctx.template || '' });
+    } catch (e) {}
+  }
 }
 
 // Chat cepat dari tabel — langsung pakai template teratas (sesuai status).
@@ -858,7 +1056,8 @@ function chatWa(no) {
   var row = state.pendaftar.find(function (r) { return r.no_pendaftaran === no; });
   if (!row) return;
   var tmpl = _daftarTemplateUntuk(row)[0];
-  _bukaWa(row.hp, _isiTemplate(tmpl.pesan, row));
+  _bukaWa(row.hp, _isiTemplate(tmpl.pesan, row),
+          { no_pendaftaran: row.no_pendaftaran, nama: row.nama, template: tmpl.label });
 }
 
 // Dipanggil saat template di dropdown modal diganti.
@@ -874,7 +1073,11 @@ function isiPesanWa() {
 function bukaWaDariModal() {
   var row = state.selectedPendaftar;
   if (!row) return;
-  _bukaWa(row.hp, document.getElementById('wa-pesan').value);
+  var sel = document.getElementById('wa-template');
+  var list = state._waList || [];
+  var lbl = (list[parseInt(sel.value, 10) || 0] || {}).label || '';
+  _bukaWa(row.hp, document.getElementById('wa-pesan').value,
+          { no_pendaftaran: row.no_pendaftaran, nama: row.nama, template: lbl });
 }
 
 
@@ -1082,6 +1285,7 @@ function bukaEditFormField(fieldId) {
   document.getElementById('edit-catatan-internal').style.display = 'none';
   document.getElementById('edit-catatan-internal').previousElementSibling.style.display = 'none';
   var waP2 = document.getElementById('wa-panel'); if (waP2) waP2.style.display = 'none';
+  var rwP2 = document.getElementById('riwayat-panel'); if (rwP2) rwP2.style.display = 'none';
 
   document.getElementById('btn-arsip').style.display = 'none';
   document.getElementById('btn-simpan-status').onclick = simpanFormField;
@@ -1140,6 +1344,8 @@ function muatCharts() {
       renderChartStatus(stats.per_status || {});
       renderChartJadwal(stats.per_jadwal || {});
       renderChartGender(stats);
+      renderChartTren(state.pendaftar || []);
+      renderChartFunnel(stats.per_status || {});
     })
     .catch(function() { tampilkanToast('Gagal memuat statistik.', 'error'); });
 }
@@ -1235,6 +1441,157 @@ function renderChartGender(stats) {
       }
     }
   });
+}
+
+
+function renderChartTren(rows) {
+  var ctx = document.getElementById('chart-tren');
+  if (!ctx) return;
+  if (_charts['tren']) { _charts['tren'].destroy(); }
+
+  // Kelompokkan per tanggal (YYYY-MM-DD) dari timestamp.
+  var byDay = {};
+  (rows || []).forEach(function (r) {
+    var d = new Date(r.timestamp);
+    if (isNaN(d.getTime())) return;
+    var key = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+    byDay[key] = (byDay[key] || 0) + 1;
+  });
+  var keys = Object.keys(byDay).sort();
+  var vals = keys.map(function (k) { return byDay[k]; });
+  var lbls = keys.map(function (k) { var p = k.split('-'); return p[2] + '/' + p[1]; });
+
+  _charts['tren'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: lbls,
+      datasets: [{
+        label: 'Pendaftar', data: vals,
+        borderColor: '#0ea5e9', backgroundColor: 'rgba(14,165,233,.15)',
+        fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+}
+
+function renderChartFunnel(perStatus) {
+  var ctx = document.getElementById('chart-funnel');
+  if (!ctx) return;
+  if (_charts['funnel']) { _charts['funnel'].destroy(); }
+
+  // Funnel kumulatif: tiap tahap = jumlah yang mencapai minimal tahap itu.
+  var terdaftar = perStatus['TERDAFTAR'] || 0;
+  var berkas    = perStatus['BERKAS_OK'] || 0;
+  var wawancara = perStatus['WAWANCARA'] || 0;
+  var diterima  = perStatus['DITERIMA']  || 0;
+  var f4 = diterima;
+  var f3 = wawancara + f4;
+  var f2 = berkas + f3;
+  var f1 = terdaftar + f2;
+
+  _charts['funnel'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Terdaftar', 'Berkas OK', 'Wawancara', 'Diterima'],
+      datasets: [{
+        data: [f1, f2, f3, f4],
+        backgroundColor: ['rgba(14,165,233,.75)', 'rgba(99,102,241,.75)', 'rgba(245,158,11,.75)', 'rgba(16,185,129,.75)'],
+        borderRadius: 6
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+}
+
+
+// ============================================================================
+// TEMPLATE WA — editor (CRUD via sheet WaTemplates)
+// ============================================================================
+
+function muatWaTemplateAdmin() {
+  var tbody = document.getElementById('tbody-watemplate');
+  tbody.innerHTML = '<tr><td colspan="5" class="no-data">Memuat data...</td></tr>';
+
+  _adminGet({ action: 'admin.watemplates', token: state.token, all: 'true' })
+    .then(function (res) {
+      if (!res.ok) { tbody.innerHTML = '<tr><td colspan="5" class="no-data">Gagal memuat data.</td></tr>'; return; }
+      state.waTemplateAdmin = res.data || [];
+      renderTabelWaTemplate();
+    })
+    .catch(function () { tbody.innerHTML = '<tr><td colspan="5" class="no-data">Koneksi bermasalah.</td></tr>'; });
+}
+
+function renderTabelWaTemplate() {
+  var tbody = document.getElementById('tbody-watemplate');
+  var list = state.waTemplateAdmin || [];
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="no-data">Belum ada template. Klik “+ Tambah”.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = '';
+  list.forEach(function (t) {
+    var preview = String(t.pesan || '');
+    if (preview.length > 80) preview = preview.slice(0, 80) + '…';
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><span class="badge badge-' + esc(t.status) + '">' + esc(t.status) + '</span></td>' +
+      '<td>' + esc(t.label) + '</td>' +
+      '<td style="font-size:0.8rem;color:var(--ink-3)">' + esc(preview) + '</td>' +
+      '<td>' + (t.active ? '✅' : '❌') + '</td>' +
+      '<td><button class="btn-icon" title="Edit" onclick="bukaEditWaTemplate(\'' + esc(t.status) + '\')">✏️</button></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function bukaEditWaTemplate(status) {
+  var t = (state.waTemplateAdmin || []).find(function (x) { return x.status === status; });
+  var baru = !t;
+  document.getElementById('modal-watemplate-title').textContent = baru ? 'Tambah Template' : 'Edit Template — ' + status;
+  document.getElementById('wt-status').value = baru ? '' : t.status;
+  document.getElementById('wt-status').readOnly = !baru;   // status jadi kunci; tak diubah saat edit
+  document.getElementById('wt-label').value = baru ? '' : (t.label || '');
+  document.getElementById('wt-pesan').value = baru ? '' : (t.pesan || '');
+  document.getElementById('wt-active').checked = baru ? true : !!t.active;
+  bukaModal('modal-watemplate');
+}
+
+function simpanWaTemplate() {
+  var status = document.getElementById('wt-status').value.trim().toUpperCase();
+  if (!status) { tampilkanToast('Status wajib diisi.', 'error'); return; }
+  var btn = document.getElementById('btn-simpan-watemplate');
+  setLoading(btn, true);
+
+  var body = {
+    action:  'admin.updateWaTemplate',
+    token:   state.token,
+    status:  status,
+    label:   document.getElementById('wt-label').value,
+    pesan:   document.getElementById('wt-pesan').value,
+    active:  document.getElementById('wt-active').checked ? 'true' : 'false'
+  };
+
+  _adminPost(body)
+    .then(function (res) {
+      setLoading(btn, false);
+      if (res.ok) {
+        tampilkanToast('Template disimpan.', 'success');
+        tutupModal('modal-watemplate');
+        muatWaTemplateAdmin();
+        muatWaTemplates();   // segarkan cache template utk fitur chat
+      } else {
+        tampilkanToast(res.pesan || res.error || 'Gagal menyimpan.', 'error');
+      }
+    })
+    .catch(function () { setLoading(btn, false); tampilkanToast('Koneksi bermasalah.', 'error'); });
 }
 
 

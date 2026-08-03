@@ -705,3 +705,43 @@ html.theme-dark .badge-DITOLAK   { color: #f87171; }
   .data-table { font-size: 0.78rem; }
   .data-table td, .data-table th { padding: 8px 10px; }
 }
+
+/* ---- Sortable header ---- */
+.th-sort { cursor: pointer; user-select: none; }
+.th-sort:hover { color: var(--primary); }
+.sort-ind { font-size: 0.7rem; color: var(--primary); }
+
+/* ---- Bulk action bar ---- */
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  box-shadow: var(--sh-sm);
+}
+
+/* ---- Timeline riwayat status ---- */
+.timeline { display: flex; flex-direction: column; gap: 2px; }
+.timeline-item { display: flex; gap: 10px; padding: 6px 0; }
+.timeline-dot {
+  width: 11px; height: 11px; margin-top: 4px;
+  border-radius: 50%;
+  background: currentColor;           /* warna dari class badge-STATUS */
+  flex: none;
+  box-shadow: 0 0 0 3px var(--soft);
+}
+.timeline-body { flex: 1; }
+.timeline-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 8px; font-size: 0.85rem; color: var(--ink);
+}
+.timeline-time { font-size: 0.72rem; color: var(--ink-4); white-space: nowrap; }
+.timeline-note {
+  font-size: 0.8rem; color: var(--ink-3);
+  margin-top: 2px; white-space: pre-wrap;
+}

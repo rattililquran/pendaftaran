@@ -45,6 +45,9 @@
         <button class="nav-item" id="nav-statistik" onclick="switchTab('statistik')">
           <span class="nav-icon">📊</span> Statistik
         </button>
+        <button class="nav-item" id="nav-watemplate" onclick="switchTab('watemplate')">
+          <span class="nav-icon">💬</span> Template WA
+        </button>
         <button class="nav-item" id="nav-qrcode" onclick="switchTab('qrcode')">
           <span class="nav-icon">🔲</span> QR Code
         </button>
@@ -136,25 +139,42 @@
             </button>
           </div>
 
+          <!-- Bulk action bar -->
+          <div class="bulk-bar" id="bulk-bar" style="display:none">
+            <span id="bulk-count" style="font-weight:700">0 dipilih</span>
+            <select class="filter-select" id="bulk-status">
+              <option value="">Ubah status ke…</option>
+              <option value="TERDAFTAR">Terdaftar</option>
+              <option value="BERKAS_OK">Berkas OK</option>
+              <option value="WAWANCARA">Wawancara</option>
+              <option value="DITERIMA">Diterima</option>
+              <option value="DITOLAK">Ditolak</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="bulkUpdateStatus()">Terapkan</button>
+            <button class="btn btn-danger btn-sm" onclick="bulkArsip()">Arsipkan</button>
+            <button class="btn btn-outline btn-sm" onclick="bulkClear()">Batal</button>
+          </div>
+
           <!-- Table -->
           <div class="table-wrap">
             <table class="data-table" id="table-pendaftar">
               <thead>
                 <tr>
+                  <th style="width:32px;text-align:center"><input type="checkbox" id="chk-all" onclick="toggleSelectAll(this)" aria-label="Pilih semua"></th>
                   <th style="width:44px;text-align:right">No.</th>
-                  <th>No. Daftar</th>
-                  <th>Nama</th>
+                  <th class="th-sort" data-sort="no_pendaftaran" onclick="sortBy('no_pendaftaran')">No. Daftar <span class="sort-ind"></span></th>
+                  <th class="th-sort" data-sort="nama" onclick="sortBy('nama')">Nama <span class="sort-ind"></span></th>
                   <th>HP</th>
-                  <th>Program</th>
-                  <th>Gender</th>
-                  <th>Jadwal</th>
-                  <th>Tgl. Daftar</th>
-                  <th>Status</th>
+                  <th class="th-sort" data-sort="program" onclick="sortBy('program')">Program <span class="sort-ind"></span></th>
+                  <th class="th-sort" data-sort="gender" onclick="sortBy('gender')">Gender <span class="sort-ind"></span></th>
+                  <th class="th-sort" data-sort="jadwal_id" onclick="sortBy('jadwal_id')">Jadwal <span class="sort-ind"></span></th>
+                  <th class="th-sort" data-sort="timestamp" onclick="sortBy('timestamp')">Tgl. Daftar <span class="sort-ind"></span></th>
+                  <th class="th-sort" data-sort="status" onclick="sortBy('status')">Status <span class="sort-ind"></span></th>
                   <th>Aksi</th>
                 </tr>
               </thead>
               <tbody id="tbody-pendaftar">
-                <tr><td colspan="10" class="no-data">Memuat data...</td></tr>
+                <tr><td colspan="11" class="no-data">Memuat data...</td></tr>
               </tbody>
             </table>
             <div class="pagination" id="pagination" style="display:none">
@@ -285,6 +305,36 @@
               <div style="font-size:0.82rem;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px">Pendaftar per Gender</div>
               <canvas id="chart-gender" height="120"></canvas>
             </div>
+            <div class="table-wrap" style="padding:20px;grid-column:1/-1">
+              <div style="font-size:0.82rem;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px">Tren Pendaftaran per Hari</div>
+              <canvas id="chart-tren" height="120"></canvas>
+            </div>
+            <div class="table-wrap" style="padding:20px;grid-column:1/-1">
+              <div style="font-size:0.82rem;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px">Funnel Konversi</div>
+              <canvas id="chart-funnel" height="120"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== TAB: TEMPLATE WA ===== -->
+        <div id="tab-watemplate" style="display:none">
+          <div class="toolbar" style="margin-bottom:16px">
+            <h2 style="font-size:1rem;font-weight:800;color:var(--ink);flex:1">Template Pesan WhatsApp</h2>
+            <button class="btn btn-outline btn-sm" onclick="bukaEditWaTemplate('')">+ Tambah</button>
+            <button class="btn btn-primary btn-sm" onclick="muatWaTemplateAdmin()">↻ Muat Ulang</button>
+          </div>
+          <div style="font-size:0.8rem;color:var(--ink-4);margin-bottom:12px">
+            Token: <code>{nama_depan}</code> <code>{nama}</code> <code>{nomor}</code> <code>{program}</code> <code>{jadwal}</code> <code>{status}</code>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Status</th><th>Label</th><th>Pesan</th><th>Aktif</th><th>Aksi</th></tr>
+              </thead>
+              <tbody id="tbody-watemplate">
+                <tr><td colspan="5" class="no-data">Memuat data...</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -343,6 +393,11 @@
         <textarea class="form-textarea" id="edit-catatan-internal" placeholder="Catatan ini hanya terlihat oleh admin..."></textarea>
       </div>
 
+      <div class="form-group" id="riwayat-panel">
+        <label class="form-label">🕘 Riwayat Status</label>
+        <div id="riwayat-status" class="timeline"></div>
+      </div>
+
       <div class="form-group" id="wa-panel">
         <label class="form-label" for="wa-template">💬 Chat via WhatsApp</label>
         <select class="form-select" id="wa-template" onchange="isiPesanWa()" style="margin-bottom:8px"></select>
@@ -359,6 +414,38 @@
         <button class="btn btn-primary btn-sm" id="btn-simpan-status" onclick="simpanStatus()">
           <div class="spinner"></div>
           <span class="btn-text">Simpan</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Edit Template WA -->
+  <div class="modal-backdrop" id="modal-watemplate">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-watemplate-title">Edit Template</div>
+        <button class="modal-close" onclick="tutupModal('modal-watemplate')">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="wt-status">Status (kunci template)</label>
+        <input class="form-input" id="wt-status" placeholder="mis. DITERIMA atau DEFAULT">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="wt-label">Label</label>
+        <input class="form-input" id="wt-label" placeholder="mis. Selamat Diterima">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="wt-pesan">Pesan</label>
+        <textarea class="form-textarea" id="wt-pesan" style="min-height:120px" placeholder="Assalamu'alaikum {nama_depan}, ..."></textarea>
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="wt-active" checked>
+        <label class="form-label" for="wt-active" style="margin:0">Aktif</label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="tutupModal('modal-watemplate')">Batal</button>
+        <button class="btn btn-primary btn-sm" id="btn-simpan-watemplate" onclick="simpanWaTemplate()">
+          <div class="spinner"></div><span class="btn-text">Simpan</span>
         </button>
       </div>
     </div>
