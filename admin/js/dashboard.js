@@ -158,7 +158,7 @@ function muatStats() {
 
 function muatPendaftar() {
   var tbody = document.getElementById('tbody-pendaftar');
-  tbody.innerHTML = '<tr><td colspan="9" class="no-data">Memuat data...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="10" class="no-data">Memuat data...</td></tr>';
 
   _adminGet({ action: 'admin.registrations', token: state.token })
     .then(function (res) {
@@ -167,7 +167,7 @@ function muatPendaftar() {
           tampilkanToast('Sesi habis, silakan login ulang.', 'error');
           setTimeout(function () { logout(); }, 2000);
         } else {
-          tbody.innerHTML = '<tr><td colspan="9" class="no-data">Gagal memuat data.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="10" class="no-data">Gagal memuat data.</td></tr>';
         }
         return;
       }
@@ -176,7 +176,7 @@ function muatPendaftar() {
       renderTabelPendaftar();
     })
     .catch(function () {
-      tbody.innerHTML = '<tr><td colspan="9" class="no-data">Koneksi bermasalah.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10" class="no-data">Koneksi bermasalah.</td></tr>';
     });
 }
 
@@ -185,7 +185,7 @@ function renderTabelPendaftar() {
   var data = state.filteredData;
 
   if (data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="no-data">Tidak ada data.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="no-data">Tidak ada data.</td></tr>';
     document.getElementById('pagination').style.display = 'none';
     return;
   }
@@ -195,9 +195,11 @@ function renderTabelPendaftar() {
   var pageData = data.slice(start, end);
 
   tbody.innerHTML = '';
-  pageData.forEach(function (row) {
+  pageData.forEach(function (row, i) {
+    var urut = start + i + 1;
     var tr = document.createElement('tr');
     tr.innerHTML =
+      '<td style="text-align:right;color:var(--ink-4);font-size:0.8rem;font-variant-numeric:tabular-nums">' + urut + '</td>' +
       '<td style="font-weight:700;font-size:0.82rem;font-family:monospace">' + esc(row.no_pendaftaran) + '</td>' +
       '<td>' + esc(row.nama) + '</td>' +
       '<td style="font-size:0.82rem">' + esc(row.hp) + '</td>' +
