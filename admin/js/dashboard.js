@@ -207,7 +207,7 @@ function renderTabelPendaftar() {
       '<td style="font-size:0.82rem">' + formatTanggal(row.timestamp) + '</td>' +
       '<td><span class="badge badge-' + row.status + '">' + labelStatus(row.status) + '</span></td>' +
       '<td style="white-space:nowrap">' +
-        '<button class="btn-icon" title="Chat WhatsApp" onclick="chatWa(\'' + row.no_pendaftaran + '\')">💬</button>' +
+        '<button class="btn-icon btn-icon-wa" title="Chat WhatsApp" onclick="chatWa(\'' + row.no_pendaftaran + '\')">💬</button>' +
         '<button class="btn-icon" title="Detail" onclick="bukaDetal(\'' + row.no_pendaftaran + '\')">✏️</button>' +
       '</td>';
     tbody.appendChild(tr);
