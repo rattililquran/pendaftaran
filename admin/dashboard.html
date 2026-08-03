@@ -342,6 +342,16 @@
         <textarea class="form-textarea" id="edit-catatan-internal" placeholder="Catatan ini hanya terlihat oleh admin..."></textarea>
       </div>
 
+      <div class="form-group" id="wa-panel">
+        <label class="form-label" for="wa-template">💬 Chat via WhatsApp</label>
+        <select class="form-select" id="wa-template" onchange="isiPesanWa()" style="margin-bottom:8px"></select>
+        <textarea class="form-textarea" id="wa-pesan" placeholder="Pesan WhatsApp (bisa diedit sebelum dikirim)..."></textarea>
+        <button type="button" class="btn btn-sm" id="btn-wa" onclick="bukaWaDariModal()"
+                style="margin-top:8px;width:100%;background:#25D366;color:#fff;border:none">
+          <span class="btn-text">Buka WhatsApp</span>
+        </button>
+      </div>
+
       <div class="modal-footer">
         <button class="btn btn-danger btn-sm" id="btn-arsip" onclick="arsipPendaftar()">Arsipkan</button>
         <button class="btn btn-outline btn-sm" onclick="tutupModal('modal-detail')">Batal</button>

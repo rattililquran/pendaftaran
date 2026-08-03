@@ -55,6 +55,7 @@ function init() {
   muatStats();
   muatPendaftar();
   muatJadwalOptions();
+  muatWaTemplates();
 }
 
 function logout() {
@@ -205,7 +206,10 @@ function renderTabelPendaftar() {
       '<td style="font-size:0.82rem">' + esc(row.jadwal_id) + '</td>' +
       '<td style="font-size:0.82rem">' + formatTanggal(row.timestamp) + '</td>' +
       '<td><span class="badge badge-' + row.status + '">' + labelStatus(row.status) + '</span></td>' +
-      '<td><button class="btn-icon" onclick="bukaDetal(\'' + row.no_pendaftaran + '\')">✏️</button></td>';
+      '<td style="white-space:nowrap">' +
+        '<button class="btn-icon" title="Chat WhatsApp" onclick="chatWa(\'' + row.no_pendaftaran + '\')">💬</button>' +
+        '<button class="btn-icon" title="Detail" onclick="bukaDetal(\'' + row.no_pendaftaran + '\')">✏️</button>' +
+      '</td>';
     tbody.appendChild(tr);
   });
 
@@ -344,6 +348,20 @@ function bukaDetal(no) {
   document.getElementById('edit-status').value = row.status;
   document.getElementById('edit-catatan-publik').value = row.catatan_publik || '';
   document.getElementById('edit-catatan-internal').value = row.catatan_internal || '';
+
+  // Panel WhatsApp — daftar template + pesan terisi otomatis (bisa diedit)
+  var waPanel = document.getElementById('wa-panel');
+  if (waPanel) {
+    waPanel.style.display = '';
+    var sel  = document.getElementById('wa-template');
+    var list = _daftarTemplateUntuk(row);
+    state._waList = list;
+    sel.innerHTML = list.map(function (t, i) {
+      return '<option value="' + i + '">' + esc(t.label) + '</option>';
+    }).join('');
+    sel.value = '0';
+    isiPesanWa();
+  }
 
   bukaModal('modal-detail');
 }
@@ -593,6 +611,7 @@ function bukaModalTambahField() {
   document.getElementById('edit-catatan-publik').previousElementSibling.textContent = 'Status Aktif (true/false)';
   document.getElementById('edit-catatan-internal').style.display = 'none';
   document.getElementById('edit-catatan-internal').previousElementSibling.style.display = 'none';
+  var waP1 = document.getElementById('wa-panel'); if (waP1) waP1.style.display = 'none';
   document.getElementById('btn-arsip').style.display = 'none';
   document.getElementById('btn-simpan-status').onclick = simpanFieldBaru;
   bukaModal('modal-detail');
@@ -768,6 +787,94 @@ function esc(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+
+// ============================================================================
+// WHATSAPP — chat cepat pendaftar (template sadar-status)
+// ============================================================================
+
+// Template cadangan bila sheet WaTemplates belum di-setup / gagal dimuat.
+var WA_FALLBACK = {
+  DEFAULT:   'Assalamu\'alaikum {nama_depan}, kami dari Panitia Pendaftaran Rattilil Qur\'an terkait pendaftaran Anda (No. {nomor}).',
+  TERDAFTAR: 'Assalamu\'alaikum {nama_depan}, pendaftaran Anda (No. {nomor}) program {program} telah kami terima. Mohon lengkapi berkas yang dibutuhkan. Jazakumullah khairan.',
+  BERKAS_OK: 'Assalamu\'alaikum {nama_depan}, berkas pendaftaran Anda (No. {nomor}) sudah diverifikasi dan lengkap. Mohon menunggu informasi jadwal wawancara.',
+  WAWANCARA: 'Assalamu\'alaikum {nama_depan}, Anda diundang mengikuti wawancara untuk pendaftaran No. {nomor} ({program}). Detail jadwal: ',
+  DITERIMA:  'Assalamu\'alaikum {nama_depan}, selamat! Anda dinyatakan DITERIMA sebagai santri Rattilil Qur\'an (No. {nomor}). Info daftar ulang: ',
+  DITOLAK:   'Assalamu\'alaikum {nama_depan}, terima kasih atas pendaftaran Anda (No. {nomor}). Mohon maaf untuk periode ini kami belum dapat menerima. Semoga Allah memudahkan.'
+};
+
+function muatWaTemplates() {
+  _adminGet({ action: 'admin.watemplates', token: state.token })
+    .then(function (res) {
+      state.waTemplates = (res && res.ok && res.data && res.data.length) ? res.data : null;
+    })
+    .catch(function () { state.waTemplates = null; });
+}
+
+// Normalisasi HP ke format wa.me — mirror backend normalisasiHP() (0 → 62).
+function _hpWa(hp) {
+  var s = String(hp || '').replace(/[^0-9]/g, '');
+  if (s.indexOf('0') === 0) s = '62' + s.substring(1);
+  return s;
+}
+
+// Ganti token {..} dengan data pendaftar.
+function _isiTemplate(teks, row) {
+  var namaDepan = String(row.nama || '').split(' ')[0];
+  return String(teks || '')
+    .replace(/\{nama_depan\}/g, namaDepan)
+    .replace(/\{nama\}/g,       row.nama || '')
+    .replace(/\{nomor\}/g,      row.no_pendaftaran || '')
+    .replace(/\{program\}/g,    row.program || '')
+    .replace(/\{jadwal\}/g,     row.jadwal_id || '')
+    .replace(/\{status\}/g,     labelStatus(row.status) || '');
+}
+
+// Daftar template untuk satu pendaftar: status-nya dulu, lalu DEFAULT, lalu sisanya.
+function _daftarTemplateUntuk(row) {
+  var src = state.waTemplates;
+  var list = [];
+  if (src && src.length) {
+    src.forEach(function (t) { if (t.status === row.status)    list.push(t); });
+    src.forEach(function (t) { if (t.status === 'DEFAULT')     list.push(t); });
+    src.forEach(function (t) { if (t.status !== row.status && t.status !== 'DEFAULT') list.push(t); });
+  } else {
+    var st = WA_FALLBACK[row.status] ? row.status : 'DEFAULT';
+    list.push({ status: st, label: labelStatus(st) || 'Sesuai Status', pesan: WA_FALLBACK[st] });
+    if (st !== 'DEFAULT') list.push({ status: 'DEFAULT', label: 'Sapaan Umum', pesan: WA_FALLBACK.DEFAULT });
+  }
+  return list;
+}
+
+function _bukaWa(hp, pesan) {
+  var no = _hpWa(hp);
+  if (!no || no.length < 8) { tampilkanToast('Nomor HP tidak valid untuk WhatsApp.', 'error'); return; }
+  window.open('https://wa.me/' + no + '?text=' + encodeURIComponent(pesan), '_blank');
+}
+
+// Chat cepat dari tabel — langsung pakai template teratas (sesuai status).
+function chatWa(no) {
+  var row = state.pendaftar.find(function (r) { return r.no_pendaftaran === no; });
+  if (!row) return;
+  var tmpl = _daftarTemplateUntuk(row)[0];
+  _bukaWa(row.hp, _isiTemplate(tmpl.pesan, row));
+}
+
+// Dipanggil saat template di dropdown modal diganti.
+function isiPesanWa() {
+  var row = state.selectedPendaftar;
+  if (!row) return;
+  var idx  = parseInt(document.getElementById('wa-template').value, 10) || 0;
+  var list = state._waList || _daftarTemplateUntuk(row);
+  var tmpl = list[idx] || list[0];
+  document.getElementById('wa-pesan').value = _isiTemplate(tmpl.pesan, row);
+}
+
+function bukaWaDariModal() {
+  var row = state.selectedPendaftar;
+  if (!row) return;
+  _bukaWa(row.hp, document.getElementById('wa-pesan').value);
+}
+
 
 // ============================================================================
 // GELOMBANG
@@ -972,6 +1079,7 @@ function bukaEditFormField(fieldId) {
   document.getElementById('edit-catatan-publik').previousElementSibling.textContent = 'Status Aktif (true/false)';
   document.getElementById('edit-catatan-internal').style.display = 'none';
   document.getElementById('edit-catatan-internal').previousElementSibling.style.display = 'none';
+  var waP2 = document.getElementById('wa-panel'); if (waP2) waP2.style.display = 'none';
 
   document.getElementById('btn-arsip').style.display = 'none';
   document.getElementById('btn-simpan-status').onclick = simpanFormField;
