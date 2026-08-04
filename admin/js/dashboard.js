@@ -1033,10 +1033,14 @@ function muatWaTemplates() {
     .catch(function () { state.waTemplates = null; });
 }
 
-// Normalisasi HP ke format wa.me — mirror backend normalisasiHP() (0 → 62).
+// Normalisasi HP ke format wa.me (kode negara Indonesia 62).
+// Menangani: 08xx → 628xx, 8xx (tanpa 0) → 628xx, +62/62xx → tetap.
+// (Bug: sebelumnya nomor tanpa awalan 0 dibiarkan → WhatsApp salah baca 82 = Korea.)
 function _hpWa(hp) {
   var s = String(hp || '').replace(/[^0-9]/g, '');
-  if (s.indexOf('0') === 0) s = '62' + s.substring(1);
+  if (!s) return '';
+  if (s.charAt(0) === '0') return '62' + s.slice(1);
+  if (s.slice(0, 2) !== '62') return '62' + s;
   return s;
 }
 
