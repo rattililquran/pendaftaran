@@ -394,7 +394,7 @@ function renderJadwal(list) {
     card.innerHTML =
       '<input type="radio" name="jadwal" id="jadwal-' + j.jadwal_id + '" value="' + j.jadwal_id + '"' + (ditutup ? ' disabled' : '') + '>' +
       '<div class="jadwal-kuota ' + kuotaClass + '">' + kuotaLabel + '</div>' +
-      (waiting ? '<div class="jadwal-waiting-note">Jadwal penuh — pendaftaran masuk daftar tunggu.</div>' : '') +
+      (waiting ? '<div class="jadwal-waiting-note">Kuota penuh — Anda tetap dapat mendaftar dan akan masuk ke daftar tunggu.</div>' : '') +
       '<div class="jadwal-nama">' + esc(j.program) + '</div>' +
       // Hari & Jam — ditampilkan besar dan mencolok
       '<div class="jadwal-schedule">' +
