@@ -393,6 +393,22 @@
           </div>
         </div>
 
+        <!-- Peringatan + persetujuan Daftar Tunggu (muncul bila jadwal terpilih penuh) -->
+        <div id="waiting-warning" class="waiting-warning" style="display:none">
+          <div class="waiting-warning-head">⚠️ Jadwal ini sudah penuh</div>
+          <p class="waiting-warning-body">
+            Kursi utama untuk jadwal ini sudah terisi. Jika Anda tetap mendaftar, Anda akan
+            masuk <strong>daftar tunggu (waiting list)</strong> — kami hubungi bila ada kursi
+            tersedia (mis. ada peserta yang mengundurkan diri).
+          </p>
+          <label class="form-label-consent" id="waiting-ack-label">
+            <input type="checkbox" id="waiting-ack">
+            <span>Saya paham dan bersedia masuk daftar tunggu untuk jadwal ini.
+              <span class="required" aria-hidden="true">*</span>
+            </span>
+          </label>
+        </div>
+
         <p style="font-size:0.82rem; color:var(--ink-3); margin-bottom:16px">
           Dengan mengirim formulir ini, Anda menyetujui bahwa data yang diberikan adalah benar dan dapat dipertanggungjawabkan.
         </p>
@@ -457,6 +473,11 @@
       <div class="nomor-box">
         <div class="nomor-label">Nomor Pendaftaran Anda</div>
         <div class="nomor-value" id="nomor-pendaftaran">RTL24180001</div>
+      </div>
+
+      <div id="modal-waiting-note" class="modal-waiting-note" style="display:none" role="note">
+        ⏳ Anda masuk <strong>daftar tunggu</strong>. Kursi utama untuk jadwal ini sudah penuh —
+        kami akan menghubungi Anda bila ada kursi tersedia. Pantau juga lewat Cek Status.
       </div>
 
       <button class="btn-salin" id="btn-salin" onclick="salinNomor()">

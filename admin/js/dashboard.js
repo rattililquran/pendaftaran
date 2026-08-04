@@ -237,7 +237,9 @@ function renderTabelPendaftar() {
       '<td style="text-align:center"><input type="checkbox" class="row-chk" data-no="' + esc(row.no_pendaftaran) + '"' + checked + ' onclick="toggleSelect(this)"></td>' +
       '<td style="text-align:right;color:var(--ink-4);font-size:0.8rem;font-variant-numeric:tabular-nums">' + urut + '</td>' +
       '<td style="font-weight:700;font-size:0.82rem;font-family:monospace">' + esc(row.no_pendaftaran) + '</td>' +
-      '<td>' + esc(row.nama) + '</td>' +
+      '<td>' + esc(row.nama) +
+        (row.waiting_list ? ' <span title="Daftar tunggu (cadangan)" style="font-size:0.7rem;font-weight:700;color:#b45309;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);border-radius:6px;padding:1px 5px;white-space:nowrap">⏳ WL</span>' : '') +
+      '</td>' +
       '<td style="font-size:0.82rem">' + esc(row.hp) + '</td>' +
       '<td style="font-size:0.82rem">' + esc(row.program) + '</td>' +
       '<td style="font-size:0.82rem">' + (esc(row.gender) || '—') + '</td>' +
@@ -323,6 +325,27 @@ function bulkUpdateStatus() {
   _bulkRun(nos, function (no) {
     return _adminPost({ action: 'admin.updateStatus', token: state.token, no_pendaftaran: no, status: status });
   }, 'Status diperbarui');
+}
+
+// Promosi / turunkan waiting list (override manual admin).
+function setWaiting(no, jadikanWaiting) {
+  var pesan = jadikanWaiting
+    ? 'Turunkan pendaftar ini ke daftar tunggu?'
+    : 'Promosikan pendaftar ini menjadi terdaftar (confirmed)? Email pemberitahuan akan dikirim bila ada email.';
+  if (!confirm(pesan)) return;
+  _adminPost({ action: 'admin.setWaiting', token: state.token, no_pendaftaran: no,
+               waiting_list: jadikanWaiting ? 'true' : 'false' })
+    .then(function (res) {
+      if (res && res.ok) {
+        tampilkanToast(res.pesan || 'Berhasil.', 'success');
+        tutupModal('modal-detail');
+        muatStats();
+        muatPendaftar();
+      } else {
+        tampilkanToast((res && (res.pesan || res.error)) || 'Gagal memperbarui.', 'error');
+      }
+    })
+    .catch(function () { tampilkanToast('Koneksi bermasalah.', 'error'); });
 }
 
 function bulkArsip() {
@@ -482,6 +505,13 @@ function bukaDetal(no) {
     '<div class="detail-item"><div class="detail-label">Gender</div><div class="detail-value">' + (esc(row.gender) || '—') + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Program</div><div class="detail-value">' + esc(row.program) + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Jadwal</div><div class="detail-value">' + esc(row.jadwal_id) + '</div></div>' +
+    '<div class="detail-item full"><div class="detail-label">Daftar Tunggu</div><div class="detail-value">' +
+      (row.waiting_list
+        ? '<span style="color:#b45309;font-weight:700">⏳ Ya (cadangan)</span> ' +
+          '<button class="btn-sm" style="margin-left:8px" onclick="setWaiting(\'' + esc(row.no_pendaftaran) + '\', false)">Promosikan ke Confirmed</button>'
+        : '<span style="color:#047857;font-weight:700">✔ Tidak (confirmed)</span> ' +
+          '<button class="btn-sm" style="margin-left:8px" onclick="setWaiting(\'' + esc(row.no_pendaftaran) + '\', true)">Turunkan ke Waiting</button>') +
+     '</div></div>' +
     // ---- Data kesiapan & komitmen (baru terlihat oleh admin) ----
     '<div class="detail-item"><div class="detail-label">Jenis Biaya</div><div class="detail-value">' + (esc(row.jenis_biaya) || '—') + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Pernah Tahsin</div><div class="detail-value">' + (esc(row.pernah_tahsin) || '—') + '</div></div>' +

@@ -110,6 +110,21 @@ function tampilkanHasil(data) {
   document.getElementById('status-hero-text').textContent  = labelStatus(status);
   document.getElementById('status-hero-desc').textContent  = deskripsiStatus(status);
 
+  // Chip Daftar Tunggu (waiting list) — dibuat/di-update dinamis di dalam hero
+  var chip = document.getElementById('status-waiting-chip');
+  if (data.waiting_list) {
+    if (!chip) {
+      chip = document.createElement('div');
+      chip.id = 'status-waiting-chip';
+      chip.className = 'status-waiting-chip';
+      hero.appendChild(chip);
+    }
+    chip.textContent = '⏳ Daftar Tunggu — menunggu kursi tersedia';
+    chip.style.display = '';
+  } else if (chip) {
+    chip.style.display = 'none';
+  }
+
   // Catatan publik
   var catatanBox = document.getElementById('catatan-box');
   var catatan = data.catatan_publik || data.catatan || '';

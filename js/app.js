@@ -373,24 +373,28 @@ function renderJadwal(list) {
   }
 
   list.forEach(function (j) {
-    var penuh    = j.status_slot === 'PENUH';
-    var sisa     = (j.kuota_maks || 13) - (j.terisi || 0);
-    var hampir   = !penuh && sisa <= 3;
-    var kuotaLabel = penuh ? 'Penuh' : (hampir ? 'Sisa ' + sisa : 'Tersedia');
-    var kuotaClass = penuh ? 'penuh' : (hampir ? 'hampir-penuh' : '');
+    // 'penuh' (blokir) HANYA bila admin menutup slot (server: j.penuh). Slot penuh kursi
+    // confirmed → waiting list: tetap bisa dipilih, pendaftar diberi tahu.
+    var ditutup  = j.penuh === true;
+    var waiting  = !ditutup && j.waiting_list === true;
+    var sisa     = j.sisa != null ? j.sisa : ((j.kuota_maks || 12) - (j.terisi || 0));
+    var hampir   = !ditutup && !waiting && sisa <= 3;
+    var kuotaLabel = ditutup ? 'Ditutup' : (waiting ? 'Daftar Tunggu' : (hampir ? 'Sisa ' + sisa : 'Tersedia'));
+    var kuotaClass = ditutup ? 'penuh' : (waiting ? 'waiting' : (hampir ? 'hampir-penuh' : ''));
 
     var card = document.createElement('label');
-    card.className = 'jadwal-card' + (penuh ? ' penuh' : '');
+    card.className = 'jadwal-card' + (ditutup ? ' penuh' : (waiting ? ' waiting' : ''));
     card.setAttribute('for', 'jadwal-' + j.jadwal_id);
-    if (!penuh) {
+    if (!ditutup) {
       card.setAttribute('tabindex', '0');
       card.setAttribute('role', 'radio');
       card.setAttribute('aria-checked', 'false');
     }
 
     card.innerHTML =
-      '<input type="radio" name="jadwal" id="jadwal-' + j.jadwal_id + '" value="' + j.jadwal_id + '"' + (penuh ? ' disabled' : '') + '>' +
+      '<input type="radio" name="jadwal" id="jadwal-' + j.jadwal_id + '" value="' + j.jadwal_id + '"' + (ditutup ? ' disabled' : '') + '>' +
       '<div class="jadwal-kuota ' + kuotaClass + '">' + kuotaLabel + '</div>' +
+      (waiting ? '<div class="jadwal-waiting-note">Jadwal penuh — pendaftaran masuk daftar tunggu.</div>' : '') +
       '<div class="jadwal-nama">' + esc(j.program) + '</div>' +
       // Hari & Jam — ditampilkan besar dan mencolok
       '<div class="jadwal-schedule">' +
@@ -410,7 +414,7 @@ function renderJadwal(list) {
         (j.gender   ? '<span>👥 ' + esc(j.gender) + '</span>' : '') +
       '</div>';
 
-    if (!penuh) {
+    if (!ditutup) {
       // FIX #1: Wrap dalam IIFE agar j dan card ter-capture dengan benar
       // tanpa IIFE, semua listener akan pakai nilai j dan card dari iterasi terakhir
       (function(jadwal, cardEl) {
@@ -460,7 +464,15 @@ function isiKonfirmasi() {
   document.getElementById('konfirm-tgl').textContent     = formatTanggal(document.getElementById('tgl_lahir').value);
   document.getElementById('konfirm-gender').textContent  = state.gender || '—';
   document.getElementById('konfirm-program').textContent = j ? j.program : '—';
-  document.getElementById('konfirm-jadwal').textContent  = j ? (j.hari + ', ' + j.jam) : '—';
+  var isWaiting = !!(j && j.waiting_list);
+  document.getElementById('konfirm-jadwal').textContent  =
+    j ? (j.hari + ', ' + j.jam + (isWaiting ? ' — Daftar Tunggu' : '')) : '—';
+
+  // Blok persetujuan daftar tunggu: tampil & wajib dicentang hanya bila jadwal penuh
+  var wWarn = document.getElementById('waiting-warning');
+  var wAck  = document.getElementById('waiting-ack');
+  if (wWarn) wWarn.style.display = isWaiting ? 'block' : 'none';
+  if (wAck && !isWaiting) wAck.checked = false;
 
   // Field baru
   var konfBiaya = document.getElementById('konfirm-jenis_biaya');
@@ -492,6 +504,17 @@ function submitPendaftaran() {
     return;
   }
 
+  // Bila jadwal terpilih penuh (waiting list), persetujuan wajib dicentang dulu
+  var ackEl = document.getElementById('waiting-ack');
+  var ackChecked = ackEl ? ackEl.checked : false;
+  if (state.jadwalTerpilih.waiting_list && !ackChecked) {
+    tampilkanAlert('Centang dulu persetujuan daftar tunggu untuk melanjutkan.');
+    var wWarn = document.getElementById('waiting-warning');
+    if (wWarn) { wWarn.style.display = 'block'; wWarn.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    if (ackEl) ackEl.focus();
+    return;
+  }
+
   setLoading(btn, true);
   sembunyikanAlert();
 
@@ -504,6 +527,7 @@ function submitPendaftaran() {
     gender:       state.gender || '',
     jadwal_id:    state.jadwalTerpilih ? state.jadwalTerpilih.jadwal_id : '',
     program:      state.jadwalTerpilih ? state.jadwalTerpilih.program : '',
+    waiting_ack:  ackChecked ? 'true' : 'false',
     client_token: state.clientToken,
     jenis_biaya:    (document.querySelector('input[name="jenis_biaya"]:checked') || {}).value || '',
     kemampuan_awal: document.getElementById('kemampuan_awal').value,
@@ -518,15 +542,23 @@ function submitPendaftaran() {
     .then(function (res) {
       setLoading(btn, false);
       if (res.ok) {
-        tampilkanModalSukses(res.no_pendaftaran);
+        tampilkanModalSukses(res.no_pendaftaran, res.waiting_list === true);
+      } else if (res.error === 'PERLU_KONFIRMASI_WAITING') {
+        // TOCTOU: slot penuh setelah form dimuat. Tandai waiting & minta persetujuan,
+        // lalu pendaftar submit ulang (client_token sama → idempoten, tak ada baris ganda).
+        if (state.jadwalTerpilih) state.jadwalTerpilih.waiting_list = true;
+        isiKonfirmasi();
+        var wWarn = document.getElementById('waiting-warning');
+        if (wWarn) { wWarn.style.display = 'block'; wWarn.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        var ackEl2 = document.getElementById('waiting-ack');
+        if (ackEl2) ackEl2.focus();
+        tampilkanAlert('Jadwal ini baru saja penuh. Centang persetujuan daftar tunggu untuk melanjutkan.');
       } else {
         var pesan = res.pesan || res.error || 'Terjadi kesalahan. Silakan coba lagi.';
-        // Cek apakah error karena duplikat HP
         if (pesan.indexOf('sudah terdaftar') !== -1 || pesan.indexOf('duplikat') !== -1) {
           tampilkanAlert('Nomor HP ini sudah terdaftar. Gunakan halaman Cek Status untuk melihat status pendaftaran Anda.');
-        } else if (pesan.indexOf('penuh') !== -1 || pesan.indexOf('kuota') !== -1) {
-          tampilkanAlert('Jadwal yang dipilih sudah penuh. Silakan kembali dan pilih jadwal lain.');
-          // Paksa reload jadwal agar UI terupdate
+        } else if (res.error === 'JADWAL_DITUTUP') {
+          tampilkanAlert('Pendaftaran untuk jadwal ini sudah ditutup. Silakan kembali dan pilih jadwal lain.');
           state.jadwalList = [];
         } else {
           tampilkanAlert(pesan);
@@ -543,8 +575,10 @@ function submitPendaftaran() {
 // MODAL SUKSES
 // ============================================================================
 
-function tampilkanModalSukses(nomorPendaftaran) {
+function tampilkanModalSukses(nomorPendaftaran, waitingList) {
   document.getElementById('nomor-pendaftaran').textContent = nomorPendaftaran || '—';
+  var wNote = document.getElementById('modal-waiting-note');
+  if (wNote) wNote.style.display = waitingList ? 'block' : 'none';
   var modal = document.getElementById('modal-sukses');
   modal.classList.add('visible');
   document.getElementById('btn-salin').focus();

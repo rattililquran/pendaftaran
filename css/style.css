@@ -649,6 +649,66 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
   color: #b91c1c;
 }
 
+/* Badge & kartu untuk slot yang sudah penuh → daftar tunggu (masih bisa dipilih) */
+.jadwal-kuota.waiting {
+  background: rgba(245,158,11,.16);
+  color: #b45309;
+}
+.jadwal-card.waiting { border-color: rgba(245,158,11,.5); }
+.jadwal-card.waiting.selected { border-color: var(--primary); }
+.jadwal-waiting-note {
+  font-size: 0.72rem;
+  color: #b45309;
+  margin-top: 4px;
+  font-weight: 600;
+}
+.theme-dark .jadwal-kuota.waiting { background: rgba(245,158,11,.14); color: #fcd34d; }
+.theme-dark .jadwal-waiting-note { color: #fcd34d; }
+
+/* Kotak peringatan + persetujuan daftar tunggu (Step 4) */
+.waiting-warning {
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+  border-radius: var(--r-sm, 12px);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.waiting-warning-head { font-weight: 800; color: #b45309; margin-bottom: 6px; font-size: 0.92rem; }
+.waiting-warning-body { font-size: 0.84rem; color: #92400e; line-height: 1.6; margin-bottom: 10px; }
+.theme-dark .waiting-warning { background: rgba(245,158,11,.08); border-color: rgba(245,158,11,.35); }
+.theme-dark .waiting-warning-head { color: #fcd34d; }
+.theme-dark .waiting-warning-body { color: #fde68a; }
+
+/* Catatan daftar tunggu di modal sukses */
+.modal-waiting-note {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: var(--r-sm, 12px);
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+  color: #92400e;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  text-align: left;
+}
+.modal-waiting-note strong { color: #b45309; }
+.theme-dark .modal-waiting-note { background: rgba(245,158,11,.10); border-color: rgba(245,158,11,.35); color: #fde68a; }
+.theme-dark .modal-waiting-note strong { color: #fcd34d; }
+
+/* Chip daftar tunggu di halaman Cek Status */
+.status-waiting-chip {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(245,158,11,.16);
+  border: 1px solid rgba(245,158,11,.4);
+  color: #b45309;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.theme-dark .status-waiting-chip { color: #fcd34d; background: rgba(245,158,11,.12); }
+
 /* ---- Gender Info Badge ---- */
 .gender-info-badge {
   display: inline-flex;
