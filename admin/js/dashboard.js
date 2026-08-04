@@ -240,7 +240,7 @@ function renderTabelPendaftar() {
       '<td>' + esc(row.nama) + '</td>' +
       '<td style="font-size:0.82rem">' + esc(row.hp) + '</td>' +
       '<td style="font-size:0.82rem">' + esc(row.program) + '</td>' +
-      '<td style="font-size:0.82rem">' + (row.gender || '—') + '</td>' +
+      '<td style="font-size:0.82rem">' + (esc(row.gender) || '—') + '</td>' +
       '<td style="font-size:0.82rem">' + esc(row.jadwal_id) + '</td>' +
       '<td style="font-size:0.82rem">' + formatTanggal(row.timestamp) + '</td>' +
       '<td><span class="badge badge-' + row.status + '">' + labelStatus(row.status) + '</span></td>' +
@@ -477,9 +477,9 @@ function bukaDetal(no) {
     '<div class="detail-item"><div class="detail-label">Tgl. Daftar</div><div class="detail-value">' + formatTanggal(row.timestamp) + '</div></div>' +
     '<div class="detail-item full"><div class="detail-label">Nama Lengkap</div><div class="detail-value">' + esc(row.nama) + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">No. HP</div><div class="detail-value">' + esc(row.hp) + '</div></div>' +
-    '<div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">' + (row.email || '—') + '</div></div>' +
-    '<div class="detail-item"><div class="detail-label">Tanggal Lahir</div><div class="detail-value">' + (row.tgl_lahir || '—') + '</div></div>' +
-    '<div class="detail-item"><div class="detail-label">Gender</div><div class="detail-value">' + (row.gender || '—') + '</div></div>' +
+    '<div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">' + (esc(row.email) || '—') + '</div></div>' +
+    '<div class="detail-item"><div class="detail-label">Tanggal Lahir</div><div class="detail-value">' + (esc(row.tgl_lahir) || '—') + '</div></div>' +
+    '<div class="detail-item"><div class="detail-label">Gender</div><div class="detail-value">' + (esc(row.gender) || '—') + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Program</div><div class="detail-value">' + esc(row.program) + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Jadwal</div><div class="detail-value">' + esc(row.jadwal_id) + '</div></div>' +
     // ---- Data kesiapan & komitmen (baru terlihat oleh admin) ----
