@@ -3,7 +3,7 @@
  * Rattilil Qur'an PMB
  */
 
-var CACHE_NAME = 'rattilil-pmb-v10';
+var CACHE_NAME = 'rattilil-pmb-v11';
 var ASSETS = [
   './',
   './index.html',
@@ -46,14 +46,20 @@ self.addEventListener('activate', function(e) {
   self.clients.claim();
 });
 
-// Fetch — network first untuk API, cache first untuk asset
+// Fetch strategy:
+//  - GAS backend  → network only (dengan fallback JSON offline)
+//  - HTML/JS/CSS & navigasi → NETWORK-FIRST (selalu versi terbaru; cache hanya fallback
+//    offline). Ini mencegah kode basi/rusak dari cache — akar masalah "login is not
+//    defined" & tampilan lama.
+//  - Aset lain (gambar/font/manifest) → cache-first (jarang berubah, hemat kuota).
 self.addEventListener('fetch', function(e) {
-  var url = e.request.url;
+  var req = e.request;
+  var url = req.url;
 
-  // Selalu ke network untuk request ke GAS backend
+  // GAS backend — selalu network, sediakan fallback JSON bila offline.
   if (url.indexOf('script.google.com') !== -1) {
     e.respondWith(
-      fetch(e.request).catch(function() {
+      fetch(req).catch(function() {
         return new Response(JSON.stringify({ ok: false, error: 'Tidak ada koneksi internet.' }), {
           headers: { 'Content-Type': 'application/json' }
         });
@@ -62,24 +68,37 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // Cache first untuk asset lokal
+  // Hanya tangani GET (biarkan POST/PUT lewat langsung ke network).
+  if (req.method !== 'GET') return;
+
+  function simpanKeCache(res) {
+    if (res && res.status === 200) {
+      var clone = res.clone();
+      caches.open(CACHE_NAME).then(function(cache) { cache.put(req, clone); });
+    }
+    return res;
+  }
+
+  var isKode = req.mode === 'navigate' || /\.(html|js|css)(\?|$)/.test(url);
+
+  if (isKode) {
+    // NETWORK-FIRST
+    e.respondWith(
+      fetch(req).then(simpanKeCache).catch(function() {
+        return caches.match(req).then(function(cached) {
+          if (cached) return cached;
+          if (req.mode === 'navigate') return caches.match('./index.html');
+          return Response.error();
+        });
+      })
+    );
+    return;
+  }
+
+  // CACHE-FIRST untuk aset lain
   e.respondWith(
-    caches.match(e.request).then(function(cached) {
-      return cached || fetch(e.request).then(function(res) {
-        // Simpan ke cache jika request berhasil
-        if (res.status === 200) {
-          var clone = res.clone();
-          caches.open(CACHE_NAME).then(function(cache) {
-            cache.put(e.request, clone);
-          });
-        }
-        return res;
-      });
-    }).catch(function() {
-      // Fallback ke index.html untuk navigasi
-      if (e.request.mode === 'navigate') {
-        return caches.match('/index.html');
-      }
+    caches.match(req).then(function(cached) {
+      return cached || fetch(req).then(simpanKeCache);
     })
   );
 });
