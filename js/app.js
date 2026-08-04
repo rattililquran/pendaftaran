@@ -368,7 +368,7 @@ function renderJadwal(list) {
   grid.innerHTML = '';
 
   if (!list || list.length === 0) {
-    grid.innerHTML = '<p style="color:var(--ink-muted);font-size:0.9rem;text-align:center;padding:var(--space-6)">Belum ada jadwal tersedia saat ini.</p>';
+    grid.innerHTML = '<p style="color:var(--ink-muted);font-size:0.9rem;text-align:center;padding:var(--space-6);line-height:1.7">Qadarullah, kuota Halaqah sudah penuh, semoga Allah mudahkan untuk bisa belajar di kesempatan berikutnya.</p>';
     return;
   }
 
