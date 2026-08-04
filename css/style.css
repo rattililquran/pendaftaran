@@ -751,6 +751,9 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
 .spinner {
   width: 18px;
   height: 18px;
+  flex: 0 0 18px;      /* jangan menyusut di flex button → tetap bulat, bukan oval */
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
   border: 2.5px solid rgba(255,255,255,.35);
   border-top-color: white;
   border-radius: 50%;
@@ -901,6 +904,34 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
 }
 
 .modal-note a { color: var(--primary); text-decoration: none; }
+
+/* Catatan penting — dibungkus kotak merah agar menonjol */
+.modal-note-penting {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  border-radius: var(--r-sm, 12px);
+}
+.modal-note-penting-icon { font-size: 1rem; line-height: 1.4; flex-shrink: 0; }
+.modal-note-penting-body { flex: 1; }
+.modal-note-penting strong { color: #b91c1c; }
+.modal-note-penting a { color: #b91c1c; font-weight: 700; text-decoration: underline; }
+
+.theme-dark .modal-note-penting {
+  color: #fecaca;
+  background: rgba(220,38,38,.10);
+  border-color: rgba(248,113,113,.35);
+}
+.theme-dark .modal-note-penting strong,
+.theme-dark .modal-note-penting a { color: #fca5a5; }
 
 /* ---- Cek Status ---- */
 .status-badge {
