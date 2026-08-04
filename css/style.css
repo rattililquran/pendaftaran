@@ -1320,6 +1320,60 @@ html.theme-dark body {
   color: rgba(255,255,255,0.65);
 }
 
+/* Kartu "Tentang Program" (link ke program.html) */
+.kartu-info-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r);
+  padding: 16px 20px;
+  text-decoration: none;
+  box-shadow: var(--sh-sm);
+  transition: transform .15s, box-shadow .2s, border-color .15s;
+  margin-bottom: var(--space-4, 16px);
+}
+
+.kartu-info-link:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sh);
+  border-color: var(--primary);
+}
+
+.kartu-info-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.kartu-info-body { flex: 1; }
+
+.kartu-info-judul {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+.kartu-info-sub {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+
+.kartu-info-cta {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
 /* Banner Pendaftaran Ditutup */
 .banner-ditutup {
   margin-bottom: var(--space-4, 16px);

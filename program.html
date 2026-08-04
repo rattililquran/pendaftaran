@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1f35">
+  <title>Tentang Program — Rattilil Qur'an</title>
+  <meta name="description" content="Informasi lengkap program tahsin Rattilil Qur'an: materi, intensitas belajar, persyaratan, biaya, dan alur pendaftaran angkatan yang sedang dibuka.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    (function() {
+      var saved = localStorage.getItem('rattilil-theme');
+      if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('theme-dark');
+      }
+    })();
+  </script>
+  <style>
+    /* ===== Komponen khusus halaman program ===== */
+    .prog-hero{border-radius:var(--r-lg);padding:24px;color:#fff;position:relative;overflow:hidden;
+      box-shadow:var(--sh);background:linear-gradient(135deg,#1d4ed8,#2563eb)}
+    .prog-hero::before{content:'';position:absolute;inset:0;opacity:.08;
+      background-image:radial-gradient(circle at 1px 1px,#fff 1px,transparent 0);background-size:18px 18px}
+    .prog-hero-inner{position:relative;z-index:1;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .prog-hero-icon{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.15);
+      display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+    .prog-hero-body{flex:1;min-width:180px}
+    .prog-hero-nama{font-size:1.2rem;font-weight:800;line-height:1.25}
+    .prog-hero-periode{font-size:.88rem;opacity:.9;margin-top:2px}
+    .prog-badge{padding:6px 14px;border-radius:999px;font-size:.76rem;font-weight:800;letter-spacing:.5px}
+    .prog-badge.aktif{background:#22c55e;color:#052e16}
+    .prog-badge.selesai{background:#94a3b8;color:#1e293b}
+
+    .prog-lead{color:var(--ink-2);font-size:.97rem;white-space:pre-line}
+    .prog-divider{display:flex;align-items:center;gap:12px;margin:26px 0 14px;color:var(--ink-3);
+      font-size:.78rem;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+    .prog-divider::before,.prog-divider::after{content:'';height:1px;background:var(--line);flex:1}
+
+    ul.prog-poin,ol.prog-poin{list-style:none;display:flex;flex-direction:column;gap:10px}
+    ul.prog-poin li{position:relative;padding-left:28px;color:var(--ink-2);font-size:.94rem}
+    ul.prog-poin li::before{content:'✓';position:absolute;left:0;top:0;color:var(--primary);font-weight:800}
+    ol.prog-poin{counter-reset:step}
+    ol.prog-poin li{position:relative;padding-left:34px;color:var(--ink-2);font-size:.94rem;counter-increment:step}
+    ol.prog-poin li::before{content:counter(step);position:absolute;left:0;top:-2px;width:24px;height:24px;
+      border-radius:50%;background:var(--soft);color:var(--primary);font-weight:800;font-size:.8rem;
+      display:flex;align-items:center;justify-content:center;border:1px solid var(--line)}
+    li.prog-warning{padding:12px 14px 12px 42px;background:var(--soft);
+      border:1px solid rgba(251,191,36,.4);border-radius:var(--r-sm);color:#b45309;font-weight:600}
+    .theme-dark li.prog-warning{color:#fcd34d;background:rgba(251,191,36,.08)}
+    li.prog-warning::before{content:'⚠';left:14px;top:12px;color:#d97706}
+    .theme-dark li.prog-warning::before{color:#fcd34d}
+
+    .prog-inforow{display:flex;align-items:flex-start;gap:12px;background:var(--soft);
+      border:1px solid var(--line);border-radius:var(--r-sm);padding:14px 16px;color:var(--ink-2);
+      font-size:.95rem;white-space:pre-line}
+    .prog-inforow .em{font-size:1.3rem;line-height:1.2}
+
+    .prog-biaya{background:var(--soft);border:1px solid rgba(34,197,94,.35);border-radius:var(--r);
+      padding:18px 20px;color:var(--ink-2);font-size:.95rem;white-space:pre-line}
+    .prog-beasiswa{display:flex;align-items:flex-start;gap:12px;margin-top:12px;padding:14px 16px;
+      background:var(--soft);border:1px solid rgba(99,102,241,.3);border-radius:var(--r-sm);
+      color:var(--ink-2);font-size:.9rem}
+    .prog-beasiswa .em{font-size:1.3rem;line-height:1.2}
+    .prog-beasiswa a{color:var(--primary);font-weight:700;text-decoration:none}
+    .prog-beasiswa a:hover{text-decoration:underline}
+
+    .prog-btnrow{display:flex;flex-direction:column;gap:12px;margin-top:26px}
+    .prog-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 20px;
+      border-radius:var(--r-sm);font-weight:800;font-size:1rem;text-decoration:none;border:none;
+      cursor:pointer;transition:transform .15s,box-shadow .2s;font-family:inherit}
+    .prog-btn:hover{transform:translateY(-2px)}
+    .prog-btn-primary{background:linear-gradient(135deg,#0ea5e9,#3b82f6);color:#fff;box-shadow:0 6px 18px rgba(14,165,233,.35)}
+    .prog-btn-share{background:var(--card);color:var(--ink);border:1.5px solid var(--line);box-shadow:var(--sh-sm)}
+    .prog-btn-share:hover{border-color:var(--primary);color:var(--primary)}
+    .prog-btn-wa{background:#25D366;color:#fff;box-shadow:0 6px 18px rgba(37,211,102,.35)}
+
+    .prog-kontak{margin-top:22px;text-align:center;color:var(--ink-3);font-size:.9rem}
+    .prog-kontak strong{color:var(--ink)}
+
+    .prog-skeleton{height:16px;border-radius:8px;background:var(--soft);margin:10px 0;
+      animation:progpulse 1.2s ease-in-out infinite}
+    @keyframes progpulse{0%,100%{opacity:.5}50%{opacity:1}}
+  </style>
+</head>
+<body>
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
+  <div class="orb orb-3" aria-hidden="true"></div>
+
+  <div class="page-wrapper">
+    <div class="container">
+
+      <nav class="site-nav">
+        <a href="index.html" class="nav-back">← Kembali ke Pendaftaran</a>
+      </nav>
+
+      <header class="site-header">
+        <img
+          src="https://raw.githubusercontent.com/rattililquran/rattililquran.github.io/main/assets/images/logo-abu.png"
+          alt="Logo Rattilil Qur'an"
+          class="site-logo"
+        >
+        <p class="site-quote">SEBUAH IKHTIAR MENJADI MANUSIA TERBAIK</p>
+        <p class="tagline">Tentang Program</p>
+      </header>
+
+      <!-- Hero angkatan -->
+      <div class="prog-hero" id="prog-hero" style="display:none">
+        <div class="prog-hero-inner">
+          <div class="prog-hero-icon">📚</div>
+          <div class="prog-hero-body">
+            <div class="prog-hero-nama" id="prog-nama">—</div>
+            <div class="prog-hero-periode" id="prog-periode"></div>
+          </div>
+          <span class="prog-badge" id="prog-badge" style="display:none"></span>
+        </div>
+      </div>
+
+      <!-- Kartu konten -->
+      <div class="card" id="prog-card">
+        <!-- Skeleton loading -->
+        <div id="prog-loading">
+          <div class="prog-skeleton" style="width:60%"></div>
+          <div class="prog-skeleton"></div>
+          <div class="prog-skeleton" style="width:80%"></div>
+          <div class="prog-skeleton" style="width:40%;margin-top:22px"></div>
+          <div class="prog-skeleton"></div>
+        </div>
+
+        <!-- Konten dinamis -->
+        <div id="prog-konten" style="display:none">
+
+          <p class="prog-lead" id="sec-deskripsi" style="display:none"></p>
+
+          <div id="sec-materi" style="display:none">
+            <div class="prog-divider">Materi</div>
+            <ul class="prog-poin" id="list-materi"></ul>
+          </div>
+
+          <div id="sec-intensitas" style="display:none">
+            <div class="prog-divider">Intensitas Belajar</div>
+            <div class="prog-inforow"><span class="em">⏱️</span><span id="txt-intensitas"></span></div>
+          </div>
+
+          <div id="sec-persyaratan" style="display:none">
+            <div class="prog-divider">Persyaratan</div>
+            <ul class="prog-poin" id="list-persyaratan"></ul>
+          </div>
+
+          <div id="sec-biaya" style="display:none">
+            <div class="prog-divider">Biaya Program</div>
+            <div class="prog-biaya" id="txt-biaya"></div>
+            <div class="prog-beasiswa">
+              <span class="em">🤝</span>
+              <span>Tersedia <strong>beasiswa</strong> bagi yang membutuhkan.
+                <a href="https://rattililquran.github.io/beasiswa.html" target="_blank" rel="noopener noreferrer">Lihat syarat &amp; ketentuan beasiswa →</a>
+              </span>
+            </div>
+          </div>
+
+          <div id="sec-alur" style="display:none">
+            <div class="prog-divider">Alur Pendaftaran</div>
+            <ol class="prog-poin" id="list-alur"></ol>
+          </div>
+
+          <div class="prog-btnrow">
+            <a href="index.html" class="prog-btn prog-btn-primary">Daftar Sekarang →</a>
+            <a href="share.html" class="prog-btn prog-btn-share">📲 Bagikan info ini &amp; daftar gratis</a>
+            <a href="#" id="btn-wa" class="prog-btn prog-btn-wa" target="_blank" rel="noopener noreferrer" style="display:none">💬 Hubungi via WhatsApp</a>
+          </div>
+
+          <div class="prog-kontak" id="sec-kontak" style="display:none">
+            Narahubung: <strong id="txt-kontak"></strong>
+          </div>
+
+        </div>
+
+        <!-- Fallback bila data tidak tersedia -->
+        <div id="prog-fallback" style="display:none">
+          <p class="prog-lead">Informasi program akan segera tersedia. Silakan cek kembali nanti,
+            atau lanjutkan mengisi formulir pendaftaran.</p>
+          <div class="prog-btnrow">
+            <a href="index.html" class="prog-btn prog-btn-primary">Daftar Sekarang →</a>
+            <a href="https://wa.me/6282154905557" class="prog-btn prog-btn-wa" target="_blank" rel="noopener noreferrer">💬 Hubungi via WhatsApp</a>
+          </div>
+        </div>
+      </div>
+
+      <footer class="site-footer">
+        <p>© <span id="tahun-footer"></span> Rattilil Qur'an</p>
+      </footer>
+
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script>
+  (function() {
+    var tahunEl = document.getElementById('tahun-footer');
+    if (tahunEl) tahunEl.textContent = new Date().getFullYear();
+
+    // ---- fetch action=info ----
+    function fetchInfo() {
+      var url = CONFIG.BACKEND_URL + '?action=info';
+      var ctrl = new AbortController();
+      var timer = setTimeout(function() { ctrl.abort(); }, CONFIG.REQUEST_TIMEOUT || 30000);
+      return fetch(url, { method: 'GET', signal: ctrl.signal })
+        .then(function(r) { clearTimeout(timer); return r.json(); });
+    }
+
+    // ---- helper render ----
+    function el(id) { return document.getElementById(id); }
+
+    function tampilTeks(secId, txtId, nilai) {
+      if (!nilai) return;
+      el(txtId).textContent = nilai;
+      el(secId).style.display = '';
+    }
+
+    // isi <ul>/<ol> dari teks multi-baris; baris *…* → penekanan (warning)
+    function tampilList(secId, listId, nilai, warningable) {
+      if (!nilai) return;
+      var baris = String(nilai).split('\n').map(function(s) { return s.trim(); })
+                    .filter(function(s) { return s.length; });
+      if (!baris.length) return;
+      var ul = el(listId);
+      ul.innerHTML = '';
+      baris.forEach(function(b) {
+        var li = document.createElement('li');
+        var m = b.match(/^\*(.+)\*$/);
+        if (warningable && m) {
+          li.className = 'prog-warning';
+          li.textContent = m[1].trim();
+        } else {
+          li.textContent = b.replace(/^\*|\*$/g, '').trim();
+        }
+        ul.appendChild(li);
+      });
+      el(secId).style.display = '';
+    }
+
+    function labelPeriode(a, b) {
+      function f(s) {
+        if (!s) return '';
+        var d = new Date(s);
+        if (isNaN(d)) return s;
+        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+      var fa = f(a), fb = f(b);
+      if (fa && fb) return fa + ' – ' + fb;
+      return fa || fb || '';
+    }
+
+    function waLink(nomor) {
+      var digit = String(nomor).replace(/[^0-9]/g, '');
+      if (digit.charAt(0) === '0') digit = '62' + digit.slice(1);
+      else if (digit.slice(0, 2) !== '62') digit = '62' + digit;
+      return 'https://wa.me/' + digit;
+    }
+
+    function tampilFallback() {
+      el('prog-loading').style.display = 'none';
+      el('prog-fallback').style.display = '';
+    }
+
+    function render(d) {
+      el('prog-loading').style.display = 'none';
+
+      if (!d || !d.nama) { tampilFallback(); return; }
+
+      // Hero
+      el('prog-nama').textContent = d.nama;
+      var per = labelPeriode(d.tgl_mulai, d.tgl_selesai);
+      if (per) el('prog-periode').textContent = per;
+      var st = String(d.status || '').toUpperCase();
+      if (st) {
+        var badge = el('prog-badge');
+        badge.textContent = st === 'AKTIF' ? 'AKTIF' : (st === 'SELESAI' ? 'SELESAI' : st);
+        badge.className = 'prog-badge' + (st === 'AKTIF' ? ' aktif' : st === 'SELESAI' ? ' selesai' : '');
+        badge.style.display = '';
+      }
+      el('prog-hero').style.display = '';
+
+      // Bila semua konten kosong → tetap tampil hero, tapi konten pakai fallback
+      var adaKonten = d.deskripsi_program || d.materi || d.intensitas ||
+                      d.persyaratan || d.biaya_info || d.alur;
+      if (!adaKonten) { tampilFallback(); return; }
+
+      el('prog-konten').style.display = '';
+
+      tampilTeks('sec-deskripsi', 'sec-deskripsi', d.deskripsi_program); // deskripsi: teks di elemen itu sendiri
+      tampilList('sec-materi', 'list-materi', d.materi, false);
+      tampilTeks('sec-intensitas', 'txt-intensitas', d.intensitas);
+      tampilList('sec-persyaratan', 'list-persyaratan', d.persyaratan, true);
+      tampilTeks('sec-biaya', 'txt-biaya', d.biaya_info);
+      tampilList('sec-alur', 'list-alur', d.alur, false);
+
+      if (d.kontak_wa) {
+        el('txt-kontak').textContent = d.kontak_wa;
+        el('sec-kontak').style.display = '';
+        var w = el('btn-wa');
+        w.href = waLink(d.kontak_wa);
+        w.style.display = '';
+      }
+    }
+
+    fetchInfo()
+      .then(function(res) { render(res && res.ok ? res.data : null); })
+      .catch(function() { render(null); });
+  })();
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(function() {});
+    }
+  </script>
+</body>
+</html>
