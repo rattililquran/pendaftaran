@@ -59,10 +59,11 @@
       font-size:.95rem;white-space:pre-line}
     .prog-inforow .em{font-size:1.3rem;line-height:1.2}
 
-    .prog-biaya{background:var(--soft);border:1px solid rgba(34,197,94,.35);border-radius:var(--r);
+    .prog-biaya{background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(16,185,129,.03));
+      border:1px solid rgba(34,197,94,.35);border-radius:var(--r);
       padding:18px 20px;color:var(--ink-2);font-size:.95rem}
-    .prog-biaya-row{margin:3px 0;line-height:1.5}
-    .prog-rp{font-size:1.55rem;font-weight:800;color:#16a34a;letter-spacing:.2px}
+    .prog-biaya-row{margin:4px 0;line-height:1.55}
+    .prog-rp{font-size:1.4rem;font-weight:800;color:#16a34a;letter-spacing:.2px}
     .theme-dark .prog-rp{color:#4ade80}
     .prog-free-wrap{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
     .prog-free-badge{display:inline-block;padding:8px 14px;border-radius:999px;
@@ -272,20 +273,19 @@
         }
         var row = document.createElement('div');
         row.className = 'prog-biaya-row';
-        var m = l.match(/rp\s?[\d.]+/i);
-        if (m) {
-          var idx = l.toLowerCase().indexOf(m[0].toLowerCase());
-          var before = l.slice(0, idx);
-          var after  = l.slice(idx + m[0].length);
-          if (before) row.appendChild(document.createTextNode(before));
+        // tebalkan SEMUA nominal "Rp…" dalam baris
+        var re = /rp\s?[\d.]+/ig, mm, last = 0, adaRp = false;
+        while ((mm = re.exec(l))) {
+          adaRp = true;
+          if (mm.index > last) row.appendChild(document.createTextNode(l.slice(last, mm.index)));
           var sp = document.createElement('span');
           sp.className = 'prog-rp';
-          sp.textContent = l.slice(idx, idx + m[0].length);
+          sp.textContent = mm[0];
           row.appendChild(sp);
-          if (after) row.appendChild(document.createTextNode(after));
-        } else {
-          row.textContent = l;
+          last = mm.index + mm[0].length;
         }
+        if (!adaRp) row.textContent = l;
+        else if (last < l.length) row.appendChild(document.createTextNode(l.slice(last)));
         box.appendChild(row);
       });
       if (adaFree) freeWrap.style.display = '';
