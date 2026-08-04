@@ -657,10 +657,13 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
 .jadwal-card.waiting { border-color: rgba(245,158,11,.5); }
 .jadwal-card.waiting.selected { border-color: var(--primary); }
 .jadwal-waiting-note {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: #b45309;
-  margin-top: 4px;
   font-weight: 600;
+  line-height: 1.5;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(245,158,11,.28);
 }
 .theme-dark .jadwal-kuota.waiting { background: rgba(245,158,11,.14); color: #fcd34d; }
 .theme-dark .jadwal-waiting-note { color: #fcd34d; }

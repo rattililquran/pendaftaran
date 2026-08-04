@@ -394,7 +394,6 @@ function renderJadwal(list) {
     card.innerHTML =
       '<input type="radio" name="jadwal" id="jadwal-' + j.jadwal_id + '" value="' + j.jadwal_id + '"' + (ditutup ? ' disabled' : '') + '>' +
       '<div class="jadwal-kuota ' + kuotaClass + '">' + kuotaLabel + '</div>' +
-      (waiting ? '<div class="jadwal-waiting-note">Kuota penuh — Anda tetap dapat mendaftar dan akan masuk ke daftar tunggu.</div>' : '') +
       '<div class="jadwal-nama">' + esc(j.program) + '</div>' +
       // Hari & Jam — ditampilkan besar dan mencolok
       '<div class="jadwal-schedule">' +
@@ -412,7 +411,9 @@ function renderJadwal(list) {
       '<div class="jadwal-meta">' +
         (j.pengajar ? '<span>👤 ' + esc(j.pengajar) + '</span>' : '') +
         (j.gender   ? '<span>👥 ' + esc(j.gender) + '</span>' : '') +
-      '</div>';
+      '</div>' +
+      // Catatan daftar tunggu di BAWAH kartu agar tidak menabrak badge kanan-atas
+      (waiting ? '<div class="jadwal-waiting-note">Kuota penuh — Anda tetap dapat mendaftar dan akan masuk ke daftar tunggu.</div>' : '');
 
     if (!ditutup) {
       // FIX #1: Wrap dalam IIFE agar j dan card ter-capture dengan benar
