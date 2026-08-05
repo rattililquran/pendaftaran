@@ -49,6 +49,9 @@
         <button class="nav-item" id="nav-watemplate" onclick="switchTab('watemplate')">
           <span class="nav-icon">💬</span> Template WA
         </button>
+        <button class="nav-item" id="nav-evaluasi" onclick="switchTab('evaluasi')">
+          <span class="nav-icon">🗒️</span> Evaluasi
+        </button>
         <button class="nav-item" id="nav-qrcode" onclick="switchTab('qrcode')">
           <span class="nav-icon">🔲</span> QR Code
         </button>
@@ -357,9 +360,117 @@
           </div>
         </div>
 
+        <!-- ===== TAB: EVALUASI ===== -->
+        <div id="tab-evaluasi" style="display:none">
+          <div class="toolbar" style="margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <h2 style="font-size:1rem;font-weight:800;color:var(--ink);flex:1;min-width:180px">Catatan Evaluasi</h2>
+            <select class="form-select" id="ev-filter-status" style="width:auto;min-width:130px" onchange="renderTabelEvaluasi()">
+              <option value="">Semua Status</option>
+              <option value="Baru">Baru</option>
+              <option value="Diproses">Diproses</option>
+              <option value="Selesai">Selesai</option>
+            </select>
+            <select class="form-select" id="ev-filter-prioritas" style="width:auto;min-width:140px" onchange="renderTabelEvaluasi()">
+              <option value="">Semua Prioritas</option>
+              <option value="Tinggi">Tinggi</option>
+              <option value="Sedang">Sedang</option>
+              <option value="Rendah">Rendah</option>
+            </select>
+            <select class="form-select" id="ev-filter-kategori" style="width:auto;min-width:140px" onchange="renderTabelEvaluasi()">
+              <option value="">Semua Kategori</option>
+              <option value="Teknis">Teknis</option>
+              <option value="UX-Alur">UX-Alur</option>
+              <option value="Data">Data</option>
+              <option value="Komunikasi">Komunikasi</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="bukaModalEvaluasi()">+ Tambah</button>
+            <button class="btn btn-primary btn-sm" onclick="muatEvaluasi()">↻ Muat Ulang</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="table-evaluasi">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Evaluasi</th>
+                  <th>Kategori</th>
+                  <th>Prioritas</th>
+                  <th>Status</th>
+                  <th>Gelombang</th>
+                  <th>Tanggal</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-evaluasi">
+                <tr><td colspan="8" class="no-data">Memuat data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div><!-- /page-body -->
     </div><!-- /main-content -->
   </div><!-- /admin-layout -->
+
+  <!-- Modal Tambah/Edit Evaluasi -->
+  <div class="modal-backdrop" id="modal-evaluasi">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-evaluasi-title">Tambah Evaluasi</div>
+        <button class="modal-close" onclick="tutupModal('modal-evaluasi')">✕</button>
+      </div>
+
+      <input type="hidden" id="ev-id">
+      <div class="form-group">
+        <label class="form-label" for="ev-evaluasi">Evaluasi / Temuan <span style="color:var(--danger)">*</span></label>
+        <textarea class="form-input" id="ev-evaluasi" rows="3" placeholder="Apa yang perlu diperbaiki? Contoh: pendaftar bingung di langkah unggah berkas."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="ev-solusi">Solusi / Saran</label>
+        <textarea class="form-input" id="ev-solusi" rows="3" placeholder="Usulan perbaikan untuk gelombang berikutnya."></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label" for="ev-kategori">Kategori</label>
+          <select class="form-select" id="ev-kategori">
+            <option value="Teknis">Teknis</option>
+            <option value="UX-Alur">UX-Alur</option>
+            <option value="Data">Data</option>
+            <option value="Komunikasi">Komunikasi</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ev-prioritas">Prioritas</label>
+          <select class="form-select" id="ev-prioritas">
+            <option value="Tinggi">Tinggi</option>
+            <option value="Sedang" selected>Sedang</option>
+            <option value="Rendah">Rendah</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ev-status">Status</label>
+          <select class="form-select" id="ev-status">
+            <option value="Baru" selected>Baru</option>
+            <option value="Diproses">Diproses</option>
+            <option value="Selesai">Selesai</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ev-gelombang">Gelombang (opsional)</label>
+          <input class="form-input" id="ev-gelombang" placeholder="Contoh: Gel. 1 - 2026" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="tutupModal('modal-evaluasi')">Batal</button>
+        <button class="btn btn-primary btn-sm" id="btn-simpan-evaluasi" onclick="simpanEvaluasi()">
+          <div class="spinner"></div>
+          <span class="btn-text">Simpan</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal Detail / Update Status -->
   <div class="modal-backdrop" id="modal-detail">

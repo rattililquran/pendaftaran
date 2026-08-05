@@ -9,6 +9,7 @@ var state = {
   pendaftar: [],
   filteredData: [],
   jadwal: [],
+  evaluasi: [],
   currentTab: 'pendaftar',
   selectedPendaftar: null,
   selectedJadwal: null,
@@ -85,7 +86,7 @@ function switchTab(tab) {
   });
   document.getElementById('nav-' + tab).classList.add('active');
 
-  var tabs = ['pendaftar', 'jadwal', 'gelombang', 'formfields', 'statistik', 'watemplate', 'qrcode'];
+  var tabs = ['pendaftar', 'jadwal', 'gelombang', 'formfields', 'statistik', 'watemplate', 'evaluasi', 'qrcode'];
   tabs.forEach(function(t) {
     var el = document.getElementById('tab-' + t);
     if (el) el.style.display = t === tab ? 'block' : 'none';
@@ -98,6 +99,7 @@ function switchTab(tab) {
     'formfields': ['Form Fields',     'Konfigurasi pertanyaan form pendaftaran'],
     'statistik':  ['Statistik',        'Visualisasi data pendaftaran'],
     'watemplate': ['Template WA',      'Kelola template pesan WhatsApp'],
+    'evaluasi':   ['Evaluasi',         'Catatan perbaikan untuk pendaftaran berikutnya'],
     'qrcode':     ['QR Code',          'QR Code link pendaftaran']
   };
 
@@ -111,6 +113,7 @@ function switchTab(tab) {
   if (tab === 'formfields') muatFormFields();
   if (tab === 'statistik')  muatCharts();
   if (tab === 'watemplate') muatWaTemplateAdmin();
+  if (tab === 'evaluasi')   muatEvaluasi();
   if (tab === 'qrcode')     muatQRCode();
 
   tutupSidebar();
@@ -1010,6 +1013,140 @@ function esc(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+
+// ============================================================================
+// EVALUASI — catatan retrospektif perbaikan pendaftaran
+// ============================================================================
+
+function muatEvaluasi() {
+  var tbody = document.getElementById('tbody-evaluasi');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="no-data">Memuat data...</td></tr>';
+  _adminGet({ action: 'admin.evaluasi', token: state.token })
+    .then(function (res) {
+      if (res && res.ok) {
+        state.evaluasi = res.data || [];
+        renderTabelEvaluasi();
+      } else {
+        if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="no-data">Gagal memuat.</td></tr>';
+        if (res && res.error === 'UNAUTHORIZED') tampilkanToast('Sesi habis, silakan login ulang.', 'error');
+      }
+    })
+    .catch(function () {
+      if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="no-data">Koneksi bermasalah.</td></tr>';
+    });
+}
+
+// Warna badge sesuai prioritas/status (dipetakan ke chip inline, theme-aware via warna solid).
+var EV_WARNA_PRIO = { 'Tinggi': '#dc2626', 'Sedang': '#d97706', 'Rendah': '#16a34a' };
+var EV_WARNA_STAT = { 'Baru': '#2563eb', 'Diproses': '#d97706', 'Selesai': '#16a34a' };
+
+function _chip(teks, warna) {
+  return '<span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:0.72rem;' +
+         'font-weight:700;color:#fff;background:' + warna + '">' + esc(teks) + '</span>';
+}
+
+function renderTabelEvaluasi() {
+  var tbody = document.getElementById('tbody-evaluasi');
+  if (!tbody) return;
+
+  var fS = (document.getElementById('ev-filter-status')    || {}).value || '';
+  var fP = (document.getElementById('ev-filter-prioritas') || {}).value || '';
+  var fK = (document.getElementById('ev-filter-kategori')  || {}).value || '';
+
+  var rows = state.evaluasi.filter(function (r) {
+    if (fS && r.status    !== fS) return false;
+    if (fP && r.prioritas !== fP) return false;
+    if (fK && r.kategori  !== fK) return false;
+    return true;
+  });
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="no-data">Belum ada catatan evaluasi.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(function (r) {
+    var evalPreview = r.evaluasi.length > 70 ? r.evaluasi.slice(0, 70) + '…' : r.evaluasi;
+    return '<tr>' +
+      '<td style="font-weight:700;white-space:nowrap">' + esc(r.id) + '</td>' +
+      '<td>' + esc(evalPreview) + '</td>' +
+      '<td>' + (r.kategori ? esc(r.kategori) : '—') + '</td>' +
+      '<td>' + (r.prioritas ? _chip(r.prioritas, EV_WARNA_PRIO[r.prioritas] || '#64748b') : '—') + '</td>' +
+      '<td>' + (r.status ? _chip(r.status, EV_WARNA_STAT[r.status] || '#64748b') : '—') + '</td>' +
+      '<td>' + (r.gelombang ? esc(r.gelombang) : '—') + '</td>' +
+      '<td style="white-space:nowrap">' + formatTanggal(r.timestamp) + '</td>' +
+      '<td style="white-space:nowrap">' +
+        '<button class="btn btn-outline btn-sm" onclick="bukaModalEvaluasi(\'' + esc(r.id) + '\')">Edit</button> ' +
+        '<button class="btn btn-outline btn-sm" style="color:var(--danger)" onclick="hapusEvaluasi(\'' + esc(r.id) + '\')">Hapus</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function bukaModalEvaluasi(id) {
+  var rec = null;
+  if (id) {
+    for (var i = 0; i < state.evaluasi.length; i++) {
+      if (state.evaluasi[i].id === id) { rec = state.evaluasi[i]; break; }
+    }
+  }
+  document.getElementById('modal-evaluasi-title').textContent = rec ? ('Edit ' + rec.id) : 'Tambah Evaluasi';
+  document.getElementById('ev-id').value        = rec ? rec.id : '';
+  document.getElementById('ev-evaluasi').value  = rec ? rec.evaluasi : '';
+  document.getElementById('ev-solusi').value    = rec ? rec.solusi : '';
+  document.getElementById('ev-kategori').value  = (rec && rec.kategori)  ? rec.kategori  : 'Teknis';
+  document.getElementById('ev-prioritas').value = (rec && rec.prioritas) ? rec.prioritas : 'Sedang';
+  document.getElementById('ev-status').value    = (rec && rec.status)    ? rec.status    : 'Baru';
+  document.getElementById('ev-gelombang').value = rec ? rec.gelombang : '';
+  bukaModal('modal-evaluasi');
+}
+
+function simpanEvaluasi() {
+  var btn = document.getElementById('btn-simpan-evaluasi');
+  var evaluasi = document.getElementById('ev-evaluasi').value.trim();
+  if (!evaluasi) { tampilkanToast('Isi evaluasi tidak boleh kosong.', 'error'); return; }
+
+  setLoading(btn, true);
+  var body = {
+    action:    'admin.simpanEvaluasi',
+    token:     state.token,
+    id:        document.getElementById('ev-id').value.trim(),
+    evaluasi:  evaluasi,
+    solusi:    document.getElementById('ev-solusi').value.trim(),
+    kategori:  document.getElementById('ev-kategori').value,
+    prioritas: document.getElementById('ev-prioritas').value,
+    status:    document.getElementById('ev-status').value,
+    gelombang: document.getElementById('ev-gelombang').value.trim()
+  };
+
+  _adminPost(body)
+    .then(function (res) {
+      setLoading(btn, false);
+      if (res && res.ok) {
+        tampilkanToast(res.pesan || 'Tersimpan.', 'success');
+        tutupModal('modal-evaluasi');
+        muatEvaluasi();
+      } else {
+        tampilkanToast((res && (res.pesan || res.error)) || 'Gagal menyimpan.', 'error');
+      }
+    })
+    .catch(function () { setLoading(btn, false); tampilkanToast('Koneksi bermasalah.', 'error'); });
+}
+
+function hapusEvaluasi(id) {
+  if (!confirm('Hapus catatan evaluasi ' + id + '? Tindakan ini tidak bisa dibatalkan.')) return;
+  _adminPost({ action: 'admin.hapusEvaluasi', token: state.token, id: id })
+    .then(function (res) {
+      if (res && res.ok) {
+        tampilkanToast(res.pesan || 'Terhapus.', 'success');
+        muatEvaluasi();
+      } else {
+        tampilkanToast((res && (res.pesan || res.error)) || 'Gagal menghapus.', 'error');
+      }
+    })
+    .catch(function () { tampilkanToast('Koneksi bermasalah.', 'error'); });
+}
+
 
 // ============================================================================
 // WHATSAPP — chat cepat pendaftar (template sadar-status)
