@@ -1770,7 +1770,7 @@ function simpanWaTemplate() {
 // #7 QR CODE
 // ============================================================================
 
-var QR_URL = 'https://rattililquran.github.io/pendaftaran/';
+var QR_URL = 'https://rattililquran.com/pendaftaran/';
 
 function muatQRCode() {
   var container = document.getElementById('qrcode-container');
