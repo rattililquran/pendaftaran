@@ -13,8 +13,33 @@ var state = {
   jadwalTerpilih: null,
   clientToken: null,
   gender: null,
-  infoGelombang: null       // data gelombang aktif dari action=info
+  infoGelombang: null,      // data gelombang aktif dari action=info
+  modeUji: false,           // true bila dibuka dengan ?tes=<kunci>
+  testKey: ''               // kunci mode uji dari query string
 };
+
+// ============================================================================
+// MODE UJI (dry-run) — untuk menguji form saat pendaftaran masih ditutup.
+// Aktif HANYA bila URL memuat ?tes=<kunci> dan kunci cocok dengan `test_key`
+// di sheet Config. Server memvalidasi ulang; di sini hanya untuk UX.
+// Tidak ada data yang disimpan, jadi aman dipakai berkali-kali.
+// ============================================================================
+function bacaModeUji() {
+  var m = /[?&]tes=([^&#]+)/.exec(window.location.search);
+  if (!m) return;
+  state.testKey = decodeURIComponent(m[1]);
+  state.modeUji = true;
+}
+
+function tampilkanBadgeUji() {
+  var badge = document.createElement('div');
+  badge.id = 'badge-mode-uji';
+  badge.textContent = 'MODE UJI — tidak ada data yang disimpan';
+  badge.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;' +
+    'background:#b45309;color:#fff;text-align:center;font-size:12px;font-weight:700;' +
+    'padding:8px 12px;letter-spacing:.02em';
+  document.body.appendChild(badge);
+}
 
 // ============================================================================
 // INIT
@@ -22,6 +47,12 @@ var state = {
 
 document.addEventListener('DOMContentLoaded', function () {
   state.clientToken = generateToken();
+  bacaModeUji();
+  if (state.modeUji) {
+    // Token berawalan TES- adalah penanda eksplisit yang juga dicek server.
+    state.clientToken = 'TES-' + state.clientToken;
+    tampilkanBadgeUji();
+  }
   updateStepUI(1);
 
   // Fetch info gelombang aktif
@@ -125,10 +156,12 @@ function tampilkanBannerGelombang(info) {
     if (bannerGel) bannerGel.style.display = 'block';
   }
 
-  // Jika pendaftaran ditutup — tampilkan banner merah + nonaktifkan tombol lanjut step 1
+  // Jika pendaftaran ditutup — tampilkan banner merah + nonaktifkan tombol lanjut step 1.
+  // MODE UJI: tetap tampilkan banner sebagai informasi, tapi JANGAN kunci tombol —
+  // tujuan mode uji justru menembus gate untuk menguji form. Server tetap dry-run.
   if (!info.pendaftaran_buka) {
     if (bannerTutup) bannerTutup.style.display = 'flex';
-    if (btnLanjut1) {
+    if (btnLanjut1 && !state.modeUji) {
       btnLanjut1.disabled  = true;
       btnLanjut1.classList.add('btn-submit-disabled');
       btnLanjut1.title     = 'Pendaftaran saat ini ditutup.';
@@ -540,11 +573,19 @@ function submitPendaftaran() {
                       ? document.getElementById('saran_masukan').value.trim() : ''
   };
 
+  // MODE UJI: sertakan kunci agar server menjalankan dry-run (tanpa menyimpan).
+  if (state.modeUji) body.test_key = state.testKey;
+
   fetchBackend('POST', body)
     .then(function (res) {
       setLoading(btn, false);
       if (res.ok) {
-        tampilkanModalSukses(res.no_pendaftaran, res.waiting_list === true);
+        if (res.mode_uji) {
+          // Dry-run: tidak ada nomor asli. Tampilkan laporan gate, bukan modal sukses.
+          tampilkanHasilUji(res);
+        } else {
+          tampilkanModalSukses(res.no_pendaftaran, res.waiting_list === true);
+        }
       } else if (res.error === 'PERLU_KONFIRMASI_WAITING') {
         // TOCTOU: slot penuh setelah form dimuat. Tandai waiting & minta persetujuan,
         // lalu pendaftar submit ulang (client_token sama → idempoten, tak ada baris ganda).
@@ -585,6 +626,52 @@ function submitPendaftaran() {
 }
 
 // ============================================================================
+// HASIL MODE UJI (dry-run) — laporan gate, bukan nomor pendaftaran
+// ============================================================================
+
+function tampilkanHasilUji(res) {
+  var lolos = res.gate === 'LULUS';
+  var r = res.rincian || {};
+  var baris = [
+    ['Gate', res.gate || '-'],
+    ['Pendaftaran dibuka (server)', r.pendaftaran_buka ? 'ya' : 'tidak'],
+    ['Slot ditutup admin', r.slot_ditutup ? 'ya' : 'tidak'],
+    ['Gender dijadwalkan', r.gender_dijadwalkan || '-'],
+    ['Gender dikirim', r.gender_dikirim || '-'],
+    ['Okupansi slot', (r.terisi != null ? r.terisi : '-') + ' / ' + (r.kuota_maks != null ? r.kuota_maks : '-')],
+    ['Simulasi daftar tunggu', r.simulasi_waiting_list ? 'ya (akan masuk daftar tunggu)' : 'tidak'],
+    ['Data disimpan', 'TIDAK — ini hanya uji']
+  ];
+  var html = '<div style="font-weight:800;margin-bottom:4px">' +
+    (lolos ? 'Form valid — semua gate lulus' : 'Ada gate yang menghalangi') + '</div>' +
+    '<div style="font-size:13px;line-height:1.6;margin-bottom:12px">' + esc(res.pesan || '') + '</div>' +
+    baris.map(function (b) {
+      return '<div style="display:flex;justify-content:space-between;gap:16px;font-size:13px;padding:5px 0;border-bottom:1px solid var(--line,#e5e7eb)">' +
+        '<span style="color:#64748b">' + esc(b[0]) + '</span>' +
+        '<span style="font-weight:700;text-align:right">' + esc(b[1]) + '</span></div>';
+    }).join('');
+
+  // Panel tetap (bukan modal sukses) supaya jelas ini bukan pendaftaran asli.
+  var panel = document.getElementById('panel-hasil-uji');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'panel-hasil-uji';
+    panel.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);' +
+      'z-index:10000;width:min(420px,92vw);background:#fff;color:#0c1825;border-radius:16px;' +
+      'padding:20px 20px 16px;box-shadow:0 24px 60px -20px rgba(15,23,42,.45)';
+    document.body.appendChild(panel);
+  }
+  panel.innerHTML = html +
+    '<button type="button" id="btn-tutup-uji" class="btn btn-ghost" style="margin-top:14px;width:100%">Tutup</button>';
+  panel.style.display = 'block';
+  document.getElementById('btn-tutup-uji').onclick = function () { panel.style.display = 'none'; };
+
+  // Token uji diregenerasi agar bisa diuji berkali-kali tanpa reload halaman.
+  // (Tanpa ini, submit uji kedua memakai token sama → server melaporkan IDEMPOTEN.)
+  state.clientToken = 'TES-' + generateToken();
+}
+
+// ============================================================================
 // MODAL SUKSES
 // ============================================================================
 
@@ -600,7 +687,7 @@ function tampilkanModalSukses(nomorPendaftaran, waitingList) {
   // dari halaman yang sama (mis. kakak lalu adik, HP berbeda) memakai token lama
   // → server menganggap duplikat dan mengembalikan nomor pendaftaran LAMA tanpa
   // menulis baris baru. Token baru = setiap submit sukses adalah transaksi unik.
-  state.clientToken = generateToken();
+  state.clientToken = (state.modeUji ? 'TES-' : '') + generateToken();
 }
 
 // Alihkan ke halaman share SETELAH nomor berhasil disalin.
