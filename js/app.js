@@ -407,13 +407,14 @@ function renderJadwal(list) {
           '<span class="jadwal-schedule-value">' + esc(j.jam || '—') + '</span>' +
         '</div>' +
       '</div>' +
-      // Info tambahan kecil
-      '<div class="jadwal-meta">' +
-        (j.pengajar ? '<span>👤 ' + esc(j.pengajar) + '</span>' : '') +
-        (j.gender   ? '<span>👥 ' + esc(j.gender) + '</span>' : '') +
-      '</div>' +
-      // Catatan daftar tunggu di BAWAH kartu agar tidak menabrak badge kanan-atas
-      (waiting ? '<div class="jadwal-waiting-note">Kuota penuh — Anda tetap dapat mendaftar dan akan masuk ke daftar tunggu.</div>' : '');
+// Info tambahan kecil
+    '<div class="jadwal-meta">' +
+      (j.pengajar ? '<span>👤 ' + esc(j.pengajar) + '</span>' : '') +
+      (j.gender   ? '<span>👥 ' + esc(j.gender) + '</span>' : '') +
+      (waiting && j.jumlah_waiting ? '<span>⏳ ' + esc(String(j.jumlah_waiting)) + ' di daftar tunggu</span>' : '') +
+    '</div>' +
+    // Catatan daftar tunggu di BAWAH kartu agar tidak menabrak badge kanan-atas
+    (waiting ? '<div class="jadwal-waiting-note">Kuota penuh — Anda tetap dapat mendaftar dan akan masuk ke daftar tunggu.</div>' : '');
 
     if (!ditutup) {
       // FIX #1: Wrap dalam IIFE agar j dan card ter-capture dengan benar
@@ -716,10 +717,15 @@ function generateToken() {
 
 function esc(str) {
   if (!str) return '';
+  // Escape lengkap untuk konteks teks DAN nilai atribut: & < > " ' (kutip tunggal
+  // penting karena esc() juga dipakai untuk argumen handler inline), plus ` dan =
+  // sebagai pertahanan berlapis. Nilai normal (mis. 'J0001') tidak berubah.
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+    .replace(/'/g, '&#39;')
+    .replace(/`/g, '&#96;')
+    .replace(/=/g, '&#61;');
 }

@@ -778,6 +778,14 @@ function bukaEditJadwal(id) {
     '<option value="TUTUP"'    + (j.status_slot === 'TUTUP'    ? ' selected' : '') + '>Tutup</option>';
   document.getElementById('edit-status-slot').previousElementSibling.textContent = 'Status Slot';
 
+  // Gender peserta — ikut divalidasi server (halaqah lawan jenis ditolak), jadi
+  // admin harus bisa memperbaiki bila sebuah jadwal salah label. Tampilkan grup ini
+  // kembali (bisa disembunyikan saat modal dipakai untuk edit Gelombang).
+  var gGroup = document.getElementById('edit-gender-group');
+  var gSelect = document.getElementById('edit-gender');
+  if (gGroup) gGroup.style.display = '';
+  if (gSelect) gSelect.value = j.gender || '';
+
   if (j.active === true || j.active === 'true') {
     document.getElementById('edit-active-ya').checked = true;
   } else {
@@ -929,6 +937,7 @@ function simpanJadwal() {
   var id = document.getElementById('edit-jadwal-id').value;
   var kuota = parseInt(document.getElementById('edit-kuota').value);
   var statusSlot = document.getElementById('edit-status-slot').value;
+  var genderEl = document.getElementById('edit-gender');
   var active = (document.querySelector('input[name="edit-active"]:checked') || {value:'true'}).value === 'true';
   var btn = document.getElementById('btn-simpan-jadwal');
 
@@ -940,6 +949,8 @@ function simpanJadwal() {
     jadwal_id: id,
     kuota_maks: kuota,
     status_slot: statusSlot,
+    // Kirim gender hanya bila kontrolnya ada (modal dipakai untuk Jadwal).
+    gender: genderEl ? genderEl.value : undefined,
     active: active
   };
 
@@ -1064,12 +1075,17 @@ function formatTanggalJam(iso) {
 
 function esc(str) {
   if (!str) return '';
+  // Escape lengkap untuk teks & nilai atribut. esc() dipakai juga untuk argumen
+  // handler inline (mis. onclick="fn('...')"), jadi kutip tunggal wajib di-escape;
+  // ` dan = ditambahkan sebagai pertahanan berlapis.
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+    .replace(/'/g, '&#39;')
+    .replace(/`/g, '&#96;')
+    .replace(/=/g, '&#61;');
 }
 
 // ============================================================================
@@ -1322,16 +1338,21 @@ function muatGelombang() {
     .then(function(res) {
       if (!res.ok) { tbody.innerHTML = '<tr><td colspan="8" class="no-data">Gagal memuat data.</td></tr>'; return; }
 
-      // Update status pendaftaran toggle
+      // Update status pendaftaran toggle. Guard null: elemen ini bisa tidak ada
+      // (mis. markup berubah) — tanpa guard, TypeError di sini jatuh ke .catch()
+      // dan menampilkan "Koneksi bermasalah." padahal request sukses.
       var label = document.getElementById('status-pendaftaran-label');
       var buka  = res.pendaftaran_buka;
-      label.textContent   = buka ? 'Dibuka' : 'Ditutup';
-      label.style.background = buka ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)';
-      label.style.color      = buka ? '#047857' : '#b91c1c';
+      if (label) {
+        label.textContent   = buka ? 'Dibuka' : 'Ditutup';
+        label.style.background = buka ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)';
+        label.style.color      = buka ? '#047857' : '#b91c1c';
+      }
 
       var btn = document.getElementById('btn-toggle-pendaftaran');
-      btn.querySelector('.btn-text').textContent = buka ? 'Tutup Pendaftaran' : 'Buka Pendaftaran';
-      btn.style.background = buka ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#10b981,#059669)';
+      var btnText = btn ? btn.querySelector('.btn-text') : null;
+      if (btnText) btnText.textContent = buka ? 'Tutup Pendaftaran' : 'Buka Pendaftaran';
+      if (btn) btn.style.background = buka ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#10b981,#059669)';
       state.pendaftaranBuka = buka;
 
       state.gelombang = res.data || [];
@@ -1396,6 +1417,10 @@ function bukaEditGelombang(waveId) {
     '<option value="DIBATALKAN"' + (g.status === 'DIBATALKAN' ? ' selected' : '') + '>DIBATALKAN</option>';
   document.getElementById('edit-status-slot').previousElementSibling.textContent = 'Status Gelombang';
 
+  // Sembunyikan grup Gender — modal ini sedang dipakai untuk Gelombang, bukan Jadwal.
+  var gGroup = document.getElementById('edit-gender-group');
+  if (gGroup) gGroup.style.display = 'none';
+
   // Override simpan button
   document.getElementById('btn-simpan-jadwal').onclick = simpanGelombang;
   bukaModal('modal-jadwal');
@@ -1411,6 +1436,9 @@ function bukaModalTambahGelombang() {
   document.getElementById('edit-status-slot').innerHTML =
     '<option value="AKTIF">AKTIF</option><option value="SELESAI">SELESAI</option>';
   document.getElementById('edit-status-slot').previousElementSibling.textContent = 'Status Gelombang';
+  // Sembunyikan grup Gender (modal mode Gelombang).
+  var gGroup = document.getElementById('edit-gender-group');
+  if (gGroup) gGroup.style.display = 'none';
   document.getElementById('btn-simpan-jadwal').onclick = simpanGelombang;
   bukaModal('modal-jadwal');
 }
