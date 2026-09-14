@@ -669,7 +669,10 @@
   <div class="toast-container" id="toast-container"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <!-- qrcodejs: menyediakan API konstrktor new QRCode(...) + QRCode.CorrectLevel
+       yang dipakai dashboard.js (paket npm "qrcode" TIDAK punya API tersebut dan
+       URL build/qrcode.min.js-nya 404). -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="../js/config.js"></script>
   <script src="js/dashboard.js"></script>
   <script>

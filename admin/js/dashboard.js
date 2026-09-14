@@ -65,10 +65,12 @@ function logout() {
   var token = state.token || sessionStorage.getItem('admin_token');
   sessionStorage.removeItem('admin_token');
 
-  // Hapus session token dari server (fire-and-forget)
+  // Hapus session token dari server. `keepalive: true` agar request tidak dibatalkan
+  // oleh navigasi yang terjadi tepat setelahnya (sebelumnya sesi server tetap hidup).
   if (token) {
     try {
-      fetch(CONFIG.BACKEND_URL + '?action=admin.logout&token=' + encodeURIComponent(token));
+      fetch(CONFIG.BACKEND_URL + '?action=admin.logout&token=' + encodeURIComponent(token),
+            { keepalive: true });
     } catch (e) { /* abaikan error jaringan saat logout */ }
   }
 
@@ -404,15 +406,35 @@ function renderPaginasi(total) {
   btnPrev.onclick = function () { gantiHalaman(state.page - 1); };
   btns.appendChild(btnPrev);
 
-  for (var i = 1; i <= Math.min(totalPages, 5); i++) {
-    var btnPage = document.createElement('button');
-    btnPage.className = 'page-btn' + (i === state.page ? ' active' : '');
-    btnPage.textContent = i;
-    btnPage.onclick = (function (p) {
-      return function () { gantiHalaman(p); };
-    })(i);
-    btns.appendChild(btnPage);
+  // Halaman dengan jendela (windowed) agar halaman > 5 tetap terjangkau:
+  // 1 … p-1 p p+1 … terakhir. Untuk ≤ 7 halaman, tampilkan semuanya.
+  var pages = [];
+  if (totalPages <= 7) {
+    for (var i = 1; i <= totalPages; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    var lo = Math.max(2, state.page - 1);
+    var hi = Math.min(totalPages - 1, state.page + 1);
+    if (lo > 2) pages.push('…');
+    for (var p = lo; p <= hi; p++) pages.push(p);
+    if (hi < totalPages - 1) pages.push('…');
+    pages.push(totalPages);
   }
+
+  pages.forEach(function (pg) {
+    if (pg === '…') {
+      var dots = document.createElement('span');
+      dots.className = 'page-dots';
+      dots.textContent = '…';
+      btns.appendChild(dots);
+      return;
+    }
+    var btnPage = document.createElement('button');
+    btnPage.className = 'page-btn' + (pg === state.page ? ' active' : '');
+    btnPage.textContent = pg;
+    btnPage.onclick = function () { gantiHalaman(pg); };
+    btns.appendChild(btnPage);
+  });
 
   var btnNext = document.createElement('button');
   btnNext.className = 'page-btn';
@@ -423,6 +445,9 @@ function renderPaginasi(total) {
 }
 
 function gantiHalaman(p) {
+  // Penjaga batas: abaikan klik halaman di luar rentang valid.
+  var totalPages = Math.max(1, Math.ceil(state.filteredData.length / state.pageSize));
+  if (p < 1 || p > totalPages) return;
   state.page = p;
   renderTabelPendaftar();
 }
@@ -490,10 +515,41 @@ function muatJadwalOptions() {
 // DETAIL PENDAFTAR
 // ============================================================================
 
+/**
+ * resetModalDetail — kembalikan seluruh elemen modal-detail ke mode "Pendaftar".
+ * Modal-detail dipakai bersama oleh editor Form Fields (bukaModalTambahField /
+ * bukaEditFormField) yang menimpa onclick tombol Simpan, menyembunyikan tombol
+ * Arsip & catatan internal, serta mengganti opsi select status. Tanpa reset ini,
+ * membuka detail pendaftar SETELAH editor field membuat tombol Simpan menjalankan
+ * handler form-field (TypeError karena input ff-* tidak ada) dan UI jadi salah.
+ */
+function resetModalDetail() {
+  var btnArsip = document.getElementById('btn-arsip');
+  if (btnArsip) btnArsip.style.display = '';
+  document.getElementById('btn-simpan-status').onclick = simpanStatus;
+
+  var catInt = document.getElementById('edit-catatan-internal');
+  if (catInt) catInt.style.display = '';
+  if (catInt && catInt.previousElementSibling) catInt.previousElementSibling.style.display = '';
+
+  var lblPub = document.getElementById('edit-catatan-publik');
+  if (lblPub && lblPub.previousElementSibling) lblPub.previousElementSibling.textContent = 'Catatan untuk Pendaftar';
+
+  var lblStatus = document.getElementById('edit-status');
+  if (lblStatus && lblStatus.previousElementSibling) lblStatus.previousElementSibling.textContent = 'Ubah Status';
+  lblStatus.innerHTML =
+    '<option value="TERDAFTAR">Terdaftar</option>' +
+    '<option value="BERKAS_OK">Berkas OK</option>' +
+    '<option value="WAWANCARA">Wawancara</option>' +
+    '<option value="DITERIMA">Diterima</option>' +
+    '<option value="DITOLAK">Ditolak</option>';
+}
+
 function bukaDetal(no) {
   var row = state.pendaftar.find(function (r) { return r.no_pendaftaran === no; });
   if (!row) return;
 
+  resetModalDetail();   // buang sisa state dari pemakaian modal sebelumnya
   state.selectedPendaftar = row;
   document.getElementById('modal-detail-title').textContent = 'Detail — ' + row.no_pendaftaran;
 
@@ -707,6 +763,10 @@ function bukaEditJadwal(id) {
   if (!j) return;
 
   state.selectedJadwal = j;
+  // FIX: pulihkan handler Simpan. bukaEditGelombang/bukaModalTambahGelombang
+  // menimpanya dengan simpanGelombang — tanpa pemulihan ini, edit jadwal setelah
+  // membuka tab Gelombang menyimpan data gelombang (korupsi data, edit tak masuk).
+  document.getElementById('btn-simpan-jadwal').onclick = simpanJadwal;
   document.getElementById('edit-jadwal-id').value = j.jadwal_id;
   document.getElementById('edit-jadwal-nama').textContent = j.program + ' — ' + j.hari + ', ' + j.jam;
   document.getElementById('edit-kuota').value = j.kuota_maks;
@@ -841,6 +901,7 @@ function simpanFieldBaru() {
     token:     state.token,
     field_id:  fieldId,
     label:     document.getElementById('ff-label').value,
+    type:      (document.getElementById('ff-type') || {}).value || 'text',
     order:     document.getElementById('ff-order').value,
     options:   document.getElementById('ff-options').value,
     required:  document.getElementById('edit-status').value,
@@ -856,11 +917,7 @@ function simpanFieldBaru() {
         tampilkanToast('Field berhasil ditambahkan.', 'success');
         tutupModal('modal-detail');
         muatFormFields();
-        // Reset modal ke mode normal
-        document.getElementById('btn-arsip').style.display = '';
-        document.getElementById('btn-simpan-status').onclick = simpanStatus;
-        document.getElementById('edit-catatan-internal').style.display = '';
-        document.getElementById('edit-catatan-internal').previousElementSibling.style.display = '';
+        resetModalDetail();   // kembalikan modal-detail ke mode pendaftar
       } else {
         tampilkanToast(res.pesan || 'Gagal menambah field.', 'error');
       }
@@ -1011,7 +1068,8 @@ function esc(str) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 // ============================================================================
@@ -1488,11 +1546,7 @@ function simpanFormField() {
         tampilkanToast('Form field diperbarui.', 'success');
         tutupModal('modal-detail');
         muatFormFields();
-        // Reset modal detail ke mode normal
-        document.getElementById('btn-arsip').style.display = '';
-        document.getElementById('btn-simpan-status').onclick = simpanStatus;
-        document.getElementById('edit-catatan-internal').style.display = '';
-        document.getElementById('edit-catatan-internal').previousElementSibling.style.display = '';
+        resetModalDetail();   // kembalikan modal-detail ke mode pendaftar
       } else {
         tampilkanToast(res.pesan || 'Gagal.', 'error');
       }

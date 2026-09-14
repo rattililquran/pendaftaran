@@ -392,7 +392,7 @@ function renderJadwal(list) {
     }
 
     card.innerHTML =
-      '<input type="radio" name="jadwal" id="jadwal-' + j.jadwal_id + '" value="' + j.jadwal_id + '"' + (ditutup ? ' disabled' : '') + '>' +
+      '<input type="radio" name="jadwal" id="jadwal-' + esc(j.jadwal_id) + '" value="' + esc(j.jadwal_id) + '"' + (ditutup ? ' disabled' : '') + '>' +
       '<div class="jadwal-kuota ' + kuotaClass + '">' + kuotaLabel + '</div>' +
       '<div class="jadwal-nama">' + esc(j.program) + '</div>' +
       // Hari & Jam — ditampilkan besar dan mencolok
@@ -558,6 +558,17 @@ function submitPendaftaran() {
         var pesan = res.pesan || res.error || 'Terjadi kesalahan. Silakan coba lagi.';
         if (pesan.indexOf('sudah terdaftar') !== -1 || pesan.indexOf('duplikat') !== -1) {
           tampilkanAlert('Nomor HP ini sudah terdaftar. Gunakan halaman Cek Status untuk melihat status pendaftaran Anda.');
+        } else if (res.error === 'PENDAFTARAN_DITUTUP') {
+          // Server-side enforcement: toggle admin buka/tutup pendaftaran.
+          tampilkanAlert(pesan);
+          state.jadwalList = [];               // paksa fetch ulang saat dibuka lagi
+          var btnLanjut = document.getElementById('btn-next-1');
+          if (btnLanjut) btnLanjut.disabled = true;
+        } else if (res.error === 'GENDER_TIDAK_COCOK') {
+          // Gender jadwal berubah di server, atau jadwal dipilih menembus filter.
+          tampilkanAlert(pesan);
+          state.jadwalList = [];               // fetch ulang daftar jadwal terkini
+          if (state.step === 4) updateStepUI(3);
         } else if (res.error === 'JADWAL_DITUTUP') {
           tampilkanAlert('Pendaftaran untuk jadwal ini sudah ditutup. Silakan kembali dan pilih jadwal lain.');
           state.jadwalList = [];
@@ -583,44 +594,39 @@ function tampilkanModalSukses(nomorPendaftaran, waitingList) {
   var modal = document.getElementById('modal-sukses');
   modal.classList.add('visible');
   document.getElementById('btn-salin').focus();
+
+  // Regenerasi token idempotensi SETELAH sukses. Tanpa ini, pendaftaran kedua
+  // dari halaman yang sama (mis. kakak lalu adik, HP berbeda) memakai token lama
+  // → server menganggap duplikat dan mengembalikan nomor pendaftaran LAMA tanpa
+  // menulis baris baru. Token baru = setiap submit sukses adalah transaksi unik.
+  state.clientToken = generateToken();
+}
+
+// Alihkan ke halaman share SETELAH nomor berhasil disalin.
+// Didefinisikan di scope modul agar dapat dipanggil dari salinNomor() maupun
+// _fallbackCopy() — sebelumnya _fallbackCopy memanggil fungsi lokal salinNomor
+// sehingga melempar ReferenceError dan redirect tidak pernah terjadi.
+function redirectKeShare(nomor) {
+  setTimeout(function () {
+    window.location.href = 'share.html?no=' + encodeURIComponent(nomor);
+  }, 1200);
 }
 
 function salinNomor() {
   var nomor = document.getElementById('nomor-pendaftaran').textContent;
   var btn   = document.getElementById('btn-salin');
 
-  function redirectKeShare() {
-    setTimeout(function () {
-      window.location.href = 'share.html?no=' + encodeURIComponent(nomor);
-    }, 1200);
-  }
-
-  if (navigator.clipboard) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(nomor).then(function () {
       btn.classList.add('copied');
       document.getElementById('salin-icon').textContent = '✓';
       document.getElementById('salin-text').textContent = 'Tersalin! Mengalihkan...';
-      redirectKeShare();
+      redirectKeShare(nomor);
     }).catch(function() {
-      redirectKeShare();
+      _fallbackCopy(nomor, btn);
     });
   } else {
-    // FIX #7: execCommand('copy') deprecated — pakai modern clipboard API dengan fallback
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(nomor).then(function() {
-          btn.classList.add('copied');
-          document.getElementById('salin-text').textContent = 'Tersalin! Mengalihkan...';
-          redirectKeShare();
-        }).catch(function() {
-          _fallbackCopy(nomor, btn);
-        });
-      } else {
-        _fallbackCopy(nomor, btn);
-      }
-    } catch (err) {
-      _fallbackCopy(nomor, btn);
-    }
+    _fallbackCopy(nomor, btn);
   }
 }
 
@@ -635,7 +641,7 @@ function _fallbackCopy(nomor, btn) {
   document.body.removeChild(el);
   btn.classList.add('copied');
   document.getElementById('salin-text').textContent = 'Tersalin! Mengalihkan...';
-  redirectKeShare();
+  redirectKeShare(nomor);
 }
 // ============================================================================
 // FETCH HELPER
@@ -714,5 +720,6 @@ function esc(str) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

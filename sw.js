@@ -9,6 +9,8 @@ var ASSETS = [
   './index.html',
   './status.html',
   './program.html',
+  './share.html',
+  './404.html',
   './css/style.css',
   './js/config.js',
   './js/app.js',
