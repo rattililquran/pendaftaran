@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
           c.classList.remove('selected');
         });
         inputEl.closest('.gender-card').classList.add('selected');
+        perbaruiAcksBeasiswa();
         tampilkanError('jenis_biaya', false);
       });
     })(el);
@@ -302,7 +303,38 @@ function validasiStep1() {
 }
 
 // ============================================================================
-// VALIDASI STEP 2 — Kesiapan & Komitmen (6 field)
+// PERNYATAAN WAJIB BEASISWA
+// ============================================================================
+
+/**
+ * perbaruiAcksBeasiswa — tampilkan dua pernyataan wajib hanya saat jenis biaya
+ * "Beasiswa" dipilih. Saat disembunyikan (kembali ke Reguler), centang direset
+ * agar tidak ada pernyataan lama yang "ikut terkirim" tanpa disadari pendaftar.
+ */
+function perbaruiAcksBeasiswa() {
+  var box = document.getElementById('beasiswa_ack');
+  if (!box) return;
+  var beasiswa = (document.querySelector('input[name="jenis_biaya"]:checked') || {}).value === 'Beasiswa';
+  box.hidden = !beasiswa;
+  if (!beasiswa) {
+    [1, 2].forEach(function (n) {
+      var cb = document.getElementById('beasiswa-ack-' + n);
+      if (cb) cb.checked = false;
+    });
+    tampilkanError('beasiswa_ack', false);
+  }
+}
+
+/** true bila kedua pernyataan beasiswa sudah dicentang (hanya relevan saat Beasiswa). */
+function acksBeasiswaLengkap() {
+  return [1, 2].every(function (n) {
+    var cb = document.getElementById('beasiswa-ack-' + n);
+    return cb && cb.checked;
+  });
+}
+
+// ============================================================================
+// VALIDASI STEP 2 — Kesiapan & Komitmen (6 field + pernyataan beasiswa)
 // ============================================================================
 
 function validasiStep2() {
@@ -313,6 +345,13 @@ function validasiStep2() {
   if (!jenisBiayaEl) {
     tampilkanError('jenis_biaya', true); valid = false;
   } else { tampilkanError('jenis_biaya', false); }
+
+  // Pernyataan wajib Beasiswa — hanya saat Beasiswa dipilih
+  if (jenisBiayaEl && jenisBiayaEl.value === 'Beasiswa') {
+    if (!acksBeasiswaLengkap()) {
+      tampilkanError('beasiswa_ack', true); valid = false;
+    } else { tampilkanError('beasiswa_ack', false); }
+  }
 
   // Kemampuan Awal
   var kemampuanEl = document.getElementById('kemampuan_awal');
@@ -565,6 +604,9 @@ function submitPendaftaran() {
     waiting_ack:  ackChecked ? 'true' : 'false',
     client_token: state.clientToken,
     jenis_biaya:    (document.querySelector('input[name="jenis_biaya"]:checked') || {}).value || '',
+    // Pernyataan wajib Beasiswa (divalidasi ulang server saat jenis_biaya=Beasiswa)
+    beasiswa_ack:   (document.querySelector('input[name="jenis_biaya"]:checked') || {}).value === 'Beasiswa'
+                      ? (acksBeasiswaLengkap() ? 'true' : 'false') : '',
     kemampuan_awal: document.getElementById('kemampuan_awal').value,
     pernah_tahsin:  (document.querySelector('input[name="pernah_tahsin"]:checked') || {}).value || '',
     motivasi:       document.getElementById('motivasi').value.trim(),

@@ -232,6 +232,36 @@
               Lihat syarat &amp; ketentuan beasiswa &rarr;
             </a>
           </div>
+
+          <!-- Pernyataan wajib khusus Beasiswa — muncul hanya saat "Beasiswa" dipilih.
+               Kedua kotak centang wajib diisi (divalidasi ulang di server). -->
+          <div id="beasiswa_ack" hidden role="group" aria-label="Pernyataan wajib pendaftar beasiswa"
+               style="margin-top:12px;padding:14px 14px 10px;border:1.5px dashed rgba(2,132,199,.35);border-radius:var(--r-sm);background:rgba(2,132,199,.04)">
+            <p style="margin:0 0 10px;font-size:0.8rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)">
+              Pernyataan Wajib Calon Penerima Beasiswa
+            </p>
+            <label class="form-label-consent" style="margin-bottom:8px" for="beasiswa-ack-1">
+              <input type="checkbox" id="beasiswa-ack-1" name="beasiswa_ack_1">
+              <span>
+                Saya menyatakan dengan sebenarnya bahwa saya dan keluarga saya benar-benar tidak mampu
+                memenuhi amanah SPP sebesar <strong>Rp75.000 per bulan</strong>, sehingga saya mengajukan
+                Beasiswa Penuh ini.
+                <span class="required" aria-hidden="true">*</span>
+              </span>
+            </label>
+            <label class="form-label-consent" for="beasiswa-ack-2">
+              <input type="checkbox" id="beasiswa-ack-2" name="beasiswa_ack_2">
+              <span>
+                Saya telah membaca, memahami, dan berkomitmen memenuhi seluruh
+                <a href="https://rattililquran.com/beasiswa.html" target="_blank" rel="noopener noreferrer"
+                   style="color:var(--primary);font-weight:600">syarat &amp; ketentuan Beasiswa Penuh</a> —
+                termasuk menjaga kedisiplinan hafalan/setsor dan kehadiran minimal yang ditentukan panitia.
+                <span class="required" aria-hidden="true">*</span>
+              </span>
+            </label>
+            <div class="form-error" id="err-beasiswa_ack">Kedua pernyataan di atas wajib dicentang untuk mendaftar via Beasiswa.</div>
+          </div>
+
           <div class="form-error" id="err-jenis_biaya">Jenis biaya wajib dipilih.</div>
         </div>
 
