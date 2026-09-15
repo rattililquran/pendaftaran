@@ -561,6 +561,7 @@ function bukaDetal(no) {
     '<div class="detail-item"><div class="detail-label">No. HP</div><div class="detail-value">' + esc(row.hp) + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">' + (esc(row.email) || '—') + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Tanggal Lahir</div><div class="detail-value">' + (esc(row.tgl_lahir) || '—') + '</div></div>' +
+    '<div class="detail-item"><div class="detail-label">Domisili</div><div class="detail-value">' + (esc(row.domisili) || '—') + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Gender</div><div class="detail-value">' + (esc(row.gender) || '—') + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Program</div><div class="detail-value">' + esc(row.program) + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Jadwal</div><div class="detail-value">' + esc(row.jadwal_id) + '</div></div>' +

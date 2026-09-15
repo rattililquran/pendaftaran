@@ -255,6 +255,8 @@ function validasiStep1() {
   var hp    = document.getElementById('hp').value.trim();
   var email = document.getElementById('email').value.trim();
   var tgl   = document.getElementById('tgl_lahir').value;
+  var domisili = (document.getElementById('domisili') || {}).value;
+  domisili = domisili ? domisili.trim() : '';
 
   // Nama
   if (!nama) {
@@ -287,6 +289,14 @@ function validasiStep1() {
     valid = false;
   } else {
     tampilkanError('tgl_lahir', false);
+  }
+
+  // Domisili (kota/kabupaten) — minimal 3 karakter agar tidak cuma spasi/simbol
+  if (domisili.length < 3) {
+    tampilkanError('domisili', true);
+    valid = false;
+  } else {
+    tampilkanError('domisili', false);
   }
 
   // Gender
@@ -536,6 +546,8 @@ function isiKonfirmasi() {
   document.getElementById('konfirm-hp').textContent      = document.getElementById('hp').value.trim();
   document.getElementById('konfirm-email').textContent   = document.getElementById('email').value.trim() || '—';
   document.getElementById('konfirm-tgl').textContent     = formatTanggal(document.getElementById('tgl_lahir').value);
+  var konfDom = document.getElementById('konfirm-domisili');
+  if (konfDom) konfDom.textContent = (document.getElementById('domisili') || {}).value || '—';
   document.getElementById('konfirm-gender').textContent  = state.gender || '—';
   document.getElementById('konfirm-program').textContent = j ? j.program : '—';
   var isWaiting = !!(j && j.waiting_list);
@@ -598,6 +610,7 @@ function submitPendaftaran() {
     hp:           document.getElementById('hp').value.trim(),
     email:        document.getElementById('email').value.trim(),
     tgl_lahir:    document.getElementById('tgl_lahir').value,
+    domisili:     (document.getElementById('domisili') || {}).value || '',
     gender:       state.gender || '',
     jadwal_id:    state.jadwalTerpilih ? state.jadwalTerpilih.jadwal_id : '',
     program:      state.jadwalTerpilih ? state.jadwalTerpilih.program : '',
