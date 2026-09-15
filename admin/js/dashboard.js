@@ -580,6 +580,10 @@ function bukaDetal(no) {
      '</div></div>' +
     // ---- Data kesiapan & komitmen (baru terlihat oleh admin) ----
     '<div class="detail-item"><div class="detail-label">Jenis Biaya</div><div class="detail-value">' + (esc(row.jenis_biaya) || '—') + '</div></div>' +
+    (row.jenis_biaya === 'Beasiswa'
+      ? '<div class="detail-item"><div class="detail-label">Pernyataan Beasiswa</div><div class="detail-value">' +
+        (row.beasiswa_ack ? '✓ Disetujui' + (row.beasiswa_ack_tanggal ? ' <span style="color:var(--ink-4)">— ' + esc(row.beasiswa_ack_tanggal) + '</span>' : '') : 'TIDAK tercatat') + '</div></div>'
+      : '') +
     '<div class="detail-item"><div class="detail-label">Pernah Tahsin</div><div class="detail-value">' + (esc(row.pernah_tahsin) || '—') + '</div></div>' +
     '<div class="detail-item full"><div class="detail-label">Kemampuan Awal</div><div class="detail-value">' + (esc(row.kemampuan_awal) || '—') + '</div></div>' +
     '<div class="detail-item full"><div class="detail-label">Motivasi</div><div class="detail-value" style="white-space:pre-wrap">' + (esc(row.motivasi) || '—') + '</div></div>' +
@@ -983,7 +987,7 @@ function simpanJadwal() {
 // ============================================================================
 
 function exportCSV() {
-  var csv = 'No. Pendaftaran,Nama,HP,HP Keluarga,Atas Nama/Hubungan,Email,Tgl. Lahir,Domisili,Gender,Program,Jadwal,Status,Tgl. Daftar,Jenis Biaya,Kemampuan Awal,Pernah Tahsin,Motivasi,Saran/Masukan,Gelombang\n';
+  var csv = 'No. Pendaftaran,Nama,HP,HP Keluarga,Atas Nama/Hubungan,Email,Tgl. Lahir,Domisili,Gender,Program,Jadwal,Status,Tgl. Daftar,Jenis Biaya,Pernyataan Beasiswa,Tgl. Pernyataan,Kemampuan Awal,Pernah Tahsin,Motivasi,Saran/Masukan,Gelombang\n';
   function csvSafe(v) {
     var s = String(v || '');
     // Cegah CSV injection
@@ -1007,6 +1011,8 @@ function exportCSV() {
       csvSafe(r.status),
       csvSafe(formatTanggal(r.timestamp)),
       csvSafe(r.jenis_biaya),
+      csvSafe(r.beasiswa_ack ? 'Ya' : (r.jenis_biaya === 'Beasiswa' ? 'TIDAK tercatat' : '')),
+      csvSafe(r.beasiswa_ack_tanggal),
       csvSafe(r.kemampuan_awal),
       csvSafe(r.pernah_tahsin),
       csvSafe(r.motivasi),

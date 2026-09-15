@@ -730,6 +730,14 @@ function isiKonfirmasi() {
     konfBiaya.textContent = biayaCk ? biayaCk.value : '—';
   }
 
+  // Ringkasan pernyataan Beasiswa: tampil hanya bila Beasiswa dipilih (read-only —
+  // kedua pernyataan memang sudah wajib dicentang di Step 2 sebelum boleh lanjut).
+  var rowAck = document.getElementById('konfirm-row-beasiswa_ack');
+  if (rowAck) {
+    var pilihBeasiswa = konfBiaya && konfBiaya.textContent === 'Beasiswa';
+    rowAck.style.display = pilihBeasiswa ? 'flex' : 'none';
+  }
+
   var konfKemampuan = document.getElementById('konfirm-kemampuan');
   if (konfKemampuan) konfKemampuan.textContent = document.getElementById('kemampuan_awal').value || '—';
 
