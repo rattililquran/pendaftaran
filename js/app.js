@@ -42,17 +42,139 @@ function tampilkanBadgeUji() {
 }
 
 // ============================================================================
+// AUTOCOMPLETE DOMISILI — combobox cari kota/kabupaten cepat
+// ============================================================================
+
+/**
+ * initAutocompleteDomisili — pasang pencarian cepat di kolom Domisili.
+ * Data: window.KOTA_INDONESIA (514 kota/kabupaten, js/kota-list.js).
+ * Prinsip: dropdown hanya MENOLONG mencari — nilai akhir tetap bebas ditulis
+ * manual, sehingga domisili yang tak ada di daftar tetap bisa diinput.
+ */
+function initAutocompleteDomisili() {
+  var input  = document.getElementById('domisili');
+  var listEl = document.getElementById('domisili-listbox');
+  if (!input || !listEl) return;
+  var daftar = (window.KOTA_INDONESIA && window.KOTA_INDONESIA.length) ? window.KOTA_INDONESIA : [];
+  if (!daftar.length) return;                     // dataset gagal dimuat → input biasa saja
+
+  var MAX_OPSI = 8;
+  var hasil = [];        // opsi yang sedang tampil
+  var aktif = -1;        // index opsi ter-highlight (keyboard)
+
+  function tutup() {
+    listEl.hidden = true;
+    input.setAttribute('aria-expanded', 'false');
+    aktif = -1;
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Render daftar hasil + highlight potongan yang cocok dengan ketikan.
+  function render(q) {
+    var ql = q.toLowerCase();
+    var awalan = [], berisi = [];
+    for (var i = 0; i < daftar.length; i++) {
+      var nama = daftar[i];
+      var nl = nama.toLowerCase();
+      if (nl.indexOf(ql) === 0) awalan.push(nama);
+      else if (nl.indexOf(ql) !== -1) berisi.push(nama);
+      if (awalan.length >= MAX_OPSI) break;
+    }
+    hasil = awalan.concat(berisi).slice(0, MAX_OPSI);
+
+    var sisa = (awalan.length + berisi.length) - hasil.length;
+    var html = '';
+    for (var k = 0; k < hasil.length; k++) {
+      var n = hasil[k];
+      var idx = n.toLowerCase().indexOf(ql);
+      var tampil = idx >= 0
+        ? escHtml(n.slice(0, idx)) + '<mark>' + escHtml(n.slice(idx, idx + q.length)) + '</mark>' + escHtml(n.slice(idx + q.length))
+        : escHtml(n);
+      html += '<div class="domisili-option" role="option" id="domisili-opt-' + k + '" data-nama="' + escHtml(n) + '">' + tampil + '</div>';
+    }
+    if (!hasil.length) {
+      html += '<div class="domisili-empty">Tidak ada yang cocok — silakan lanjutkan menulis manual.</div>';
+    } else if (sisa > 0) {
+      html += '<div class="domisili-more">… dan ' + sisa + ' lainnya — ketik lebih spesifik</div>';
+    }
+
+    listEl.innerHTML = html;
+    listEl.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    aktif = -1;
+  }
+
+  function setAktif(idx) {
+    var opts = listEl.querySelectorAll('.domisili-option');
+    if (!opts.length) return;
+    if (aktif >= 0 && opts[aktif]) opts[aktif].classList.remove('active');
+    aktif = Math.max(0, Math.min(idx, opts.length - 1));
+    opts[aktif].classList.add('active');
+    opts[aktif].scrollIntoView({ block: 'nearest' });
+    input.setAttribute('aria-activedescendant', opts[aktif].id);
+  }
+
+  function pilih(nama) {
+    input.value = nama;
+    tutup();
+    tampilkanError('domisili', false);
+    input.focus();
+  }
+
+  input.addEventListener('input', function () {
+    var q = input.value.trim();
+    if (q.length < 2) { tutup(); return; }        // minimal 2 huruf biar daftar tak meledak
+    render(q);
+  });
+
+  input.addEventListener('keydown', function (e) {
+    var terbuka = !listEl.hidden;
+    if (e.key === 'ArrowDown' && terbuka) {
+      e.preventDefault();
+      setAktif(aktif + 1);
+    } else if (e.key === 'ArrowUp' && terbuka) {
+      e.preventDefault();
+      setAktif(aktif - 1);
+    } else if (e.key === 'Enter' && terbuka && aktif >= 0) {
+      e.preventDefault();
+      pilih(hasil[aktif]);
+    } else if (e.key === 'Escape') {
+      tutup();
+    }
+  });
+
+  // Klik opsi (delegasi — opsi dirender ulang tiap ketikan)
+  listEl.addEventListener('mousedown', function (e) {
+    var opt = e.target.closest('.domisili-option');
+    if (!opt) return;
+    e.preventDefault();                          // cegah blur menutup dulu
+    pilih(opt.getAttribute('data-nama'));
+  });
+
+  // Tutup saat klik di luar / input kehilangan fokus
+  document.addEventListener('click', function (e) {
+    if (listEl.hidden) return;
+    if (input.contains(e.target) || listEl.contains(e.target)) return;
+    tutup();
+  });
+}
+
+// ============================================================================
 // INIT
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', function () {
-  state.clientToken = generateToken();
+    state.clientToken = generateToken();
   bacaModeUji();
   if (state.modeUji) {
     // Token berawalan TES- adalah penanda eksplisit yang juga dicek server.
     state.clientToken = 'TES-' + state.clientToken;
     tampilkanBadgeUji();
   }
+  initAutocompleteDomisili();
   updateStepUI(1);
 
   // Fetch info gelombang aktif

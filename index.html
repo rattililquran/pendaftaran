@@ -179,20 +179,27 @@
           <div class="form-error" id="err-tgl_lahir">Tanggal lahir wajib diisi.</div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group domisili-group">
           <label class="form-label" for="domisili">
             Domisili <span class="required" aria-hidden="true">*</span>
           </label>
-          <input
-            class="form-input"
-            type="text"
-            id="domisili"
-            name="domisili"
-            maxlength="60"
-            autocomplete="address-level2"
-            placeholder="Kota / Kabupaten tempat tinggal saat ini"
-          >
-          <div class="form-hint">Cukup kota/kabupaten.</div>
+          <div class="domisili-wrap">
+            <input
+              class="form-input"
+              type="text"
+              id="domisili"
+              name="domisili"
+              maxlength="60"
+              autocomplete="off"
+              role="combobox"
+              aria-expanded="false"
+              aria-controls="domisili-listbox"
+              aria-autocomplete="list"
+              placeholder="Ketik untuk mencari kota/kabupaten…"
+            >
+            <div class="domisili-listbox" id="domisili-listbox" role="listbox" hidden></div>
+          </div>
+          <div class="form-hint">Cukup kota/kabupaten. Ketik untuk mencari cepat — boleh juga menulis sendiri bila tidak ada.</div>
           <div class="form-error" id="err-domisili">Domisili wajib diisi (minimal 3 karakter).</div>
         </div>
 
@@ -551,6 +558,7 @@
   </div>
 
   <script src="js/config.js"></script>
+  <script src="js/kota-list.js"></script>
   <script src="js/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

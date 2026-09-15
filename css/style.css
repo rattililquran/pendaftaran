@@ -349,6 +349,52 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
   margin-top: 5px;
 }
 
+/* Autocomplete Domisili — combobox cari kota/kabupaten cepat */
+.domisili-wrap { position: relative; }
+.domisili-listbox {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e2e8f0);
+  border-radius: var(--r-sm, 10px);
+  box-shadow: 0 18px 40px -18px rgba(15, 23, 42, .35);
+  padding: 6px;
+}
+.domisili-option {
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  cursor: pointer;
+  color: var(--ink, #0c1825);
+}
+.domisili-option:hover { background: rgba(2, 132, 199, .07); }
+.domisili-option.active { background: rgba(2, 132, 199, .12); }
+.domisili-option mark {
+  background: transparent;
+  color: var(--primary, #0284c7);
+  font-weight: 700;
+  padding: 0;
+}
+.domisili-more {
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: var(--ink-4, #94a3b8);
+  text-align: center;
+}
+.domisili-empty {
+  padding: 12px;
+  font-size: 0.8rem;
+  color: var(--ink-4, #94a3b8);
+  text-align: center;
+  line-height: 1.6;
+}
+
 .form-error {
   font-size: 0.78rem;
   color: #ef4444;
