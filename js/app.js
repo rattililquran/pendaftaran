@@ -375,6 +375,10 @@ function validasiStep1() {
 
   var nama  = document.getElementById('nama').value.trim();
   var hp    = document.getElementById('hp').value.trim();
+  var keluargaEl = document.getElementById('hp_keluarga');
+  var keluarga = keluargaEl ? keluargaEl.value.trim() : '';
+  var keluargaNamaEl = document.getElementById('hp_keluarga_nama');
+  var keluargaNama = keluargaNamaEl ? keluargaNamaEl.value.trim() : '';
   var email = document.getElementById('email').value.trim();
   var tgl   = document.getElementById('tgl_lahir').value;
   var domisili = (document.getElementById('domisili') || {}).value;
@@ -395,6 +399,26 @@ function validasiStep1() {
     valid = false;
   } else {
     tampilkanError('hp', false);
+  }
+
+  // Nomor HP keluarga — WAJIB. Format valid, berbeda dari nomor utama
+  // (verifikasi ulang di server; nomor identik tidak berguna sebagai cadangan).
+  var kBersih = keluarga.replace(/\D/g, '');
+  if (kBersih.length < 9 || kBersih.length > 15 ||
+      !/^(08|628|\+628)/.test(keluarga.replace(/\s/g, '')) ||
+      kBersih === hpBersih) {
+    tampilkanError('hp_keluarga', true);
+    valid = false;
+  } else {
+    tampilkanError('hp_keluarga', false);
+  }
+
+  // Atas nama & hubungan pemilik nomor keluarga — WAJIB, minimal 3 karakter.
+  if (keluargaNama.length < 3) {
+    tampilkanError('hp_keluarga_nama', true);
+    valid = false;
+  } else {
+    tampilkanError('hp_keluarga_nama', false);
   }
 
   // Email (wajib diisi dan harus valid)
@@ -666,6 +690,16 @@ function isiKonfirmasi() {
 
   document.getElementById('konfirm-nama').textContent    = document.getElementById('nama').value.trim();
   document.getElementById('konfirm-hp').textContent      = document.getElementById('hp').value.trim();
+  var konfKeluarga = document.getElementById('konfirm-hp_keluarga');
+  if (konfKeluarga) {
+    var kv = (document.getElementById('hp_keluarga') || {}).value || '';
+    konfKeluarga.textContent = kv.trim() || '—';
+  }
+  var konfKeluargaNama = document.getElementById('konfirm-hp_keluarga_nama');
+  if (konfKeluargaNama) {
+    var kn = (document.getElementById('hp_keluarga_nama') || {}).value || '';
+    konfKeluargaNama.textContent = kn.trim() || '—';
+  }
   document.getElementById('konfirm-email').textContent   = document.getElementById('email').value.trim() || '—';
   document.getElementById('konfirm-tgl').textContent     = formatTanggal(document.getElementById('tgl_lahir').value);
   var konfDom = document.getElementById('konfirm-domisili');
@@ -730,6 +764,8 @@ function submitPendaftaran() {
     action:       'submit',
     nama:         document.getElementById('nama').value.trim(),
     hp:           document.getElementById('hp').value.trim(),
+    hp_keluarga:  ((document.getElementById('hp_keluarga') || {}).value || '').trim(),
+    hp_keluarga_nama: ((document.getElementById('hp_keluarga_nama') || {}).value || '').trim(),
     email:        document.getElementById('email').value.trim(),
     tgl_lahir:    document.getElementById('tgl_lahir').value,
     domisili:     (document.getElementById('domisili') || {}).value || '',

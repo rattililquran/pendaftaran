@@ -349,6 +349,19 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
   margin-top: 5px;
 }
 
+.optional-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--ink-4);
+  border: 1px solid var(--line, #e2e8f0);
+  border-radius: 999px;
+  padding: 2px 9px;
+  margin-left: 6px;
+  vertical-align: middle;
+  text-transform: none;
+}
+
 /* Autocomplete Domisili — combobox cari kota/kabupaten cepat */
 .domisili-wrap { position: relative; }
 .domisili-listbox {

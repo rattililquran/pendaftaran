@@ -559,6 +559,7 @@ function bukaDetal(no) {
     '<div class="detail-item"><div class="detail-label">Tgl. Daftar</div><div class="detail-value">' + formatTanggal(row.timestamp) + '</div></div>' +
     '<div class="detail-item full"><div class="detail-label">Nama Lengkap</div><div class="detail-value">' + esc(row.nama) + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">No. HP</div><div class="detail-value">' + esc(row.hp) + '</div></div>' +
+    '<div class="detail-item"><div class="detail-label">HP Keluarga</div><div class="detail-value">' + (esc(row.hp_keluarga) || '—') + (row.hp_keluarga_nama ? ' <span style="color:var(--ink-4)">— ' + esc(row.hp_keluarga_nama) + '</span>' : '') + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">' + (esc(row.email) || '—') + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Tanggal Lahir</div><div class="detail-value">' + (esc(row.tgl_lahir) || '—') + '</div></div>' +
     '<div class="detail-item"><div class="detail-label">Domisili</div><div class="detail-value">' + (esc(row.domisili) || '—') + '</div></div>' +
