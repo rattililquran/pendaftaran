@@ -401,12 +401,19 @@ function validasiStep1() {
     tampilkanError('hp', false);
   }
 
-  // Nomor HP keluarga — WAJIB. Format valid, berbeda dari nomor utama
-  // (verifikasi ulang di server; nomor identik tidak berguna sebagai cadangan).
+  // Nomor HP keluarga — WAJIB. Format valid, berbeda dari nomor utama.
+  // Perbandingan memakai normalisasi yang SAMA dengan server (08 ↔ 62) agar
+  // "08123456789" vs "628123456789" terdeteksi identik di klien, bukan baru
+  // ketahuan setelah submit di server.
   var kBersih = keluarga.replace(/\D/g, '');
+  function normLokal(x) {
+    var d = x.replace(/\D/g, '');
+    if (d.indexOf('62') === 0) d = '0' + d.slice(2);
+    return d;
+  }
   if (kBersih.length < 9 || kBersih.length > 15 ||
       !/^(08|628|\+628)/.test(keluarga.replace(/\s/g, '')) ||
-      kBersih === hpBersih) {
+      normLokal(keluarga) === normLokal(hp)) {
     tampilkanError('hp_keluarga', true);
     valid = false;
   } else {

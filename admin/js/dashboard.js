@@ -978,7 +978,7 @@ function simpanJadwal() {
 // ============================================================================
 
 function exportCSV() {
-  var csv = 'No. Pendaftaran,Nama,HP,Email,Tgl. Lahir,Gender,Program,Jadwal,Status,Tgl. Daftar,Jenis Biaya,Kemampuan Awal,Pernah Tahsin,Motivasi,Saran/Masukan\n';
+  var csv = 'No. Pendaftaran,Nama,HP,HP Keluarga,Atas Nama/Hubungan,Email,Tgl. Lahir,Domisili,Gender,Program,Jadwal,Status,Tgl. Daftar,Jenis Biaya,Kemampuan Awal,Pernah Tahsin,Motivasi,Saran/Masukan,Gelombang\n';
   function csvSafe(v) {
     var s = String(v || '');
     // Cegah CSV injection
@@ -991,8 +991,11 @@ function exportCSV() {
       csvSafe(r.no_pendaftaran),
       csvSafe(r.nama),
       csvSafe(r.hp),
+      csvSafe(r.hp_keluarga),
+      csvSafe(r.hp_keluarga_nama),
       csvSafe(r.email),
       csvSafe(r.tgl_lahir),
+      csvSafe(r.domisili),
       csvSafe(r.gender),
       csvSafe(r.program),
       csvSafe(r.jadwal_id),
@@ -1002,7 +1005,8 @@ function exportCSV() {
       csvSafe(r.kemampuan_awal),
       csvSafe(r.pernah_tahsin),
       csvSafe(r.motivasi),
-      csvSafe(r.saran_masukan)
+      csvSafe(r.saran_masukan),
+      csvSafe(r.gelombang)
     ].join(',') + '\n';
   });
 
