@@ -484,7 +484,12 @@ function _doFilter() {
     if (search) {
       var match = (row.nama || '').toLowerCase().indexOf(search) !== -1 ||
                   (row.hp || '').toLowerCase().indexOf(search) !== -1 ||
-                  (row.no_pendaftaran || '').toLowerCase().indexOf(search) !== -1;
+                  (row.no_pendaftaran || '').toLowerCase().indexOf(search) !== -1 ||
+                  // Telusuri via kontak cadangan & domisili — skenario umum admin:
+                  // keluarga menelepon dari nomor cadangan, atau cari pendaftar per kota.
+                  (row.hp_keluarga || '').toLowerCase().indexOf(search) !== -1 ||
+                  (row.hp_keluarga_nama || '').toLowerCase().indexOf(search) !== -1 ||
+                  (row.domisili || '').toLowerCase().indexOf(search) !== -1;
       if (!match) return false;
     }
     return true;
