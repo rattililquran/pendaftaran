@@ -799,3 +799,97 @@ html.theme-dark .email-gagal-angka { color: #f87171; }
   border: 1px solid var(--line); border-radius: 99px; background: var(--card);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.75rem; color: var(--ink);
 }
+
+/* ============================================================
+   DASHBOARD DI HP — audit Okt 2026
+   ============================================================ */
+/* Kontras teks berwarna di mode terang (sebelumnya 2.2–3.8:1). */
+html:not(.theme-dark) .btn-outline { color: #0369a1; border-color: #0284c7; }
+html:not(.theme-dark) .stat-card.accent  .stat-value { color: #047857; }
+html:not(.theme-dark) .stat-card.warning .stat-value { color: #b45309; }
+html:not(.theme-dark) .stat-card.danger  .stat-value { color: #b91c1c; }
+html:not(.theme-dark) .btn-logout { color: #dc2626; }
+html:not(.theme-dark) .btn-danger { color: #b91c1c; border-color: rgba(185,28,28,.3); }
+html:not(.theme-dark) .form-label { --danger: #dc2626; }   /* tanda * wajib diisi */
+.data-table th { color: var(--ink-2); }
+
+/* Tombol tema di topbar (sebelumnya tanpa gaya, 18×22px) */
+.topbar .theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; flex-shrink: 0;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--card);
+  cursor: pointer; font-size: 1rem; line-height: 1;
+}
+
+@media (max-width: 768px) {
+  .btn-menu { width: 40px; height: 40px; align-items: center; justify-content: center; font-size: 1.4rem; }
+  .topbar { gap: 10px; }
+  .topbar-right { gap: 8px; }
+  /* Semua tombol ≥40px tinggi (sebelumnya .btn-sm 28–31px, teks 11.7px). */
+  .btn { min-height: 40px; }
+  .btn-sm { font-size: 0.85rem; }
+  .topbar-sub { font-size: 12.5px; }
+  .stat-label { font-size: 12px; }
+  .sidebar-title { font-size: 12px; }
+  .btn-logout { min-height: 40px; font-size: 0.9rem; }
+  .search-input, .filter-select { min-height: 44px; }
+  /* Modal: ruang isi lebih lega, tombol tutup mudah diketuk, footer boleh turun baris. */
+  .modal { padding: 20px 18px; }
+  .modal-close { display: inline-grid; place-items: center; width: 40px; height: 40px; padding: 0; }
+  .modal-footer { flex-wrap: wrap; }
+  .modal input[type="checkbox"] { width: 20px; height: 20px; }
+}
+@media (max-width: 420px) {
+  .topbar-sub { display: none; }
+  .topbar .btn-sm { padding: 6px 10px; }
+  /* Ikon kartu statistik lebih kecil agar tidak menempel ke label (layar 320px). */
+  .stat-card::after { top: 12px; right: 12px; width: 30px; height: 30px; border-radius: 9px; font-size: .9rem; }
+  .stat-label { padding-right: 34px; }
+}
+
+/* Grafik Statistik: item grid boleh menyempit; satu kolom di HP (sebelumnya
+   grafik melebar 656px di layar 375px dan terpotong). */
+.grafik-grid > * { min-width: 0; }
+.grafik-grid canvas { max-width: 100%; }
+@media (max-width: 640px) { .grafik-grid { grid-template-columns: 1fr !important; } }
+
+/* Tabel → kartu di HP: tiap baris jadi kartu dua kolom, label (data-label dari <th>,
+   dipasang dashboard.js) di atas nilai. Sel tombol aksi menempati satu baris penuh. */
+@media (max-width: 640px) {
+  /* Hanya pembungkus tabel; kotak grafik Statistik juga memakai .table-wrap. */
+  .table-wrap:has(> .data-table) { background: none; border: none; box-shadow: none; overflow: visible; }
+  .data-table, .data-table tbody { display: block; width: 100%; }
+  .data-table thead { display: none; }
+  .data-table tbody tr {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 14px;
+    margin-bottom: 12px; padding: 10px 14px;
+    border: 1px solid var(--line); border-radius: var(--r); background: var(--card); box-shadow: var(--sh-sm);
+  }
+  .data-table td {
+    display: block; padding: 6px 0; border: none;
+    font-size: 14px !important; text-align: left !important; white-space: normal !important;
+    overflow-wrap: anywhere; min-width: 0;
+  }
+  .data-table td[data-label]::before {
+    content: attr(data-label); display: block; margin-bottom: 2px;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 11.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .data-table td[data-label=""]::before { display: none; }
+  /* Baris tombol aksi: penuh, rata kanan, dipisah garis tipis */
+  .data-table td:has(> .btn-icon), .data-table td:has(> .btn) {
+    grid-column: 1 / -1; display: flex; justify-content: flex-end; align-items: center; gap: 8px;
+    margin-top: 4px; padding-top: 10px; border-top: 1px dashed var(--line);
+  }
+  .data-table td:has(> .btn-icon)::before, .data-table td:has(> .btn)::before { content: none; }
+  .data-table .btn-icon + .btn-icon { margin-left: 0; }
+  .data-table tbody tr:nth-child(even) td,
+  .data-table tbody tr:hover td { background: none; }
+  .data-table tbody tr:hover td:first-child { box-shadow: none; }
+  .data-table .no-data { grid-column: 1 / -1; display: block; text-align: center !important; }
+  .data-table tbody tr:has(> .no-data) { display: block; }
+  .data-table input[type="checkbox"] { width: 22px; height: 22px; }
+  .data-table .btn-icon { width: 42px; height: 42px; }
+  .data-table .badge { font-size: 12px; }
+}

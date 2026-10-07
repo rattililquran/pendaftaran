@@ -6,10 +6,7 @@
   <meta name="theme-color" content="#0d1f35">
   <meta name="robots" content="noindex, nofollow, noarchive">
   <title>Dashboard Admin — Rattilil Qur'an</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"></noscript>
+  <link rel="stylesheet" href="/assets/fonts.css">
   <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
@@ -288,7 +285,7 @@
             <h2 style="font-size:1rem;font-weight:800;color:var(--ink);flex:1">Statistik Pendaftaran</h2>
             <button class="btn btn-primary btn-sm" onclick="muatCharts()">↻ Muat Ulang</button>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="grafik-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
             <div class="table-wrap" style="padding:20px">
               <div style="font-size:0.82rem;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px">Status Pendaftar</div>
               <canvas id="chart-status" height="220"></canvas>
@@ -507,7 +504,7 @@
         <select class="form-select" id="wa-template" onchange="isiPesanWa()" style="margin-bottom:8px"></select>
         <textarea class="form-textarea" id="wa-pesan" placeholder="Pesan WhatsApp (bisa diedit sebelum dikirim)..."></textarea>
         <button type="button" class="btn btn-sm" id="btn-wa" onclick="bukaWaDariModal()"
-                style="margin-top:8px;width:100%;background:#25D366;color:#fff;border:none">
+                style="margin-top:8px;width:100%;background:#15803d;color:#fff;border:none">
           <span class="btn-text">Buka WhatsApp</span>
         </button>
       </div>

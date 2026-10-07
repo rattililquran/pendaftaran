@@ -271,7 +271,7 @@ function renderTabelPendaftar() {
     var tr = document.createElement('tr');
     tr.innerHTML =
       '<td style="text-align:center"><input type="checkbox" class="row-chk" data-no="' + esc(row.no_pendaftaran) + '"' + checked + ' onclick="toggleSelect(this)"></td>' +
-      '<td style="text-align:right;color:var(--ink-4);font-size:0.8rem;font-variant-numeric:tabular-nums">' + urut + '</td>' +
+      '<td style="text-align:right;color:var(--ink-3);font-size:0.8rem;font-variant-numeric:tabular-nums">' + urut + '</td>' +
       '<td style="font-weight:700;font-size:0.82rem;font-family:monospace">' + esc(row.no_pendaftaran) + '</td>' +
       '<td>' + esc(row.nama) +
         (row.waiting_list ? ' <span title="Daftar tunggu (cadangan)" style="font-size:0.7rem;font-weight:700;color:#b45309;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);border-radius:6px;padding:1px 5px;white-space:nowrap">⏳ WL</span>' : '') +
@@ -1912,19 +1912,53 @@ function copyQRLink() {
 // #8 DARK MODE
 // ============================================================================
 
+// Tema memakai kunci 'theme' yang sama dengan situs utama & formulir
+// ('rattilil-theme' lama tetap dibaca agar pilihan sebelumnya tidak hilang).
 function initDarkMode() {
-  var saved = localStorage.getItem('rattilil-theme');
-  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('theme-dark');
-  }
+  var saved = null;
+  try { saved = localStorage.getItem('theme') || localStorage.getItem('rattilil-theme'); } catch (e) {}
+  var gelap = saved === 'dark' || ((!saved || saved === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.classList.toggle('theme-dark', gelap);
+  var btn = document.getElementById('btn-theme-toggle');
+  if (btn) btn.textContent = gelap ? '☀' : '🌙';
 }
 
 function toggleDarkMode() {
   var isDark = document.documentElement.classList.toggle('theme-dark');
-  localStorage.setItem('rattilil-theme', isDark ? 'dark' : 'light');
+  try {
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    localStorage.removeItem('rattilil-theme');
+  } catch (e) {}
   var btn = document.getElementById('btn-theme-toggle');
   if (btn) btn.textContent = isDark ? '☀' : '🌙';
 }
+
+// ---- Tabel menjadi kartu di HP ----
+// CSS (≤640px) menampilkan tiap baris sebagai kartu dan memakai atribut data-label
+// sebagai label sel. Label diambil dari <th> setiap tabel dan dipasang ulang setiap
+// tbody dirender, jadi semua tabel (pendaftar, jadwal, gelombang, template WA, evaluasi)
+// ikut tanpa mengubah fungsi render masing-masing.
+function labeliTabel(table) {
+  var heads = Array.prototype.map.call(table.querySelectorAll('thead th'), function (th) {
+    var t = th.textContent.replace(/[▲▼]/g, '').trim();
+    return t || (th.querySelector('input[type="checkbox"]') ? 'Pilih' : '');
+  });
+  Array.prototype.forEach.call(table.querySelectorAll('tbody tr'), function (tr) {
+    var sel = tr.children;
+    if (sel.length === 1 && sel[0].colSpan > 1) return;   // baris "Memuat data..." / kosong
+    for (var i = 0; i < sel.length; i++) sel[i].setAttribute('data-label', heads[i] || '');
+  });
+}
+function pasangLabelTabel() {
+  Array.prototype.forEach.call(document.querySelectorAll('.data-table'), function (table) {
+    var tb = table.querySelector('tbody');
+    if (!tb) return;
+    labeliTabel(table);
+    new MutationObserver(function () { labeliTabel(table); }).observe(tb, { childList: true });
+  });
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pasangLabelTabel);
+else pasangLabelTabel();
 
 // Init dark mode on load
 initDarkMode();
