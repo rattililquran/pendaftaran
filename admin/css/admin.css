@@ -779,3 +779,23 @@ html.theme-dark .login-back a { color: var(--primary); }
   .form-input, .form-select, .form-textarea,
   input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px; }
 }
+
+/* ---- Pantauan email (di bawah kartu statistik) ---- */
+.email-info {
+  margin: -6px 0 18px; padding: 12px 14px;
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  background: var(--card); box-shadow: var(--sh-sm);
+  font-size: 0.85rem; color: var(--ink-2); line-height: 1.55;
+}
+.email-info[hidden] { display: none; }
+.email-info.waspada { border-color: rgba(245,158,11,.45); background: rgba(245,158,11,.08); }
+.email-info-baris { display: flex; gap: 8px; align-items: baseline; }
+.email-info-baris > span:last-child { flex: 1; min-width: 0; }
+.email-info-catatan { margin-top: 6px; font-size: 0.8rem; color: var(--ink-3); }
+.email-gagal-angka { color: #b91c1c; }
+html.theme-dark .email-gagal-angka { color: #f87171; }
+.email-no {
+  display: inline-block; margin: 2px 2px 0 0; padding: 1px 7px;
+  border: 1px solid var(--line); border-radius: 99px; background: var(--card);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.75rem; color: var(--ink);
+}

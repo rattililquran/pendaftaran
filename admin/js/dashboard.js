@@ -155,9 +155,41 @@ function muatStats() {
         var proses = (stats.per_status['TERDAFTAR'] || 0) + (stats.per_status['BERKAS_OK'] || 0) + (stats.per_status['WAWANCARA'] || 0);
         document.getElementById('stat-proses').textContent = proses;
         document.getElementById('stat-ditolak').textContent = stats.per_status['DITOLAK'] || 0;
+        renderInfoEmail(stats.email);
       }
     })
     .catch(function () {});
+}
+
+/**
+ * renderInfoEmail — ringkasan email di bawah kartu statistik. Akun Gmail biasa hanya bisa
+ * mengirim ±100 email per hari; bila habis, email konfirmasi gagal tanpa menggagalkan
+ * pendaftaran. Kotak berubah kuning saat kuota menipis atau ada email gagal hari ini,
+ * dan menampilkan nomor pendaftar yang perlu dihubungi lewat WhatsApp.
+ */
+function renderInfoEmail(em) {
+  var box = document.getElementById('email-info');
+  if (!box || !em) return;
+  var sisa = em.sisa_kuota;
+  var menipis = sisa != null && sisa < 20;
+  var waspada = menipis || em.gagal_hari_ini > 0;
+  var html = '<div class="email-info-baris"><span aria-hidden="true">📧</span><span>' +
+    '<b>Email hari ini:</b> ' + esc(String(em.terkirim_hari_ini || 0)) + ' terkirim' +
+    (em.gagal_hari_ini ? ' · <b class="email-gagal-angka">' + esc(String(em.gagal_hari_ini)) + ' gagal</b>' : '') +
+    (sisa != null ? ' · sisa kuota <b>' + esc(String(sisa)) + '</b>' : '') + '</span></div>';
+  if (menipis) {
+    html += '<div class="email-info-catatan">Kuota email hampir habis. Pendaftaran tetap tersimpan, ' +
+      'tapi email konfirmasi berikutnya bisa gagal — kuota pulih otomatis dalam 24 jam.</div>';
+  }
+  if (em.gagal_terbaru && em.gagal_terbaru.length) {
+    html += '<div class="email-info-catatan">Email gagal 7 hari terakhir (' + esc(String(em.gagal_7_hari)) + '): ' +
+      em.gagal_terbaru.map(function (g) {
+        return '<span class="email-no" title="' + esc(g.jenis + ' · ' + g.waktu) + '">' + esc(g.no) + '</span>';
+      }).join(' ') + ' — hubungi lewat WhatsApp.</div>';
+  }
+  box.innerHTML = html;
+  box.className = 'email-info' + (waspada ? ' waspada' : '');
+  box.hidden = false;
 }
 
 // ============================================================================
