@@ -273,8 +273,16 @@ function tampilkanBannerGelombang(info) {
     if (elPeriode) elPeriode.textContent = _labelPeriode(info.tgl_mulai, info.tgl_selesai);
     if (elBadge) {
       var st = String(info.status || '').toUpperCase();
-      elBadge.textContent = st === 'AKTIF' ? 'Aktif' : (st === 'SELESAI' ? 'Selesai' : st);
-      elBadge.className   = 'banner-gelombang-badge' + (st === 'AKTIF' ? ' aktif' : st === 'SELESAI' ? ' selesai' : '');
+      // Gelombang berstatus AKTIF tapi di luar rentang tanggalnya → tampilkan keadaan
+      // sebenarnya, bukan "Aktif" di samping banner "pendaftaran ditutup".
+      if (st === 'AKTIF' && info.alasan_tutup === 'SUDAH_BERAKHIR') st = 'SELESAI';
+      if (st === 'AKTIF' && info.alasan_tutup === 'BELUM_DIBUKA') {
+        elBadge.textContent = 'Segera';
+        elBadge.className   = 'banner-gelombang-badge';
+      } else {
+        elBadge.textContent = st === 'AKTIF' ? 'Aktif' : (st === 'SELESAI' ? 'Selesai' : st);
+        elBadge.className   = 'banner-gelombang-badge' + (st === 'AKTIF' ? ' aktif' : st === 'SELESAI' ? ' selesai' : '');
+      }
     }
     if (bannerGel) bannerGel.style.display = 'block';
   }
@@ -283,6 +291,9 @@ function tampilkanBannerGelombang(info) {
   // MODE UJI: tetap tampilkan banner sebagai informasi, tapi JANGAN kunci tombol —
   // tujuan mode uji justru menembus gate untuk menguji form. Server tetap dry-run.
   if (!info.pendaftaran_buka) {
+    // Alasan dari server: belum dibuka (sebelum tgl_mulai), sudah berakhir, atau ditutup admin.
+    var elPesanTutup = document.getElementById('banner-ditutup-pesan');
+    if (elPesanTutup && info.pesan_tutup) elPesanTutup.textContent = info.pesan_tutup;
     if (bannerTutup) bannerTutup.style.display = 'flex';
     if (btnLanjut1 && !state.modeUji) {
       btnLanjut1.disabled  = true;
@@ -602,8 +613,25 @@ function renderJadwal(list) {
   var grid = document.getElementById('jadwal-grid');
   grid.innerHTML = '';
 
+  function pesanKosong(teks) {
+    grid.innerHTML = '<p style="color:var(--ink-muted);font-size:0.9rem;text-align:center;padding:var(--space-6);line-height:1.7">' + esc(teks) + '</p>';
+  }
+  var PESAN_PENUH = 'Qadarullah, kuota Halaqah sudah penuh, semoga Allah mudahkan untuk bisa belajar di kesempatan berikutnya.';
+
   if (!list || list.length === 0) {
-    grid.innerHTML = '<p style="color:var(--ink-muted);font-size:0.9rem;text-align:center;padding:var(--space-6);line-height:1.7">Qadarullah, kuota Halaqah sudah penuh, semoga Allah mudahkan untuk bisa belajar di kesempatan berikutnya.</p>';
+    // Ada jadwal, tapi tidak satu pun untuk gender ini → bukan "kuota penuh".
+    if (state.gender && state.jadwalList && state.jadwalList.length > 0) {
+      pesanKosong('Belum ada halaqah untuk ' + state.gender + ' pada gelombang ini. Silakan hubungi admin via WhatsApp untuk info jadwal berikutnya.');
+    } else {
+      pesanKosong(PESAN_PENUH);
+    }
+    return;
+  }
+
+  // Semua jadwal ditutup admin → kartu tak ada yang bisa dipilih; beri pesan, jangan
+  // biarkan pendaftar buntu di depan deretan kartu nonaktif.
+  if (list.every(function (j) { return j.penuh === true; })) {
+    pesanKosong(PESAN_PENUH);
     return;
   }
 
@@ -826,7 +854,8 @@ function submitPendaftaran() {
         tampilkanAlert('Jadwal ini baru saja penuh. Centang persetujuan daftar tunggu untuk melanjutkan.');
       } else {
         var pesan = res.pesan || res.error || 'Terjadi kesalahan. Silakan coba lagi.';
-        if (pesan.indexOf('sudah terdaftar') !== -1 || pesan.indexOf('duplikat') !== -1) {
+        // Pesan server berbunyi "sudah pernah mendaftar" — cocokkan kode error, bukan teks.
+        if (res.error === 'HP_SUDAH_TERDAFTAR') {
           tampilkanAlert('Nomor HP ini sudah terdaftar. Gunakan halaman Cek Status untuk melihat status pendaftaran Anda.');
         } else if (res.error === 'PENDAFTARAN_DITUTUP') {
           // Server-side enforcement: toggle admin buka/tutup pendaftaran.

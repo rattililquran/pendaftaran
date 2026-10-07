@@ -41,9 +41,6 @@
         <button class="nav-item" id="nav-gelombang" onclick="switchTab('gelombang')">
           <span class="nav-icon">🌊</span> Gelombang
         </button>
-        <button class="nav-item" id="nav-formfields" onclick="switchTab('formfields')">
-          <span class="nav-icon">📝</span> Form Fields
-        </button>
         <button class="nav-item" id="nav-statistik" onclick="switchTab('statistik')">
           <span class="nav-icon">📊</span> Statistik
         </button>
@@ -226,6 +223,7 @@
               <div>
                 <div style="font-size:1rem;font-weight:800;color:var(--ink)">Status Pendaftaran</div>
                 <div style="font-size:0.82rem;color:var(--ink-3);margin-top:4px">Buka atau tutup pendaftaran untuk semua calon murid</div>
+                <div id="status-pendaftaran-info" style="font-size:0.8rem;color:#b45309;margin-top:6px;display:none"></div>
               </div>
               <div style="display:flex;align-items:center;gap:12px">
                 <span id="status-pendaftaran-label" style="font-size:0.85rem;font-weight:700;padding:4px 14px;border-radius:999px;background:var(--soft);color:var(--primary-3)">Memuat...</span>
@@ -259,33 +257,6 @@
               </thead>
               <tbody id="tbody-gelombang">
                 <tr><td colspan="8" class="no-data">Memuat data...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- ===== TAB: FORM FIELDS ===== -->
-        <div id="tab-formfields" style="display:none">
-          <div class="toolbar" style="margin-bottom:16px">
-            <h2 style="font-size:1rem;font-weight:800;color:var(--ink);flex:1">Konfigurasi Form Pendaftaran</h2>
-            <button class="btn btn-outline btn-sm" onclick="bukaModalTambahField()">+ Tambah Field</button>
-            <button class="btn btn-primary btn-sm" onclick="muatFormFields()">↻ Muat Ulang</button>
-          </div>
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Field ID</th>
-                  <th>Label</th>
-                  <th>Tipe</th>
-                  <th>Wajib</th>
-                  <th>Urutan</th>
-                  <th>Aktif</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody id="tbody-formfields">
-                <tr><td colspan="7" class="no-data">Memuat data...</td></tr>
               </tbody>
             </table>
           </div>
@@ -662,7 +633,7 @@
       </div>
       <div class="form-group">
         <label class="form-label" for="new-kuota">Kuota Maksimal</label>
-        <input class="form-input" id="new-kuota" type="number" value="13" min="1">
+        <input class="form-input" id="new-kuota" type="number" value="12" min="1">
       </div>
 
       <div class="modal-footer">
@@ -670,6 +641,56 @@
         <button class="btn btn-primary btn-sm" id="btn-simpan-jadwal-baru" onclick="simpanJadwalBaru()">
           <div class="spinner"></div>
           <span class="btn-text">Tambah Jadwal</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Gelombang (tambah / edit) -->
+  <div class="modal-backdrop" id="modal-gelombang">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="gel-modal-title">Gelombang</div>
+        <button class="modal-close" onclick="tutupModal('modal-gelombang')">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="gel-nama">Nama Gelombang <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="gel-nama" placeholder="Contoh: Angkatan 11 - Tahun 2026/2027" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="gel-mulai">Tanggal Mulai <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="gel-mulai" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="gel-selesai">Tanggal Selesai <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="gel-selesai" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="gel-tahun">Tahun Ajaran</label>
+        <input class="form-input" id="gel-tahun" placeholder="Contoh: 2026/2027" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="gel-status">Status Gelombang</label>
+        <select class="form-select" id="gel-status">
+          <option value="AKTIF">AKTIF</option>
+          <option value="SELESAI">SELESAI</option>
+          <option value="DIBATALKAN">DIBATALKAN</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:0.875rem;font-weight:600">
+          <input type="checkbox" id="gel-jadikan-aktif" style="margin-top:3px">
+          <span>Jadikan gelombang yang tampil di form pendaftaran<br>
+            <span style="font-weight:400;color:var(--ink-3);font-size:0.8rem">Pendaftar baru tercatat di gelombang ini. Gelombang lain yang masih AKTIF ditandai SELESAI.</span></span>
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="tutupModal('modal-gelombang')">Batal</button>
+        <button class="btn btn-primary btn-sm" id="btn-simpan-gelombang" onclick="simpanGelombang()">
+          <div class="spinner"></div>
+          <span class="btn-text">Simpan</span>
         </button>
       </div>
     </div>

@@ -104,7 +104,8 @@ function tampilkanHasil(data) {
 
   // Hero status
   var hero = document.getElementById('status-hero');
-  hero.className = 'status-hero s-' + status;
+  // BATAL memakai gaya visual yang sama dengan DITOLAK (kelas CSS s-BATAL tidak ada).
+  hero.className = 'status-hero s-' + (status === 'BATAL' ? 'DITOLAK' : status);
   document.getElementById('status-icon').textContent      = ikonStatus(status);
   document.getElementById('status-hero-label').textContent = 'Status Pendaftaran';
   document.getElementById('status-hero-text').textContent  = labelStatus(status);
@@ -159,11 +160,12 @@ function renderTimeline(statusAktif) {
   var container = document.getElementById('status-timeline');
   container.innerHTML = '';
 
-  if (statusAktif === 'DITOLAK') {
+  if (statusAktif === 'DITOLAK' || statusAktif === 'BATAL') {
+    var judul = statusAktif === 'BATAL' ? 'Pendaftaran Dibatalkan' : 'Tidak Diterima';
     container.innerHTML =
       '<div style="display:flex;align-items:center;gap:12px;padding:16px;background:rgba(239,68,68,.06);border-radius:0 0 var(--r) var(--r)">' +
       '<div style="width:36px;height:36px;border-radius:50%;background:rgba(239,68,68,.12);border:2px solid #fca5a5;display:flex;align-items:center;justify-content:center;flex-shrink:0">❌</div>' +
-      '<div><div style="font-size:0.88rem;font-weight:700;color:#b91c1c">Tidak Diterima</div>' +
+      '<div><div style="font-size:0.88rem;font-weight:700;color:#b91c1c">' + judul + '</div>' +
       '<div style="font-size:0.75rem;color:#ef4444;margin-top:2px">Hubungi admin untuk informasi lebih lanjut</div></div></div>';
     return;
   }
@@ -222,7 +224,8 @@ function labelStatus(status) {
     'BERKAS_OK':  'Berkas Diperiksa',
     'WAWANCARA':  'Jadwal Wawancara',
     'DITERIMA':   'Diterima! 🎉',
-    'DITOLAK':    'Tidak Diterima'
+    'DITOLAK':    'Tidak Diterima',
+    'BATAL':      'Dibatalkan'
   };
   return map[status] || status;
 }
@@ -233,7 +236,8 @@ function ikonStatus(status) {
     'BERKAS_OK': '📋',
     'WAWANCARA': '💬',
     'DITERIMA':  '✅',
-    'DITOLAK':   '❌'
+    'DITOLAK':   '❌',
+    'BATAL':     '❌'
   };
   return map[status] || '📄';
 }
@@ -244,7 +248,8 @@ function deskripsiStatus(status) {
     'BERKAS_OK': 'Alhamdulillah. Berkas Anda telah diperiksa dan dinyatakan lengkap. Menunggu jadwal wawancara. Baarakallahu fiikum.',
     'WAWANCARA': 'Alhamdulillah. Anda dijadwalkan untuk wawancara. Semoga Allah memberi kemudahan dan kelancaran. Tawakkal ilallah.',
     'DITERIMA':  'Alhamdulillahirabbil\'aalamin. Selamat! Anda resmi diterima sebagai murid Rattilil Qur\'an. Semoga Allah memberkahi perjalanan Anda dalam menghafal dan memahami Al-Qur\'an. بَارَكَ اللهُ فِيكُمْ',
-    'DITOLAK':   'Innalillahi wa inna ilaihi raji\'un. Mohon maaf, pendaftaran Anda belum dapat kami terima saat ini. Semoga Allah membuka pintu kebaikan yang lebih baik. Hubungi admin untuk informasi lebih lanjut.'
+    'DITOLAK':   'Innalillahi wa inna ilaihi raji\'un. Mohon maaf, pendaftaran Anda belum dapat kami terima saat ini. Semoga Allah membuka pintu kebaikan yang lebih baik. Hubungi admin untuk informasi lebih lanjut.',
+    'BATAL':     'Pendaftaran Anda telah dibatalkan. Bila ini keliru atau Anda ingin mendaftar kembali, silakan hubungi admin.'
   };
   return map[status] || '';
 }

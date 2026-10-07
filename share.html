@@ -136,7 +136,7 @@
       document.execCommand('copy'); document.body.removeChild(el);
     }
     function copyLink(){copyToClipboard(LINK,function(){var el=document.getElementById('copy-link-text');el.textContent='✓ Link Tersalin!';setTimeout(function(){el.textContent='Salin Link Pendaftaran'},2500)})}
-    function copyPesan(){navigator.clipboard.writeText(pesanWA).then(function(){var btn=document.getElementById('btn-copy-pesan');btn.textContent='✓ Tersalin!';btn.classList.add('copied');setTimeout(function(){btn.textContent='⎘ Salin';btn.classList.remove('copied')},2500)})}
+    function copyPesan(){copyToClipboard(pesanWA,function(){var btn=document.getElementById('btn-copy-pesan');btn.textContent='✓ Tersalin!';btn.classList.add('copied');setTimeout(function(){btn.textContent='⎘ Salin';btn.classList.remove('copied')},2500)})}
   </script>
 </body>
 </html>
