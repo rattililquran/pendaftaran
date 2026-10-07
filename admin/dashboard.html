@@ -190,8 +190,24 @@
         <div id="tab-jadwal" style="display:none">
           <div class="toolbar" style="margin-bottom:16px">
             <h2 style="font-size:1rem;font-weight:800;color:var(--ink);flex:1">Kelola Jadwal & Kuota</h2>
+            <select class="form-select" id="filter-gelombang-jadwal" onchange="renderTabelJadwal()" aria-label="Filter gelombang" style="width:auto;min-width:190px">
+              <option value="aktif">Gelombang aktif</option>
+              <option value="semua">Semua gelombang</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="bukaModalSalinJadwal()">⧉ Salin Jadwal</button>
             <button class="btn btn-outline btn-sm" onclick="bukaModalTambahJadwal()">+ Tambah Jadwal</button>
             <button class="btn btn-primary btn-sm" onclick="muatJadwal()">↻ Muat Ulang</button>
+          </div>
+          <!-- Jadwal aktif tanpa gelombang tampil di form gelombang mana pun -->
+          <div id="jadwal-peringatan" class="table-wrap" style="display:none;padding:14px 16px;margin-bottom:16px;border-color:rgba(245,158,11,.45)">
+            <div style="font-size:0.85rem;color:#b45309;font-weight:700;margin-bottom:8px" id="jadwal-peringatan-teks"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <select class="form-select" id="jadwal-peringatan-gelombang" style="width:auto;min-width:220px" aria-label="Gelombang tujuan"></select>
+              <button class="btn btn-primary btn-sm" id="btn-tetapkan-gelombang" onclick="tetapkanGelombangJadwalKosong()">
+                <div class="spinner"></div>
+                <span class="btn-text">Tetapkan gelombang</span>
+              </button>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="data-table" id="table-jadwal">
@@ -202,6 +218,7 @@
                   <th>Hari & Jam</th>
                   <th>Pengajar</th>
                   <th>Gender</th>
+                  <th>Gelombang</th>
                   <th>Kuota</th>
                   <th>Status</th>
                   <th>Aktif</th>
@@ -209,7 +226,7 @@
                 </tr>
               </thead>
               <tbody id="tbody-jadwal">
-                <tr><td colspan="9" class="no-data">Memuat data...</td></tr>
+                <tr><td colspan="10" class="no-data">Memuat data...</td></tr>
               </tbody>
             </table>
           </div>
@@ -544,10 +561,27 @@
       </div>
 
       <input type="hidden" id="edit-jadwal-id">
+      <div id="edit-jadwal-judul" style="font-weight:700;color:var(--ink-3);font-size:0.85rem;margin-bottom:12px"></div>
 
       <div class="form-group">
-        <label class="form-label">Program</label>
-        <div id="edit-jadwal-nama" style="font-weight:700;color:var(--ink);padding:8px 0"></div>
+        <label class="form-label" for="edit-program">Program <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="edit-program" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-hari">Hari <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="edit-hari" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-jam">Jam <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="edit-jam" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-pengajar">Pengajar</label>
+        <input class="form-input" id="edit-pengajar" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-gelombang">Gelombang</label>
+        <select class="form-select" id="edit-gelombang"></select>
       </div>
 
       <div class="form-group">
@@ -555,7 +589,7 @@
         <input class="form-input" type="number" id="edit-kuota" min="1" max="100">
       </div>
 
-      <div class="form-group" id="edit-gender-group">
+      <div class="form-group">
         <label class="form-label" for="edit-gender">Gender Peserta</label>
         <select class="form-select" id="edit-gender">
           <option value="">Semua</option>
@@ -632,6 +666,10 @@
         </select>
       </div>
       <div class="form-group">
+        <label class="form-label" for="new-gelombang">Gelombang</label>
+        <select class="form-select" id="new-gelombang"></select>
+      </div>
+      <div class="form-group">
         <label class="form-label" for="new-kuota">Kuota Maksimal</label>
         <input class="form-input" id="new-kuota" type="number" value="12" min="1">
       </div>
@@ -641,6 +679,35 @@
         <button class="btn btn-primary btn-sm" id="btn-simpan-jadwal-baru" onclick="simpanJadwalBaru()">
           <div class="spinner"></div>
           <span class="btn-text">Tambah Jadwal</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Salin Jadwal antar-gelombang -->
+  <div class="modal-backdrop" id="modal-salin-jadwal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Salin Jadwal</div>
+        <button class="modal-close" onclick="tutupModal('modal-salin-jadwal')">✕</button>
+      </div>
+      <p style="font-size:0.85rem;color:var(--ink-3);margin:0 0 14px">
+        Semua jadwal di gelombang asal disalin ke gelombang tujuan dengan ID baru (G&lt;tujuan&gt;-01, -02, …),
+        kursi terisi 0, status Tersedia, dan aktif. Sesuaikan hari, jam, atau pengajar lewat tombol ✏️ setelahnya.
+      </p>
+      <div class="form-group">
+        <label class="form-label" for="salin-dari">Dari gelombang</label>
+        <select class="form-select" id="salin-dari"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="salin-ke">Ke gelombang</label>
+        <select class="form-select" id="salin-ke"></select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="tutupModal('modal-salin-jadwal')">Batal</button>
+        <button class="btn btn-primary btn-sm" id="btn-salin-jadwal" onclick="salinJadwal()">
+          <div class="spinner"></div>
+          <span class="btn-text">Salin</span>
         </button>
       </div>
     </div>
@@ -678,6 +745,43 @@
           <option value="DIBATALKAN">DIBATALKAN</option>
         </select>
       </div>
+      <!-- Konten kartu "Tentang Program" di form pendaftaran (per gelombang) -->
+      <div style="border-top:1px solid var(--line);margin:18px 0 12px;padding-top:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+          <div style="font-size:0.95rem;font-weight:800;color:var(--ink)">Konten Tentang Program</div>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-salin-konten" onclick="salinKontenGelombangSebelumnya()">⧉ Salin dari gelombang lain</button>
+        </div>
+        <div style="font-size:0.8rem;color:var(--ink-3);margin-top:6px">Satu poin per baris untuk Materi, Persyaratan, dan Alur. Khusus Persyaratan, baris yang diapit bintang, mis. <code>*Ada denda*</code>, tampil sebagai peringatan. Di Biaya, nominal "Rp…" ditebalkan dan baris berawalan "GRATIS" tampil sebagai lencana.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="gel-deskripsi_program">Deskripsi Program</label>
+        <textarea class="form-textarea" id="gel-deskripsi_program" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="gel-materi">Materi</label>
+        <textarea class="form-textarea" id="gel-materi" rows="4"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="gel-intensitas">Intensitas</label>
+        <textarea class="form-textarea" id="gel-intensitas" rows="2"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="gel-persyaratan">Persyaratan</label>
+        <textarea class="form-textarea" id="gel-persyaratan" rows="4"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="gel-biaya_info">Biaya</label>
+        <textarea class="form-textarea" id="gel-biaya_info" rows="4"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="gel-alur">Alur Pendaftaran</label>
+        <textarea class="form-textarea" id="gel-alur" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="gel-kontak_wa">Kontak WhatsApp</label>
+        <input class="form-input" id="gel-kontak_wa" placeholder="Contoh: 0823-1699-3233" autocomplete="off">
+      </div>
+
       <div class="form-group">
         <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:0.875rem;font-weight:600">
           <input type="checkbox" id="gel-jadikan-aktif" style="margin-top:3px">

@@ -694,33 +694,107 @@ function arsipPendaftar() {
 
 function muatJadwal() {
   var tbody = document.getElementById('tbody-jadwal');
-  tbody.innerHTML = '<tr><td colspan="9" class="no-data">Memuat data...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="10" class="no-data">Memuat data...</td></tr>';
 
-  _adminGet({ action: 'admin.jadwal', token: state.token })
-    .then(function (res) {
+  // Daftar gelombang dibutuhkan untuk kolom, filter, dan pilihan di modal.
+  Promise.all([
+    _adminGet({ action: 'admin.jadwal', token: state.token }),
+    _muatDaftarGelombang()
+  ])
+    .then(function (hasil) {
+      var res = hasil[0];
       if (!res.ok) {
-        tbody.innerHTML = '<tr><td colspan="9" class="no-data">Gagal memuat data.</td></tr>';
+        if (res.error === 'UNAUTHORIZED') { logout(); return; }
+        tbody.innerHTML = '<tr><td colspan="10" class="no-data">Gagal memuat data.</td></tr>';
         return;
       }
       state.jadwal = res.data || [];
+      if (res.gelombang_aktif !== undefined) state.gelombangAktif = String(res.gelombang_aktif || '');
+      _isiFilterGelombangJadwal();
       renderTabelJadwal();
     })
     .catch(function () {
-      tbody.innerHTML = '<tr><td colspan="9" class="no-data">Koneksi bermasalah.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10" class="no-data">Koneksi bermasalah.</td></tr>';
     });
+}
+
+/** Muat daftar gelombang (sekali per sesi panel, kecuali dipaksa). Selalu resolve. */
+function _muatDaftarGelombang(paksa) {
+  if (state.gelombang && state.gelombang.length && !paksa) return Promise.resolve(state.gelombang);
+  return _adminGet({ action: 'admin.gelombang', token: state.token })
+    .then(function (res) {
+      if (res && res.ok) {
+        state.gelombang = res.data || [];
+        state.gelombangAktif = String(res.gelombang_aktif || '');
+      }
+      return state.gelombang || [];
+    })
+    .catch(function () { return state.gelombang || []; });
+}
+
+function _namaGelombang(id) {
+  var g = (state.gelombang || []).find(function (x) { return String(x.wave_id) === String(id); });
+  return g ? g.nama : 'Gelombang ' + id;
+}
+
+/**
+ * Opsi <select> gelombang. opsiKosong = label untuk nilai '' (mis. "Semua gelombang")
+ * atau null bila tidak boleh kosong.
+ */
+function _opsiGelombang(terpilih, opsiKosong) {
+  var html = opsiKosong !== null ? '<option value="">' + esc(opsiKosong) + '</option>' : '';
+  (state.gelombang || []).slice().reverse().forEach(function (g) {
+    var id = String(g.wave_id);
+    var aktif = id === String(state.gelombangAktif) ? ' (aktif)' : '';
+    html += '<option value="' + esc(id) + '"' + (id === String(terpilih) ? ' selected' : '') + '>' +
+            esc(id + ' — ' + g.nama + aktif) + '</option>';
+  });
+  return html;
+}
+
+function _isiFilterGelombangJadwal() {
+  var sel = document.getElementById('filter-gelombang-jadwal');
+  if (!sel) return;
+  var nilai = sel.value || 'aktif';
+  var html = '<option value="aktif">Gelombang aktif</option><option value="semua">Semua gelombang</option>' +
+             '<option value="__kosong">Tanpa gelombang</option>';
+  (state.gelombang || []).slice().reverse().forEach(function (g) {
+    html += '<option value="' + esc(String(g.wave_id)) + '">' + esc(g.wave_id + ' — ' + g.nama) + '</option>';
+  });
+  sel.innerHTML = html;
+  sel.value = nilai;
+  if (sel.value !== nilai) sel.value = 'aktif';
+}
+
+/** Sama dengan _jadwalBerlaku di server: kolom gelombang kosong = berlaku untuk semua. */
+function _jadwalTampilDiForm(j) {
+  return !j.gelombang || !state.gelombangAktif || String(j.gelombang) === String(state.gelombangAktif);
 }
 
 function renderTabelJadwal() {
   var tbody = document.getElementById('tbody-jadwal');
-  if (state.jadwal.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="no-data">Tidak ada data.</td></tr>';
+  var filter = (document.getElementById('filter-gelombang-jadwal') || {}).value || 'aktif';
+  var data = state.jadwal.filter(function (j) {
+    if (filter === 'semua')   return true;
+    if (filter === 'aktif')   return _jadwalTampilDiForm(j);
+    if (filter === '__kosong') return !j.gelombang;
+    return String(j.gelombang) === filter;
+  });
+
+  _renderPeringatanJadwal();
+
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" class="no-data">Tidak ada jadwal untuk filter ini.</td></tr>';
     return;
   }
 
   tbody.innerHTML = '';
-  state.jadwal.forEach(function (j) {
+  data.forEach(function (j) {
     var persen = j.kuota_maks > 0 ? Math.round((j.terisi / j.kuota_maks) * 100) : 0;
     var fillClass = persen >= 100 ? 'penuh' : persen >= 80 ? 'hampir' : '';
+    var selGel = j.gelombang
+      ? esc(_namaGelombang(j.gelombang))
+      : '<span style="color:#b45309" title="Tampil di form gelombang mana pun">Semua</span>';
 
     var tr = document.createElement('tr');
     tr.innerHTML =
@@ -729,13 +803,60 @@ function renderTabelJadwal() {
       '<td style="font-size:0.82rem">' + esc(j.hari) + '<br>' + esc(j.jam) + '</td>' +
       '<td style="font-size:0.82rem">' + (esc(j.pengajar) || '—') + '</td>' +
       '<td style="font-size:0.82rem">' + (esc(j.gender) || '—') + '</td>' +
-      '<td style="font-size:0.82rem">' + j.terisi + ' / ' + j.kuota_maks +
-        '<div class="kuota-bar"><div class="kuota-fill ' + fillClass + '" style="width:' + persen + '%"></div></div></td>' +
+      '<td style="font-size:0.82rem">' + selGel + '</td>' +
+      '<td style="font-size:0.82rem">' + esc(String(j.terisi)) + ' / ' + esc(String(j.kuota_maks)) +
+        '<div class="kuota-bar"><div class="kuota-fill ' + fillClass + '" style="width:' + Math.min(persen, 100) + '%"></div></div></td>' +
       '<td><span class="badge badge-' + esc(j.status_slot) + '">' + esc(j.status_slot) + '</span></td>' +
-      '<td>' + (j.active ? '✅' : '❌') + '</td>' +
+      '<td>' + (_jadwalAktif(j) ? '✅' : '❌') + '</td>' +
       '<td><button class="btn-icon" onclick="bukaEditJadwal(' + jsArg(j.jadwal_id) + ')">✏️</button></td>';
     tbody.appendChild(tr);
   });
+}
+
+function _jadwalAktif(j) {
+  return j.active === true || String(j.active).toLowerCase() === 'true';
+}
+
+/** Peringatan: jadwal AKTIF tanpa gelombang ikut tampil di form gelombang mana pun. */
+function _renderPeringatanJadwal() {
+  var box = document.getElementById('jadwal-peringatan');
+  if (!box) return;
+  var kosong = state.jadwal.filter(function (j) { return _jadwalAktif(j) && !j.gelombang; });
+  if (!kosong.length || !(state.gelombang || []).length) { box.style.display = 'none'; return; }
+  document.getElementById('jadwal-peringatan-teks').textContent =
+    kosong.length + ' jadwal aktif belum punya gelombang (' +
+    kosong.map(function (j) { return j.jadwal_id; }).join(', ') +
+    ') — jadwal ini tampil di form gelombang mana pun. Tetapkan gelombangnya:';
+  // Bawaan: gelombang SEBELUM gelombang aktif (jadwal lama biasanya milik angkatan lalu).
+  var lain = (state.gelombang || []).filter(function (g) { return String(g.wave_id) !== String(state.gelombangAktif); });
+  var bawaan = lain.length ? lain[lain.length - 1].wave_id : state.gelombangAktif;
+  document.getElementById('jadwal-peringatan-gelombang').innerHTML = _opsiGelombang(bawaan, null);
+  box.style.display = 'block';
+}
+
+function tetapkanGelombangJadwalKosong() {
+  var gel = document.getElementById('jadwal-peringatan-gelombang').value;
+  var ids = state.jadwal.filter(function (j) { return _jadwalAktif(j) && !j.gelombang; })
+                        .map(function (j) { return j.jadwal_id; });
+  if (!gel || !ids.length) return;
+  if (!confirm('Tetapkan ' + ids.length + ' jadwal (' + ids.join(', ') + ') ke "' + _namaGelombang(gel) + '"?')) return;
+
+  var btn = document.getElementById('btn-tetapkan-gelombang');
+  setLoading(btn, true);
+  var i = 0, gagal = 0;
+  function next() {
+    if (i >= ids.length) {
+      setLoading(btn, false);
+      tampilkanToast(gagal ? (gagal + ' jadwal gagal diperbarui.') : 'Gelombang jadwal ditetapkan.', gagal ? 'error' : 'success');
+      muatJadwal();
+      return;
+    }
+    _adminPost({ action: 'admin.updateJadwal', token: state.token, jadwal_id: ids[i], gelombang: gel })
+      .then(function (res) { if (!res || !res.ok) gagal++; })
+      .catch(function () { gagal++; })
+      .then(function () { i++; next(); });
+  }
+  next();
 }
 
 function bukaEditJadwal(id) {
@@ -743,34 +864,18 @@ function bukaEditJadwal(id) {
   if (!j) return;
 
   state.selectedJadwal = j;
-  // FIX: pulihkan handler Simpan. bukaEditGelombang/bukaModalTambahGelombang
-  // menimpanya dengan simpanGelombang — tanpa pemulihan ini, edit jadwal setelah
-  // membuka tab Gelombang menyimpan data gelombang (korupsi data, edit tak masuk).
-  document.getElementById('btn-simpan-jadwal').onclick = simpanJadwal;
   document.getElementById('edit-jadwal-id').value = j.jadwal_id;
-  document.getElementById('edit-jadwal-nama').textContent = j.program + ' — ' + j.hari + ', ' + j.jam;
+  document.getElementById('edit-jadwal-judul').textContent = 'ID jadwal: ' + j.jadwal_id;
+  document.getElementById('edit-program').value  = j.program  || '';
+  document.getElementById('edit-hari').value     = j.hari     || '';
+  document.getElementById('edit-jam').value      = j.jam      || '';
+  document.getElementById('edit-pengajar').value = j.pengajar || '';
+  document.getElementById('edit-gelombang').innerHTML = _opsiGelombang(j.gelombang || '', 'Semua gelombang (tanpa gelombang)');
   document.getElementById('edit-kuota').value = j.kuota_maks;
-  document.getElementById('edit-kuota').type = 'number';
-  document.getElementById('edit-kuota').previousElementSibling.textContent = 'Kuota Maksimal';
-  document.getElementById('edit-status-slot').innerHTML =
-    '<option value="TERSEDIA"' + (j.status_slot === 'TERSEDIA' ? ' selected' : '') + '>Tersedia</option>' +
-    '<option value="PENUH"'    + (j.status_slot === 'PENUH'    ? ' selected' : '') + '>Penuh</option>' +
-    '<option value="TUTUP"'    + (j.status_slot === 'TUTUP'    ? ' selected' : '') + '>Tutup</option>';
-  document.getElementById('edit-status-slot').previousElementSibling.textContent = 'Status Slot';
-
-  // Gender peserta — ikut divalidasi server (halaqah lawan jenis ditolak), jadi
-  // admin harus bisa memperbaiki bila sebuah jadwal salah label. Tampilkan grup ini
-  // kembali (bisa disembunyikan saat modal dipakai untuk edit Gelombang).
-  var gGroup = document.getElementById('edit-gender-group');
-  var gSelect = document.getElementById('edit-gender');
-  if (gGroup) gGroup.style.display = '';
-  if (gSelect) gSelect.value = j.gender || '';
-
-  if (j.active === true || j.active === 'true') {
-    document.getElementById('edit-active-ya').checked = true;
-  } else {
-    document.getElementById('edit-active-tidak').checked = true;
-  }
+  document.getElementById('edit-gender').value = j.gender || '';
+  // DITUTUP (ditulis manual di sheet) setara TUTUP: keduanya mengunci slot.
+  document.getElementById('edit-status-slot').value = j.status_slot === 'DITUTUP' ? 'TUTUP' : (j.status_slot || 'TERSEDIA');
+  document.getElementById(_jadwalAktif(j) ? 'edit-active-ya' : 'edit-active-tidak').checked = true;
 
   bukaModal('modal-jadwal');
 }
@@ -783,6 +888,8 @@ function bukaModalTambahJadwal() {
   document.getElementById('new-pengajar').value  = '';
   document.getElementById('new-gender').value    = '';
   document.getElementById('new-kuota').value     = '12';
+  document.getElementById('new-gelombang').innerHTML =
+    _opsiGelombang(state.gelombangAktif || '', 'Semua gelombang (tanpa gelombang)');
   bukaModal('modal-tambah-jadwal');
 }
 
@@ -810,13 +917,10 @@ function simpanJadwalBaru() {
     pengajar:    document.getElementById('new-pengajar').value.trim(),
     gender:      document.getElementById('new-gender').value,
     kuota_maks:  parseInt(document.getElementById('new-kuota').value) || 12,
-    terisi:      0,
-    status_slot: 'TERSEDIA',
-    active:      'true'
+    gelombang:   document.getElementById('new-gelombang').value
   };
 
-  fetch(CONFIG.BACKEND_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(body) })
-    .then(function(r) { return r.json(); })
+  _adminPost(body)
     .then(function(res) {
       setLoading(btn, false);
       if (res.ok) {
@@ -831,26 +935,31 @@ function simpanJadwalBaru() {
 }
 
 function simpanJadwal() {
-  var id = document.getElementById('edit-jadwal-id').value;
-  var kuota = parseInt(document.getElementById('edit-kuota').value);
-  var statusSlot = document.getElementById('edit-status-slot').value;
-  var genderEl = document.getElementById('edit-gender');
-  var active = (document.querySelector('input[name="edit-active"]:checked') || {value:'true'}).value === 'true';
   var btn = document.getElementById('btn-simpan-jadwal');
-
-  setLoading(btn, true);
+  var program = document.getElementById('edit-program').value.trim();
+  var hari    = document.getElementById('edit-hari').value.trim();
+  var jam     = document.getElementById('edit-jam').value.trim();
+  if (!program || !hari || !jam) {
+    tampilkanToast('Program, hari, dan jam tidak boleh kosong.', 'error');
+    return;
+  }
 
   var body = {
-    action: 'admin.updateJadwal',
-    token: state.token,
-    jadwal_id: id,
-    kuota_maks: kuota,
-    status_slot: statusSlot,
-    // Kirim gender hanya bila kontrolnya ada (modal dipakai untuk Jadwal).
-    gender: genderEl ? genderEl.value : undefined,
-    active: active
+    action:      'admin.updateJadwal',
+    token:       state.token,
+    jadwal_id:   document.getElementById('edit-jadwal-id').value,
+    program:     program,
+    hari:        hari,
+    jam:         jam,
+    pengajar:    document.getElementById('edit-pengajar').value.trim(),
+    gelombang:   document.getElementById('edit-gelombang').value,
+    kuota_maks:  parseInt(document.getElementById('edit-kuota').value),
+    status_slot: document.getElementById('edit-status-slot').value,
+    gender:      document.getElementById('edit-gender').value,
+    active:      (document.querySelector('input[name="edit-active"]:checked') || { value: 'true' }).value === 'true'
   };
 
+  setLoading(btn, true);
   _adminPost(body)
     .then(function (res) {
       setLoading(btn, false);
@@ -866,6 +975,42 @@ function simpanJadwal() {
       setLoading(btn, false);
       tampilkanToast('Koneksi bermasalah.', 'error');
     });
+}
+
+function bukaModalSalinJadwal() {
+  _muatDaftarGelombang().then(function (daftar) {
+    if (!daftar.length) { tampilkanToast('Belum ada gelombang. Buat dulu di tab Gelombang.', 'error'); return; }
+    // Bawaan: dari gelombang sebelum yang aktif → ke gelombang aktif.
+    var lain = daftar.filter(function (g) { return String(g.wave_id) !== String(state.gelombangAktif); });
+    var dari = lain.length ? lain[lain.length - 1].wave_id : '';
+    document.getElementById('salin-dari').innerHTML = _opsiGelombang(dari, 'Tanpa gelombang (jadwal lama)');
+    document.getElementById('salin-ke').innerHTML = _opsiGelombang(state.gelombangAktif || '', null);
+    bukaModal('modal-salin-jadwal');
+  });
+}
+
+function salinJadwal() {
+  var dari = document.getElementById('salin-dari').value;
+  var ke   = document.getElementById('salin-ke').value;
+  if (!ke) { tampilkanToast('Pilih gelombang tujuan.', 'error'); return; }
+  if (dari === ke) { tampilkanToast('Gelombang asal dan tujuan sama.', 'error'); return; }
+
+  var btn = document.getElementById('btn-salin-jadwal');
+  setLoading(btn, true);
+  _adminPost({ action: 'admin.salinJadwal', token: state.token, dari_gelombang: dari, ke_gelombang: ke })
+    .then(function (res) {
+      setLoading(btn, false);
+      if (res.ok) {
+        tampilkanToast(res.pesan + ' (' + res.jadwal_baru.join(', ') + ')', 'success');
+        tutupModal('modal-salin-jadwal');
+        var f = document.getElementById('filter-gelombang-jadwal');
+        if (f) f.value = 'semua';
+        muatJadwal();
+      } else {
+        tampilkanToast(res.pesan || res.error || 'Gagal menyalin jadwal.', 'error');
+      }
+    })
+    .catch(function () { setLoading(btn, false); tampilkanToast('Koneksi bermasalah.', 'error'); });
 }
 
 // ============================================================================
@@ -1328,6 +1473,10 @@ function togglePendaftaran() {
 // Editor gelombang memakai modal sendiri. Sebelumnya modal Jadwal dipinjam dan hanya
 // bisa mengubah tanggal mulai + status: nama, tanggal selesai, tahun ajaran, dan
 // gelombang aktif tidak bisa diatur dari panel sama sekali.
+// Field konten "Tentang Program" — sama dengan KONTEN_GELOMBANG di Admin.gs.
+var KONTEN_GELOMBANG = ['deskripsi_program', 'materi', 'intensitas', 'persyaratan',
+                        'biaya_info', 'alur', 'kontak_wa'];
+
 function _isiModalGelombang(g) {
   var aktifId = String(state.gelombangAktif || '');
   document.getElementById('gel-modal-title').textContent =
@@ -1338,6 +1487,12 @@ function _isiModalGelombang(g) {
   document.getElementById('gel-tahun').value   = g ? (g.tahun_ajaran || '') : '';
   document.getElementById('gel-status').value  = g ? (g.status || 'AKTIF') : 'AKTIF';
   document.getElementById('gel-jadikan-aktif').checked = g ? String(g.wave_id) === aktifId : true;
+  KONTEN_GELOMBANG.forEach(function (k) {
+    document.getElementById('gel-' + k).value = g ? (g[k] || '') : '';
+  });
+  // Tombol salin tampil bila ada gelombang LAIN yang punya konten (berguna saat menambah,
+  // maupun saat mengedit gelombang yang telanjur dibuat tanpa konten).
+  document.getElementById('btn-salin-konten').style.display = _sumberKontenGelombang() ? '' : 'none';
   bukaModal('modal-gelombang');
 }
 
@@ -1351,6 +1506,31 @@ function bukaEditGelombang(waveId) {
 function bukaModalTambahGelombang() {
   state.selectedGelombang = null;
   _isiModalGelombang(null);
+}
+
+/**
+ * Sumber "salin konten": gelombang terbaru (wave_id terbesar) yang punya konten, selain
+ * gelombang yang sedang diedit. null bila tidak ada.
+ */
+function _sumberKontenGelombang() {
+  var sedangDiedit = state.selectedGelombang ? String(state.selectedGelombang.wave_id) : '';
+  var daftar = (state.gelombang || []).filter(function (g) {
+    return String(g.wave_id) !== sedangDiedit &&
+           KONTEN_GELOMBANG.some(function (k) { return String(g[k] || '').trim(); });
+  }).sort(function (a, b) { return Number(b.wave_id) - Number(a.wave_id); });
+  return daftar[0] || null;
+}
+
+/** Isi textarea konten dari _sumberKontenGelombang(). */
+function salinKontenGelombangSebelumnya() {
+  var sumber = _sumberKontenGelombang();
+  if (!sumber) { tampilkanToast('Belum ada gelombang lain yang punya konten.', 'error'); return; }
+  var adaIsi = KONTEN_GELOMBANG.some(function (k) { return document.getElementById('gel-' + k).value.trim(); });
+  if (adaIsi && !confirm('Timpa konten yang sudah diisi dengan konten "' + sumber.nama + '"?')) return;
+  KONTEN_GELOMBANG.forEach(function (k) {
+    document.getElementById('gel-' + k).value = sumber[k] || '';
+  });
+  tampilkanToast('Konten disalin dari "' + sumber.nama + '". Periksa dan sesuaikan sebelum menyimpan.', 'info');
 }
 
 function simpanGelombang() {
@@ -1380,6 +1560,9 @@ function simpanGelombang() {
     status:           document.getElementById('gel-status').value,
     jadikan_aktif:    document.getElementById('gel-jadikan-aktif').checked ? 'true' : 'false'
   };
+  KONTEN_GELOMBANG.forEach(function (k) {
+    body[k] = document.getElementById('gel-' + k).value.replace(/\r\n/g, '\n').trim();
+  });
   if (!isNew) body.wave_id = state.selectedGelombang.wave_id;
 
   setLoading(btn, true);

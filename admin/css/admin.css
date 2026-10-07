@@ -164,6 +164,7 @@ html.theme-dark .orb-2 { background:linear-gradient(135deg,#23275e,#2d1f5e); opa
 .main-content {
   margin-left: var(--sidebar-w);
   flex: 1;
+  min-width: 0;   /* item flex: tanpa ini ikut melebar mengikuti tabel lebar di layar HP */
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -301,7 +302,8 @@ html.theme-dark .orb-2 { background:linear-gradient(135deg,#23275e,#2d1f5e); opa
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--r);
-  overflow: hidden;
+  overflow-x: auto;   /* tabel lebar digeser di dalam kotak, kolom Aksi tetap terjangkau */
+  overflow-y: hidden;
   box-shadow: var(--sh-sm);
 }
 
@@ -387,7 +389,8 @@ html.theme-dark .orb-2 { background:linear-gradient(135deg,#23275e,#2d1f5e); opa
    sebelumnya tanpa definisi CSS sehingga kolom Status tampil polos. */
 .badge-TERSEDIA   { background: rgba(16,185,129,.1);      color: #047857; border-color: rgba(16,185,129,.22); }
 .badge-PENUH      { background: rgba(245,158,11,.12);     color: #92400e; border-color: rgba(245,158,11,.28); }
-.badge-TUTUP      { background: rgba(239,68,68,.1);       color: #b91c1c; border-color: rgba(239,68,68,.22); }
+.badge-TUTUP,
+.badge-DITUTUP    { background: rgba(239,68,68,.1);       color: #b91c1c; border-color: rgba(239,68,68,.22); }
 
 html.theme-dark .badge-WAWANCARA { color: #fbbf24; }
 html.theme-dark .badge-BERKAS_OK,
