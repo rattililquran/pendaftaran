@@ -1,0 +1,40 @@
+name: Pemanas backend PMB
+
+# Memanggil backend Apps Script secara berkala agar web app jarang "cold start".
+# Latar: 7 Okt 2026 malam, latensi terukur 13–59 detik dan sebagian berakhir HTTP 404,
+# termasuk untuk permintaan yang tidak membaca sheet sama sekali.
+# Log setiap run sekaligus menjadi catatan latensi backend (tab Actions).
+#
+# Catatan GitHub: jadwal cron bisa tertunda beberapa menit, karena itu setiap run berisi
+# 4 panggilan berjarak 2,5 menit. Workflow terjadwal di repo publik otomatis dinonaktifkan
+# GitHub setelah 60 hari tanpa aktivitas repo — aktifkan lagi dari tab Actions bila perlu.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: pemanas-backend
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  panggil:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Panggil ?action=info 4 kali (jeda 150 detik)
+        env:
+          URL_INFO: https://script.google.com/macros/s/AKfycbxYlR1MnbxBEmDpr5GqahYO3g2v6wUZfrda-N_VrgQua_5uKlRJx1X81-5lLim0Q9jTyw/exec?action=info
+        run: |
+          for i in 1 2 3 4; do
+            # HTTP 000 = gagal tersambung / lewat batas 90 detik
+            hasil=$(curl -s -o respons.json -L --max-time 90 -w '%{time_total}s HTTP %{http_code}' "$URL_INFO" || true)
+            echo "$(TZ=Asia/Jakarta date +%H:%M:%S) WIB  panggilan $i: $hasil  $(head -c 60 respons.json 2>/dev/null)"
+            if [ "$i" -lt 4 ]; then sleep 150; fi
+          done
+          # Selalu sukses: lambat/404 dicatat di log, bukan dijadikan run gagal
+          # (run gagal memicu email notifikasi berulang).
+          exit 0
