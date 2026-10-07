@@ -59,6 +59,12 @@
         <div style="font-family:'Amiri',serif;font-size:1.3rem;color:#c0392b;text-align:center;margin-bottom:12px;line-height:2">بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيمِ</div>
         <h1 style="font-size:1.15rem;font-weight:800;color:var(--ink);margin-bottom:8px;text-align:center">Mari Berlomba-lomba dalam Kebaikan</h1>
         <p style="font-size:0.85rem;color:var(--ink-3);line-height:1.7;text-align:center;margin-bottom:4px">Alhamdulillah, pendaftaran Anda telah berhasil.<br>Kini ajak saudara-saudara Anda untuk ikut bergabung.</p>
+        <!-- Nomor dari ?no= (dialihkan dari form) — pengingat agar tidak hilang setelah pindah halaman. -->
+        <div class="nomor-box" id="nomor-share" hidden style="margin:14px 0 4px">
+          <div class="nomor-label">Nomor Pendaftaran Anda</div>
+          <div class="nomor-value" id="nomor-share-val"></div>
+          <a id="nomor-share-link" href="status.html" style="display:inline-block;margin-top:8px;font-size:0.82rem;font-weight:700;color:var(--primary)">Cek status pendaftaran →</a>
+        </div>
         <div class="hadits-box">
           <div class="hadits-arab">اَلدَّالُّ عَلَى الْخَيْرِ كَفَاعِلِهِ</div>
           <div class="hadits-terjemah">"Orang yang menunjukkan kepada kebaikan,<br>maka ia mendapatkan pahala seperti orang yang melakukannya."</div>
@@ -119,6 +125,13 @@
       '👇 Daftar sekarang:\n' + LINK + '\n\n' +
       'Baarakallahu fiikum';
     document.getElementById('pesan-teks').textContent = pesanWA;
+    (function () {
+      var no = (new URLSearchParams(window.location.search).get('no') || '').trim().toUpperCase();
+      if (!/^RTL\d{4,}$/.test(no)) return;          // hanya format nomor yang sah
+      document.getElementById('nomor-share-val').textContent = no;
+      document.getElementById('nomor-share-link').href = 'status.html?no=' + encodeURIComponent(no);
+      document.getElementById('nomor-share').hidden = false;
+    })();
     function shareWA(e){e.preventDefault();window.open('https://wa.me/?text='+encodeURIComponent(pesanWA),'_blank')}
     function shareFB(e){e.preventDefault();window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(LINK),'_blank','width=600,height=400')}
     function shareTW(e){e.preventDefault();var t='Alhamdulillah! Baru mendaftar ke Rattilil Quran\nMari berlomba dalam kebaikan! '+LINK;window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(t),'_blank')}

@@ -1563,6 +1563,13 @@ html.theme-dark body {
   line-height: 1.5;
 }
 
+/* Belum dibuka (sebelum tanggal mulai): kuning, selaras label "Segera Dibuka" di beranda */
+.banner-ditutup.segera {
+  background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
+  box-shadow: 0 2px 12px rgba(146,64,14,0.25);
+}
+.banner-ditutup.segera p { color: rgba(255,255,255,0.85); }
+
 /* Tombol submit disabled state karena pendaftaran ditutup */
 .btn-submit-disabled {
   opacity: 0.5;

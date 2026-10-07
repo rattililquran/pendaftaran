@@ -247,7 +247,7 @@ function deskripsiStatus(status) {
     'TERDAFTAR': 'Bismillah. Data pendaftaran Anda telah kami terima dengan baik. Tim kami sedang memproses berkas Anda. Semoga Allah memudahkan setiap langkah.',
     'BERKAS_OK': 'Alhamdulillah. Berkas Anda telah diperiksa dan dinyatakan lengkap. Menunggu jadwal wawancara. Baarakallahu fiikum.',
     'WAWANCARA': 'Alhamdulillah. Anda dijadwalkan untuk wawancara. Semoga Allah memberi kemudahan dan kelancaran. Tawakkal ilallah.',
-    'DITERIMA':  'Alhamdulillahirabbil\'aalamin. Selamat! Anda resmi diterima sebagai murid Rattilil Qur\'an. Semoga Allah memberkahi perjalanan Anda dalam menghafal dan memahami Al-Qur\'an. بَارَكَ اللهُ فِيكُمْ',
+    'DITERIMA':  'Alhamdulillahirabbil\'aalamin. Selamat! Anda resmi diterima sebagai murid Rattilil Qur\'an. Semoga Allah memberkahi perjalanan Anda dalam mempelajari Al-Qur\'an. بَارَكَ اللهُ فِيكُمْ',
     'DITOLAK':   'Innalillahi wa inna ilaihi raji\'un. Mohon maaf, pendaftaran Anda belum dapat kami terima saat ini. Semoga Allah membuka pintu kebaikan yang lebih baik. Hubungi admin untuk informasi lebih lanjut.',
     'BATAL':     'Pendaftaran Anda telah dibatalkan. Bila ini keliru atau Anda ingin mendaftar kembali, silakan hubungi admin.'
   };

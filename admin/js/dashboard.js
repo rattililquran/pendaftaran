@@ -249,7 +249,7 @@ function renderTabelPendaftar() {
       '<td style="font-size:0.82rem">' + (esc(row.gender) || '—') + '</td>' +
       '<td style="font-size:0.82rem">' + esc(row.jadwal_id) + '</td>' +
       '<td style="font-size:0.82rem">' + formatTanggal(row.timestamp) + '</td>' +
-      '<td><span class="badge badge-' + row.status + '">' + labelStatus(row.status) + '</span></td>' +
+      '<td><span class="badge badge-' + esc(row.status) + '">' + esc(labelStatus(row.status)) + '</span></td>' +
       '<td style="white-space:nowrap">' +
         '<button class="btn-icon btn-icon-wa" title="Chat WhatsApp" onclick="chatWa(' + jsArg(row.no_pendaftaran) + ')">💬</button>' +
         '<button class="btn-icon" title="Detail" onclick="bukaDetal(' + jsArg(row.no_pendaftaran) + ')">✏️</button>' +
@@ -598,8 +598,8 @@ function muatRiwayatStatus(no) {
       }
       box.innerHTML = res.data.map(function (r) {
         var ket = r.status_lama
-          ? labelStatus(r.status_lama) + ' → <strong>' + labelStatus(r.status_baru) + '</strong>'
-          : '<strong>' + labelStatus(r.status_baru) + '</strong>';
+          ? esc(labelStatus(r.status_lama)) + ' → <strong>' + esc(labelStatus(r.status_baru)) + '</strong>'
+          : '<strong>' + esc(labelStatus(r.status_baru)) + '</strong>';
         return '<div class="timeline-item">' +
           '<div class="timeline-dot badge-' + esc(r.status_baru) + '"></div>' +
           '<div class="timeline-body">' +

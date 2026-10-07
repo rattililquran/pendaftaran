@@ -292,13 +292,23 @@ function tampilkanBannerGelombang(info) {
   // tujuan mode uji justru menembus gate untuk menguji form. Server tetap dry-run.
   if (!info.pendaftaran_buka) {
     // Alasan dari server: belum dibuka (sebelum tgl_mulai), sudah berakhir, atau ditutup admin.
+    // Belum dibuka = kabar baik yang tertunda: kuning "Segera Dibuka" (selaras beranda),
+    // bukan merah "Ditutup" yang terkesan sudah berakhir.
+    var segera = info.alasan_tutup === 'BELUM_DIBUKA';
     var elPesanTutup = document.getElementById('banner-ditutup-pesan');
     if (elPesanTutup && info.pesan_tutup) elPesanTutup.textContent = info.pesan_tutup;
-    if (bannerTutup) bannerTutup.style.display = 'flex';
+    var elJudulTutup = document.getElementById('banner-ditutup-judul');
+    if (elJudulTutup) elJudulTutup.textContent = segera ? 'Pendaftaran Segera Dibuka' : 'Pendaftaran Saat Ini Ditutup';
+    if (bannerTutup) {
+      var elIkonTutup = bannerTutup.querySelector('.banner-ditutup-icon');
+      if (elIkonTutup) elIkonTutup.textContent = segera ? '⏳' : '🔒';
+      bannerTutup.classList.toggle('segera', segera);
+      bannerTutup.style.display = 'flex';
+    }
     if (btnLanjut1 && !state.modeUji) {
       btnLanjut1.disabled  = true;
       btnLanjut1.classList.add('btn-submit-disabled');
-      btnLanjut1.title     = 'Pendaftaran saat ini ditutup.';
+      btnLanjut1.title     = segera ? 'Pendaftaran belum dibuka.' : 'Pendaftaran saat ini ditutup.';
     }
   }
 }
