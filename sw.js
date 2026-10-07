@@ -3,7 +3,7 @@
  * Rattilil Qur'an PMB
  */
 
-var CACHE_NAME = 'rattilil-pmb-v14';
+var CACHE_NAME = 'rattilil-pmb-v15';
 var ASSETS = [
   './',
   './index.html',
@@ -16,6 +16,7 @@ var ASSETS = [
   './js/kota-list.js',
   './js/app.js',
   './js/status.js',
+  './js/tema.js',
   './manifest.json'
 ];
 
