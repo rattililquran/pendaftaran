@@ -217,7 +217,7 @@
     function fetchInfo() {
       var url = CONFIG.BACKEND_URL + '?action=info';
       var ctrl = new AbortController();
-      var timer = setTimeout(function() { ctrl.abort(); }, CONFIG.REQUEST_TIMEOUT || 30000);
+      var timer = setTimeout(function() { ctrl.abort(); }, CONFIG.REQUEST_TIMEOUT || 60000);
       return fetch(url, { method: 'GET', signal: ctrl.signal })
         .then(function(r) { clearTimeout(timer); return r.json(); });
     }

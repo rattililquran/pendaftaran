@@ -1003,7 +1003,7 @@ function fetchBackend(method, params) {
     return Promise.race([
       fetch(url).then(function(r) { return r.json(); }),
       new Promise(function(_, reject) {
-        setTimeout(function() { reject(new Error('timeout')); }, CONFIG.REQUEST_TIMEOUT || 30000);
+        setTimeout(function() { reject(new Error('timeout')); }, CONFIG.REQUEST_TIMEOUT || 60000);
       })
     ]);
   }
@@ -1017,7 +1017,7 @@ function fetchBackend(method, params) {
   return Promise.race([
     fetch(url, { method: 'POST', body: searchParams }).then(function(r) { return r.json(); }),
     new Promise(function(_, reject) {
-      setTimeout(function() { reject(new Error('timeout')); }, CONFIG.REQUEST_TIMEOUT || 30000);
+      setTimeout(function() { reject(new Error('timeout')); }, CONFIG.REQUEST_TIMEOUT || 60000);
     })
   ]);
 }

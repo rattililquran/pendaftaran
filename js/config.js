@@ -10,6 +10,8 @@ var CONFIG = {
   // Nama institusi (tampil di UI)
   NAMA_INSTITUSI: 'Rattilil Qur\'an',
 
-  // Timeout request (ms)
-  REQUEST_TIMEOUT: 30000
+  // Timeout request (ms). 60 detik: Apps Script bisa butuh >30 detik saat cold start
+  // (terukur 36,7 detik pada 7 Okt 2026). Submit yang melewati batas ini aman dicoba
+  // ulang — client_token yang sama mengembalikan nomor pendaftaran yang sama.
+  REQUEST_TIMEOUT: 60000
 };
