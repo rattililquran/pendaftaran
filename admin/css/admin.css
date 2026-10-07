@@ -764,3 +764,18 @@ html.theme-dark .badge-DITOLAK   { color: #f87171; }
   font-size: 0.8rem; color: var(--ink-3);
   margin-top: 2px; white-space: pre-wrap;
 }
+
+/* ============================================================
+   KETERBACAAN HP — audit Okt 2026
+   ============================================================ */
+/* Tombol login penuh lebar & mudah diketuk; tautan kembali kontras ≥4.5:1. */
+#btn-login { width: 100%; min-height: 46px; font-size: 0.95rem; }
+.login-back { text-align: center; margin-top: 20px; font-size: 0.88rem; }
+.login-back a { display: inline-block; padding: 10px 4px; color: var(--primary-3); font-weight: 600; }
+html.theme-dark .login-back a { color: var(--primary); }
+
+@media (max-width: 768px) {
+  /* iOS Safari memperbesar halaman bila kolom isian < 16px saat difokus. */
+  .form-input, .form-select, .form-textarea,
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px; }
+}

@@ -1588,3 +1588,60 @@ html.theme-dark body {
   .banner-gelombang-nama  { font-size: 0.88rem; }
   .banner-ditutup strong  { font-size: 0.88rem; }
 }
+
+/* ============================================================
+   KETERBACAAN & KONTRAS — audit HP Okt 2026
+   Teks bantuan, label, dan footer di HP sebelumnya 10–12px dengan kontras
+   2.4–3.6:1 (--ink-4, --primary). Diseragamkan: bacaan ≥14px, bantuan ≥13px,
+   label ≥11.5px; teks kecil memakai --ink-3 (4.8:1 terang / 6.7:1 gelap) dan
+   tautan memakai --link (5.9:1 terang).
+   ============================================================ */
+:root { --link: #0369a1; }
+html.theme-dark { --link: #38bdf8; }
+
+.form-hint,
+.site-footer { color: var(--ink-3); }
+.step-ind:not(.active):not(.done) .step-dot { color: var(--ink-3); }
+.form-label .required { color: #dc2626; }
+html.theme-dark .form-label .required { color: #f87171; }
+.kartu-info-cta { color: var(--link); }
+.nomor-label { color: #1d4ed8; }
+html.theme-dark .nomor-label { color: var(--primary); }
+
+/* Tombol ✕ modal sukses: area ketuk 40×40 */
+.modal-tutup {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 40px; min-height: 40px;
+  background: none; border: none; cursor: pointer;
+  font-size: 1.2rem; color: var(--ink-3); border-radius: var(--r-sm);
+}
+.modal-tutup:hover { background: var(--soft); }
+
+@media (max-width: 520px) {
+  .form-hint,
+  .form-error              { font-size: 13px; line-height: 1.5; }
+  .step-dot                { width: 32px; height: 32px; font-size: 12.5px; }
+  .site-quote              { font-size: 11.5px; letter-spacing: 1.2px; }
+  .card-subtitle           { font-size: 14px; line-height: 1.6; }
+  .banner-ditutup strong   { font-size: 15px; }
+  .banner-ditutup p        { font-size: 14px; }
+  .banner-gelombang-nama   { font-size: 15px; }
+  .banner-gelombang-periode{ font-size: 13px; }
+  .banner-gelombang-badge  { font-size: 12px; }
+  .kartu-info-judul        { font-size: 15px; }
+  .kartu-info-sub          { font-size: 13.5px; line-height: 1.5; }
+  .kartu-info-cta          { font-size: 14px; }
+  .site-footer             { font-size: 13px; }
+  .nomor-label             { font-size: 12px; }
+  .modal-subtitle          { font-size: 14.5px; }
+  .modal-note-penting-body { font-size: 13.5px; }
+  .nav-back                { font-size: 14px; padding: 10px 14px; min-height: 42px; }
+}
+
+/* Kartu "Tentang Program" di layar sempit: teks tidak terpotong-potong;
+   tautan "Selengkapnya" turun ke barisnya sendiri. */
+@media (max-width: 400px) {
+  .kartu-info-link { flex-wrap: wrap; row-gap: 8px; }
+  .kartu-info-body { flex: 1 1 0; min-width: 0; }
+  .kartu-info-cta  { flex-basis: 100%; padding-left: 58px; }
+}

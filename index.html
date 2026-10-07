@@ -551,10 +551,10 @@
           <div style="width:40px;height:40px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">🔍</div>
           <div>
             <div style="font-size:0.9rem;font-weight:800;color:var(--ink);margin-bottom:2px">Sudah mendaftar?</div>
-            <div style="font-size:0.78rem;color:var(--ink-3)">Cek status pendaftaran Anda di sini</div>
+            <div style="font-size:0.85rem;color:var(--ink-3)">Cek status pendaftaran Anda di sini</div>
           </div>
         </div>
-        <div style="font-size:0.85rem;font-weight:700;color:var(--primary);white-space:nowrap">Cek Status →</div>
+        <div style="font-size:0.9rem;font-weight:700;color:var(--link);white-space:nowrap">Cek Status →</div>
       </a>
     </div>
 
@@ -567,7 +567,7 @@
   <div class="modal-backdrop" id="modal-sukses" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal">
       <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-        <button onclick="document.getElementById('modal-sukses').classList.remove('visible')" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--ink-3);padding:4px 8px;border-radius:var(--r-sm)">✕</button>
+        <button type="button" class="modal-tutup" aria-label="Tutup" onclick="document.getElementById('modal-sukses').classList.remove('visible')">✕</button>
       </div>
 
       <div class="modal-icon" aria-hidden="true">✓</div>
