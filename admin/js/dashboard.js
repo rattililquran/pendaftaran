@@ -1473,10 +1473,6 @@ function togglePendaftaran() {
 // Editor gelombang memakai modal sendiri. Sebelumnya modal Jadwal dipinjam dan hanya
 // bisa mengubah tanggal mulai + status: nama, tanggal selesai, tahun ajaran, dan
 // gelombang aktif tidak bisa diatur dari panel sama sekali.
-// Field konten "Tentang Program" — sama dengan KONTEN_GELOMBANG di Admin.gs.
-var KONTEN_GELOMBANG = ['deskripsi_program', 'materi', 'intensitas', 'persyaratan',
-                        'biaya_info', 'alur', 'kontak_wa'];
-
 function _isiModalGelombang(g) {
   var aktifId = String(state.gelombangAktif || '');
   document.getElementById('gel-modal-title').textContent =
@@ -1487,12 +1483,6 @@ function _isiModalGelombang(g) {
   document.getElementById('gel-tahun').value   = g ? (g.tahun_ajaran || '') : '';
   document.getElementById('gel-status').value  = g ? (g.status || 'AKTIF') : 'AKTIF';
   document.getElementById('gel-jadikan-aktif').checked = g ? String(g.wave_id) === aktifId : true;
-  KONTEN_GELOMBANG.forEach(function (k) {
-    document.getElementById('gel-' + k).value = g ? (g[k] || '') : '';
-  });
-  // Tombol salin tampil bila ada gelombang LAIN yang punya konten (berguna saat menambah,
-  // maupun saat mengedit gelombang yang telanjur dibuat tanpa konten).
-  document.getElementById('btn-salin-konten').style.display = _sumberKontenGelombang() ? '' : 'none';
   bukaModal('modal-gelombang');
 }
 
@@ -1506,31 +1496,6 @@ function bukaEditGelombang(waveId) {
 function bukaModalTambahGelombang() {
   state.selectedGelombang = null;
   _isiModalGelombang(null);
-}
-
-/**
- * Sumber "salin konten": gelombang terbaru (wave_id terbesar) yang punya konten, selain
- * gelombang yang sedang diedit. null bila tidak ada.
- */
-function _sumberKontenGelombang() {
-  var sedangDiedit = state.selectedGelombang ? String(state.selectedGelombang.wave_id) : '';
-  var daftar = (state.gelombang || []).filter(function (g) {
-    return String(g.wave_id) !== sedangDiedit &&
-           KONTEN_GELOMBANG.some(function (k) { return String(g[k] || '').trim(); });
-  }).sort(function (a, b) { return Number(b.wave_id) - Number(a.wave_id); });
-  return daftar[0] || null;
-}
-
-/** Isi textarea konten dari _sumberKontenGelombang(). */
-function salinKontenGelombangSebelumnya() {
-  var sumber = _sumberKontenGelombang();
-  if (!sumber) { tampilkanToast('Belum ada gelombang lain yang punya konten.', 'error'); return; }
-  var adaIsi = KONTEN_GELOMBANG.some(function (k) { return document.getElementById('gel-' + k).value.trim(); });
-  if (adaIsi && !confirm('Timpa konten yang sudah diisi dengan konten "' + sumber.nama + '"?')) return;
-  KONTEN_GELOMBANG.forEach(function (k) {
-    document.getElementById('gel-' + k).value = sumber[k] || '';
-  });
-  tampilkanToast('Konten disalin dari "' + sumber.nama + '". Periksa dan sesuaikan sebelum menyimpan.', 'info');
 }
 
 function simpanGelombang() {
@@ -1560,9 +1525,6 @@ function simpanGelombang() {
     status:           document.getElementById('gel-status').value,
     jadikan_aktif:    document.getElementById('gel-jadikan-aktif').checked ? 'true' : 'false'
   };
-  KONTEN_GELOMBANG.forEach(function (k) {
-    body[k] = document.getElementById('gel-' + k).value.replace(/\r\n/g, '\n').trim();
-  });
   if (!isNew) body.wave_id = state.selectedGelombang.wave_id;
 
   setLoading(btn, true);
