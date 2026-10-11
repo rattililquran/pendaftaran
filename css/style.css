@@ -1715,3 +1715,45 @@ html.theme-dark .theme-toggle .i-moon { display: block; }
 }
 html.theme-dark .form-judul em { background-image: linear-gradient(135deg, #38bdf8, #818cf8); }
 @media (max-width: 520px) { .page-wrapper { padding-top: 20px; } }
+
+/* ============================================================
+   LATAR FOTO — foto "Program" situs utama (mushaf, tasbih, lentera)
+   di bagian atas halaman, sama dengan hero program.html. Selubung krem
+   hangat (tema terang) / biru gelap (tema gelap) menjaga teks tetap
+   kontras, lalu larut ke warna latar sebelum kartu formulir (Okt 2026).
+   ============================================================ */
+:root { --veil-hangat: 250,246,239; --veil-bg: 246,249,252; }
+html.theme-dark { --veil-hangat: 7,14,28; --veil-bg: 7,14,28; }
+.latar-foto {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: clamp(560px, 80vh, 780px);
+  z-index: 0; overflow: hidden; pointer-events: none;
+}
+.latar-foto picture, .latar-foto img { display: block; width: 100%; height: 100%; }
+.latar-foto img { object-fit: cover; object-position: 50% 82%; filter: saturate(1.2) brightness(1.03); }
+.latar-foto::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg,
+    rgba(var(--veil-hangat),.84) 0%,
+    rgba(var(--veil-hangat),.7) 42%,
+    rgba(var(--veil-bg),.88) 78%,
+    rgba(var(--veil-bg),1) 100%);
+}
+html.theme-dark .latar-foto::after {
+  background: linear-gradient(180deg,
+    rgba(var(--veil-hangat),.9) 0%,
+    rgba(var(--veil-hangat),.8) 42%,
+    rgba(var(--veil-bg),.93) 78%,
+    rgba(var(--veil-bg),1) 100%);
+}
+@media (max-width: 900px) {
+  .latar-foto img { object-position: center 100%; }
+}
+/* Teks kecil di atas foto: tanpa transparansi agar tetap ≥4.5:1. */
+.site-quote { opacity: 1; }
+/* Dua kartu tautan bertumpuk: jarak dirapatkan agar terbaca sebagai satu kelompok. */
+.kartu-info-link + .kartu-info-link { margin-top: -6px; }
+/* Label langkah yang belum aktif dipertegas agar terbaca di atas foto
+   (aktif & selesai tetap memakai aturan .step-ind.active/.done yang lebih spesifik). */
+.step-label { color: var(--ink-2); }
+html.theme-dark .step-label { color: var(--ink-3); }

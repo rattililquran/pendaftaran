@@ -44,6 +44,17 @@
   <div class="orb orb-3" aria-hidden="true"></div>
 
   <div class="page-wrapper">
+    <!-- Latar foto "Program" situs utama (sama dengan hero program.html):
+         tampil di bagian atas, larut ke warna latar sebelum kartu formulir. -->
+    <div class="latar-foto" aria-hidden="true">
+      <picture>
+        <source media="(max-width:900px)" type="image/webp" srcset="/assets/images/Program-mobile-780.webp 780w, /assets/images/Program-mobile-1170.webp 1170w" sizes="100vw">
+        <source media="(max-width:900px)" srcset="/assets/images/Program-mobile-780.jpg 780w, /assets/images/Program-mobile-1170.jpg 1170w" sizes="100vw">
+        <source type="image/webp" srcset="/assets/images/Program-desktop-1280.webp 1280w, /assets/images/Program-desktop-1920.webp 1920w" sizes="100vw">
+        <source srcset="/assets/images/Program-desktop-1280.jpg 1280w, /assets/images/Program-desktop-1920.jpg 1920w" sizes="100vw">
+        <img src="/assets/images/Program-desktop-1280.jpg" alt="" decoding="async" fetchpriority="high">
+      </picture>
+    </div>
     <div class="container">
 
       <!-- Header -->
@@ -72,6 +83,17 @@
           <div class="kartu-info-sub">Info lengkap: materi, biaya, syarat &amp; alur pendaftaran angkatan ini.</div>
         </div>
         <div class="kartu-info-cta">Selengkapnya &rarr;</div>
+      </a>
+
+      <!-- Kartu: Sudah mendaftar? — di atas, agar pendaftar yang ingin cek status
+           tidak perlu menggulir melewati seluruh formulir. -->
+      <a id="kartu-cek-status" class="kartu-info-link" href="status.html">
+        <div class="kartu-info-icon" aria-hidden="true">&#128269;</div>
+        <div class="kartu-info-body">
+          <div class="kartu-info-judul">Sudah mendaftar?</div>
+          <div class="kartu-info-sub">Cek status pendaftaran Anda di sini</div>
+        </div>
+        <div class="kartu-info-cta">Cek Status &rarr;</div>
       </a>
 
       <!-- Banner Pendaftaran Ditutup -->
@@ -534,33 +556,6 @@
       </div>
 
     </div><!-- /container -->
-
-    <!-- Cek Status Banner -->
-    <div style="width:100%;max-width:560px;margin-top:16px;position:relative;z-index:1;">
-      <a href="status.html" style="
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        background:var(--card);
-        border:1.5px solid var(--line);
-        border-radius:var(--r);
-        padding:16px 20px;
-        text-decoration:none;
-        box-shadow:var(--sh-sm);
-        transition:transform .15s, box-shadow .2s, border-color .15s;
-        gap:12px;
-      " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh)';this.style.borderColor='var(--primary)'"
-         onmouseout="this.style.transform='';this.style.boxShadow='var(--sh-sm)';this.style.borderColor='var(--line)'">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:40px;height:40px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">🔍</div>
-          <div>
-            <div style="font-size:0.9rem;font-weight:800;color:var(--ink);margin-bottom:2px">Sudah mendaftar?</div>
-            <div style="font-size:0.85rem;color:var(--ink-3)">Cek status pendaftaran Anda di sini</div>
-          </div>
-        </div>
-        <div style="font-size:0.9rem;font-weight:700;color:var(--link);white-space:nowrap">Cek Status →</div>
-      </a>
-    </div>
 
     <footer class="site-footer">
       <p>© <span id="tahun-footer"></span> Rattilil Qur'an</p>
