@@ -376,7 +376,7 @@ function bulkUpdateStatus() {
 function setWaiting(no, jadikanWaiting) {
   var pesan = jadikanWaiting
     ? 'Turunkan pendaftar ini ke daftar tunggu?'
-    : 'Promosikan pendaftar ini menjadi terdaftar (confirmed)? Email pemberitahuan akan dikirim bila ada email.';
+    : 'Naikkan pendaftar ini dari daftar tunggu ke kursi? Email pemberitahuan akan dikirim bila ada email.';
   if (!confirm(pesan)) return;
   _adminPost({ action: 'admin.setWaiting', token: state.token, no_pendaftaran: no,
                waiting_list: jadikanWaiting ? 'true' : 'false' })
@@ -421,7 +421,7 @@ function _bulkRun(nos, fn, okMsg) {
   setProgress(0);
   setLocked(true);
 
-  var i = 0, ok = 0, fail = 0;
+  var i = 0, ok = 0, fail = 0, naik = 0, lebihKuota = 0, emailGagal = 0;
   function next() {
     if (i >= nos.length) {
       setLocked(false);
@@ -429,14 +429,25 @@ function _bulkRun(nos, fn, okMsg) {
       // Kosongkan catatan setelah selesai
       var cEl = document.getElementById('bulk-catatan');
       if (cEl) cEl.value = '';
-      tampilkanToast(okMsg + ': ' + ok + ' berhasil' + (fail ? ', ' + fail + ' gagal' : ''), fail ? 'error' : 'success');
+      tampilkanToast(okMsg + ': ' + ok + ' berhasil' + (fail ? ', ' + fail + ' gagal' : '') +
+                     (naik ? ' · ' + naik + ' pendaftar naik dari daftar tunggu ke kursi' : ''),
+                     fail ? 'error' : 'success', naik ? 7000 : 4000);
+      if (lebihKuota) tampilkanToast(lebihKuota + ' pendaftar yang diaktifkan lagi kini melebihi kuota jadwalnya. ' +
+                                     'Turunkan ke daftar tunggu bila perlu.', 'warning', 10000);
+      if (emailGagal) tampilkanToast(emailGagal + ' email pemberitahuan gagal terkirim — lihat ringkasan email.', 'error', 8000);
       state.selected = {};
       muatStats();
       muatPendaftar();
       return;
     }
     fn(nos[i])
-      .then(function (res) { if (res && res.ok) ok++; else fail++; })
+      .then(function (res) {
+        if (!(res && res.ok)) { fail++; return; }
+        ok++;
+        naik += _daftarPromosi(res).length;
+        if (res.peringatan) lebihKuota++;
+        if (res.email && res.email.gagal) emailGagal++;
+      })
       .catch(function () { fail++; })
       .then(function () { i++; setProgress(i); next(); });
   }
@@ -726,7 +737,9 @@ function simpanStatus() {
     .then(function (res) {
       setLoading(btn, false);
       if (res.ok) {
-        tampilkanToast('Status berhasil diperbarui.', 'success');
+        var teksNaik = _teksPromosi(res);
+        tampilkanToast('Status berhasil diperbarui.' + teksNaik, 'success', teksNaik ? 7000 : 4000);
+        _toastEfekSamping(res);
         tutupModal('modal-detail');
         muatStats();
         muatPendaftar();
@@ -760,8 +773,10 @@ function arsipPendaftar() {
     .then(function (r) { return r.json(); })
     .then(function (res) {
       if (res.ok) {
-        tampilkanToast('Data diarsipkan.', 'success');
+        var teksNaikArsip = _teksPromosi(res);
+        tampilkanToast('Data diarsipkan.' + teksNaikArsip, 'success', teksNaikArsip ? 7000 : 4000);
         tutupModal('modal-detail');
+        muatStats();
         muatPendaftar();
       } else {
         tampilkanToast(res.pesan || 'Gagal arsip.', 'error');
@@ -1048,7 +1063,8 @@ function simpanJadwal() {
     .then(function (res) {
       setLoading(btn, false);
       if (res.ok) {
-        tampilkanToast('Jadwal berhasil diperbarui.', 'success');
+        var teksNaikJadwal = _teksPromosi(res);
+        tampilkanToast('Jadwal berhasil diperbarui.' + teksNaikJadwal, 'success', teksNaikJadwal ? 8000 : 4000);
         tutupModal('modal-jadwal');
         muatJadwal();
       } else {
@@ -1168,13 +1184,33 @@ function setLoading(btn, loading) {
   }
 }
 
-function tampilkanToast(msg, type) {
+function tampilkanToast(msg, type, durasiMs) {
   var container = document.getElementById('toast-container');
   var toast = document.createElement('div');
   toast.className = 'toast ' + (type || 'info');
   toast.textContent = msg;
   container.appendChild(toast);
-  setTimeout(function () { container.removeChild(toast); }, 4000);
+  setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, durasiMs || 4000);
+}
+
+// Efek samping aksi admin yang perlu diketahui: pendaftar daftar tunggu yang otomatis
+// naik ke kursi (res.promosi: objek atau array), kelebihan kuota, dan email yang gagal.
+function _daftarPromosi(res) {
+  if (!res || !res.promosi) return [];
+  return Array.isArray(res.promosi) ? res.promosi : [res.promosi];
+}
+function _teksPromosi(res) {
+  var p = _daftarPromosi(res);
+  if (!p.length) return '';
+  return ' ' + p.map(function (x) { return x.nama || x.no_pendaftaran; }).join(', ') +
+         ' naik dari daftar tunggu ke kursi.';
+}
+function _toastEfekSamping(res) {
+  if (!res) return;
+  if (res.email && res.email.gagal) {
+    tampilkanToast('Email pemberitahuan gagal terkirim: ' + (res.email.alasan || 'tanpa keterangan'), 'error', 8000);
+  }
+  if (res.peringatan) tampilkanToast(res.peringatan, 'warning', 10000);
 }
 
 function labelStatus(status) {

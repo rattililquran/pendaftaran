@@ -675,6 +675,7 @@ html.theme-dark .badge-DITOLAK   { color: #f87171; }
 .toast.success { border-left: 3px solid var(--accent); }
 .toast.error   { border-left: 3px solid var(--danger); }
 .toast.info    { border-left: 3px solid var(--primary); }
+.toast.warning { border-left: 3px solid #d97706; }
 
 @keyframes slideUp {
   from { transform: translateY(16px); opacity: 0; }
