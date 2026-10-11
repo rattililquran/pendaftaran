@@ -124,7 +124,12 @@ function tampilkanHasil(data) {
   document.getElementById('status-icon').textContent      = ikonStatus(status);
   document.getElementById('status-hero-label').textContent = 'Status Pendaftaran';
   document.getElementById('status-hero-text').textContent  = labelStatus(status);
-  document.getElementById('status-hero-desc').textContent  = deskripsiStatus(status);
+  // Daftar tunggu: belum ada kursi → keterangan tahap Wawancara (ramah tamah) belum berlaku;
+  // tampilkan kabar daftar tunggu (kalimat sama dengan modal formulir pendaftaran).
+  document.getElementById('status-hero-desc').textContent  =
+    (data.waiting_list && status === 'WAWANCARA')
+      ? 'Anda masuk daftar tunggu. Kursi utama untuk jadwal ini sudah penuh — kami akan menghubungi Anda bila ada kursi tersedia.'
+      : deskripsiStatus(status);
 
   // Chip Daftar Tunggu (waiting list) — dibuat/di-update dinamis di dalam hero
   var chip = document.getElementById('status-waiting-chip');
