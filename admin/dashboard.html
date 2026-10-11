@@ -121,11 +121,12 @@
             >
             <select class="filter-select" id="filter-status" onchange="filterData()">
               <option value="">Semua Status</option>
-              <option value="TERDAFTAR">Terdaftar</option>
-              <option value="BERKAS_OK">Berkas OK</option>
               <option value="WAWANCARA">Wawancara</option>
               <option value="DITERIMA">Diterima</option>
               <option value="DITOLAK">Ditolak</option>
+              <!-- Status lama (sebelum Okt 2026) — untuk mencari sisa data setelah migrasi -->
+              <option value="TERDAFTAR">Terdaftar (lama)</option>
+              <option value="BERKAS_OK">Berkas OK (lama)</option>
             </select>
             <select class="filter-select" id="filter-gender" onchange="filterData()">
               <option value="">Semua Gender</option>
@@ -147,8 +148,6 @@
             <div class="bulk-actions">
               <select class="filter-select" id="bulk-status" aria-label="Status tujuan">
                 <option value="">Ubah status ke…</option>
-                <option value="TERDAFTAR">Terdaftar</option>
-                <option value="BERKAS_OK">Berkas OK</option>
                 <option value="WAWANCARA">Wawancara</option>
                 <option value="DITERIMA">Diterima</option>
                 <option value="DITOLAK">Ditolak</option>
@@ -481,9 +480,9 @@
 
       <div class="form-group">
         <label class="form-label" for="edit-status">Ubah Status</label>
+        <!-- Pendaftar langsung berstatus Wawancara (pemeriksaan berkas dihapus, Okt 2026).
+             Baris berstatus lama mendapat opsi sementara "(status lama)" dari dashboard.js. -->
         <select class="form-select" id="edit-status">
-          <option value="TERDAFTAR">Terdaftar</option>
-          <option value="BERKAS_OK">Berkas OK</option>
           <option value="WAWANCARA">Wawancara</option>
           <option value="DITERIMA">Diterima</option>
           <option value="DITOLAK">Ditolak</option>

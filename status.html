@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/assets/fonts.css">
   <!-- ?v= disamakan dengan CACHE_NAME di sw.js: HTML baru selalu memuat CSS yang cocok
        (GitHub Pages menyimpan CSS di cache browser hingga 10 menit). -->
-  <link rel="stylesheet" href="css/style.css?v=22">
+  <link rel="stylesheet" href="css/style.css?v=23">
   <script>
     // Tema sama dengan situs utama (kunci 'theme'); 'rattilil-theme' lama tetap dibaca.
     (function() {
@@ -55,7 +55,6 @@
     }
 
     .status-hero.s-TERDAFTAR  { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1.5px solid #bfdbfe; }
-    .status-hero.s-BERKAS_OK  { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1.5px solid #bbf7d0; }
     .status-hero.s-WAWANCARA  { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1.5px solid #fde68a; }
     .status-hero.s-DITERIMA   { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1.5px solid #bbf7d0; }
     .status-hero.s-DITOLAK    { background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 1.5px solid #fecaca; }
@@ -72,7 +71,6 @@
     }
 
     .s-TERDAFTAR  .status-icon { background: rgba(59,130,246,.15);  }
-    .s-BERKAS_OK  .status-icon { background: rgba(16,185,129,.15);  }
     .s-WAWANCARA  .status-icon { background: rgba(245,158,11,.15);  }
     .s-DITERIMA   .status-icon { background: rgba(16,185,129,.15);  }
     .s-DITOLAK    .status-icon { background: rgba(239,68,68,.15);   }
@@ -87,7 +85,6 @@
     }
 
     .s-TERDAFTAR  .status-hero-label { color: #1d4ed8; }
-    .s-BERKAS_OK  .status-hero-label { color: #047857; }
     .s-WAWANCARA  .status-hero-label { color: #92400e; }
     .s-DITERIMA   .status-hero-label { color: #047857; }
     .s-DITOLAK    .status-hero-label { color: #b91c1c; }
@@ -101,7 +98,6 @@
     }
 
     .s-TERDAFTAR  .status-hero-text { color: #1e40af; }
-    .s-BERKAS_OK  .status-hero-text { color: #065f46; }
     .s-WAWANCARA  .status-hero-text { color: #78350f; }
     .s-DITERIMA   .status-hero-text { color: #065f46; }
     .s-DITOLAK    .status-hero-text { color: #991b1b; }
@@ -114,7 +110,6 @@
     }
 
     .s-TERDAFTAR  .status-hero-desc { color: #1d4ed8; }
-    .s-BERKAS_OK  .status-hero-desc { color: #047857; }
     .s-WAWANCARA  .status-hero-desc { color: #92400e; }
     .s-DITERIMA   .status-hero-desc { color: #065f46; }
     .s-DITOLAK    .status-hero-desc { color: #b91c1c; }
@@ -459,7 +454,7 @@
 
   <script src="js/tema.js"></script>
   <script src="js/config.js"></script>
-  <script src="js/status.js?v=22"></script>
+  <script src="js/status.js?v=23"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(function() {});

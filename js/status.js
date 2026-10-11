@@ -103,7 +103,10 @@ function cekStatus() {
 // ============================================================================
 
 function tampilkanHasil(data) {
-  var status = data.status || 'TERDAFTAR';
+  var status = data.status || 'WAWANCARA';   // status awal pendaftaran (sejak Okt 2026)
+  // Tahap pemeriksaan berkas dihapus (Okt 2026). Data lama terarsip yang masih BERKAS_OK
+  // ditampilkan setara "Terdaftar" (label, warna, keterangan, dan timeline sekaligus).
+  if (status === 'BERKAS_OK') status = 'TERDAFTAR';
 
   // Nomor pendaftaran pill
   document.getElementById('hasil-nomor').textContent = data.no_pendaftaran || '—';
@@ -161,12 +164,15 @@ function tampilkanHasil(data) {
 // TIMELINE STATUS
 // ============================================================================
 
+// Alur sejak Okt 2026: daftar → langsung tahap Wawancara (pemeriksaan berkas dihapus —
+// tidak ada berkas yang diunggah). "Terdaftar" tetap tampil sebagai langkah pertama yang
+// selesai begitu pendaftaran diterima.
 var ALUR_STATUS = [
-  { key: 'TERDAFTAR', label: 'Terdaftar',        sub: 'Data diterima',         icon: '📝' },
-  { key: 'BERKAS_OK', label: 'Berkas Diperiksa',  sub: 'Berkas lengkap',        icon: '📋' },
-  { key: 'WAWANCARA', label: 'Wawancara',          sub: 'Jadwal dikonfirmasi',   icon: '💬' },
-  { key: 'DITERIMA',  label: 'Diterima',           sub: 'Selamat bergabung!',    icon: '✅' }
+  { key: 'TERDAFTAR', label: 'Terdaftar',  sub: 'Data diterima',                 icon: '📝' },
+  { key: 'WAWANCARA', label: 'Wawancara',  sub: 'Ramah tamah bersama pengajar',  icon: '💬' },
+  { key: 'DITERIMA',  label: 'Diterima',   sub: 'Selamat bergabung!',            icon: '✅' }
 ];
+
 
 function renderTimeline(statusAktif) {
   var container = document.getElementById('status-timeline');
@@ -233,8 +239,7 @@ function renderTimeline(statusAktif) {
 function labelStatus(status) {
   var map = {
     'TERDAFTAR':  'Terdaftar',
-    'BERKAS_OK':  'Berkas Diperiksa',
-    'WAWANCARA':  'Jadwal Wawancara',
+    'WAWANCARA':  'Tahap Wawancara',
     'DITERIMA':   'Diterima! 🎉',
     'DITOLAK':    'Tidak Diterima',
     'BATAL':      'Dibatalkan'
@@ -245,7 +250,6 @@ function labelStatus(status) {
 function ikonStatus(status) {
   var map = {
     'TERDAFTAR': '📝',
-    'BERKAS_OK': '📋',
     'WAWANCARA': '💬',
     'DITERIMA':  '✅',
     'DITOLAK':   '❌',
@@ -256,9 +260,9 @@ function ikonStatus(status) {
 
 function deskripsiStatus(status) {
   var map = {
-    'TERDAFTAR': 'Bismillah. Data pendaftaran Anda telah kami terima dengan baik. Tim kami sedang memproses berkas Anda. Semoga Allah memudahkan setiap langkah.',
-    'BERKAS_OK': 'Alhamdulillah. Berkas Anda telah diperiksa dan dinyatakan lengkap. Menunggu jadwal wawancara. Baarakallahu fiikum.',
-    'WAWANCARA': 'Alhamdulillah. Anda dijadwalkan untuk wawancara. Semoga Allah memberi kemudahan dan kelancaran. Tawakkal ilallah.',
+    // TERDAFTAR: status lama (data terarsip; juga BERKAS_OK yang disetarakan di tampilkanHasil).
+    'TERDAFTAR': 'Bismillah. Data pendaftaran Anda telah kami terima dengan baik. Semoga Allah memudahkan setiap langkah.',
+    'WAWANCARA': 'Alhamdulillah, pendaftaran Anda telah kami terima. Tahap berikutnya adalah ramah tamah — sesi diskusi dan wawancara bersama para pengajar. Detail jadwal wawancara akan segera disampaikan oleh panitia. Semoga Allah memberi kemudahan dan kelancaran.',
     'DITERIMA':  'Alhamdulillahirabbil\'aalamin. Selamat! Anda resmi diterima sebagai murid Rattilil Qur\'an. Semoga Allah memberkahi perjalanan Anda dalam mempelajari Al-Qur\'an. بَارَكَ اللهُ فِيكُمْ',
     'DITOLAK':   'Innalillahi wa inna ilaihi raji\'un. Mohon maaf, pendaftaran Anda belum dapat kami terima saat ini. Semoga Allah membuka pintu kebaikan yang lebih baik. Hubungi admin untuk informasi lebih lanjut.',
     'BATAL':     'Pendaftaran Anda telah dibatalkan. Bila ini keliru atau Anda ingin mendaftar kembali, silakan hubungi admin.'

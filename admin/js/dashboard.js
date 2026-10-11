@@ -152,7 +152,8 @@ function muatStats() {
         var stats = res.data;
         document.getElementById('stat-total').textContent = stats.total || 0;
         document.getElementById('stat-diterima').textContent = stats.per_status['DITERIMA'] || 0;
-        var proses = (stats.per_status['TERDAFTAR'] || 0) + (stats.per_status['BERKAS_OK'] || 0) + (stats.per_status['WAWANCARA'] || 0);
+        // "Dalam proses" = tahap Wawancara (+ sisa status lama TERDAFTAR/BERKAS_OK bila belum dimigrasi).
+        var proses = (stats.per_status['WAWANCARA'] || 0) + (stats.per_status['TERDAFTAR'] || 0) + (stats.per_status['BERKAS_OK'] || 0);
         document.getElementById('stat-proses').textContent = proses;
         document.getElementById('stat-ditolak').textContent = stats.per_status['DITOLAK'] || 0;
         renderInfoEmail(stats.email);
@@ -624,7 +625,21 @@ function bukaDetal(no) {
   if (rwPanel) rwPanel.style.display = '';
   muatRiwayatStatus(row.no_pendaftaran);
 
-  document.getElementById('edit-status').value = row.status;
+  // Status lama (TERDAFTAR/BERKAS_OK pada data terarsip, atau BATAL) tidak ada di pilihan:
+  // tampilkan sebagai opsi sementara agar dropdown tidak kosong dan catatan tetap bisa
+  // disimpan (backend hanya mengizinkan status lama DIPERTAHANKAN, bukan dipilih).
+  var selStatus = document.getElementById('edit-status');
+  Array.prototype.slice.call(selStatus.querySelectorAll('option[data-lama]')).forEach(function (o) { o.remove(); });
+  var stRow = String(row.status || '').trim().toUpperCase();
+  var adaOpsi = Array.prototype.some.call(selStatus.options, function (o) { return o.value === stRow; });
+  if (stRow && !adaOpsi) {
+    var opsiLama = document.createElement('option');
+    opsiLama.value = stRow;
+    opsiLama.textContent = labelStatus(stRow) + ' (status lama)';
+    opsiLama.setAttribute('data-lama', '1');
+    selStatus.insertBefore(opsiLama, selStatus.firstChild);
+  }
+  selStatus.value = stRow;
   document.getElementById('edit-catatan-publik').value = row.catatan_publik || '';
   document.getElementById('edit-catatan-internal').value = row.catatan_internal || '';
 
@@ -1372,8 +1387,6 @@ function hapusEvaluasi(id) {
 // Template cadangan bila sheet WaTemplates belum di-setup / gagal dimuat.
 var WA_FALLBACK = {
   DEFAULT:   'Assalamu\'alaikum {nama_depan}, kami dari Panitia Pendaftaran Rattilil Qur\'an terkait pendaftaran Anda (No. {nomor}).',
-  TERDAFTAR: 'Assalamu\'alaikum {nama_depan}, pendaftaran Anda (No. {nomor}) program {program} telah kami terima. Mohon lengkapi berkas yang dibutuhkan. Jazakumullah khairan.',
-  BERKAS_OK: 'Assalamu\'alaikum {nama_depan}, berkas pendaftaran Anda (No. {nomor}) sudah diverifikasi dan lengkap. Mohon menunggu informasi jadwal wawancara.',
   WAWANCARA: 'Assalamu\'alaikum {nama_depan}, Anda diundang mengikuti wawancara untuk pendaftaran No. {nomor} ({program}). Detail jadwal: ',
   DITERIMA:  'Assalamu\'alaikum {nama_depan}, selamat! Anda dinyatakan DITERIMA sebagai santri Rattilil Qur\'an (No. {nomor}). Info daftar ulang: ',
   DITOLAK:   'Assalamu\'alaikum {nama_depan}, terima kasih atas pendaftaran Anda (No. {nomor}). Mohon maaf untuk periode ini kami belum dapat menerima. Semoga Allah memudahkan.'
@@ -1647,11 +1660,15 @@ function renderChartStatus(perStatus) {
   if (!ctx) return;
   if (_charts['status']) { _charts['status'].destroy(); }
 
-  var labels = { 'TERDAFTAR': 'Terdaftar', 'BERKAS_OK': 'Berkas OK', 'WAWANCARA': 'Wawancara', 'DITERIMA': 'Diterima', 'DITOLAK': 'Ditolak' };
-  var colors = ['#0ea5e9', '#6366f1', '#f59e0b', '#10b981', '#ef4444'];
+  var labels = { 'WAWANCARA': 'Wawancara', 'DITERIMA': 'Diterima', 'DITOLAK': 'Ditolak', 'BATAL': 'Batal',
+                 'TERDAFTAR': 'Terdaftar (lama)', 'BERKAS_OK': 'Berkas OK (lama)' };
+  // Warna per STATUS (dulu per urutan data: warna bisa tertukar bila ada status yang kosong).
+  var warna  = { 'WAWANCARA': '#f59e0b', 'DITERIMA': '#10b981', 'DITOLAK': '#ef4444', 'BATAL': '#94a3b8',
+                 'TERDAFTAR': '#0ea5e9', 'BERKAS_OK': '#6366f1' };
   var keys = Object.keys(perStatus);
   var vals = keys.map(function(k) { return perStatus[k]; });
   var lbls = keys.map(function(k) { return labels[k] || k; });
+  var colors = keys.map(function(k) { return warna[k] || '#64748b'; });
 
   _charts['status'] = new Chart(ctx, {
     type: 'doughnut',
@@ -1776,23 +1793,21 @@ function renderChartFunnel(perStatus) {
   if (!ctx) return;
   if (_charts['funnel']) { _charts['funnel'].destroy(); }
 
-  // Funnel kumulatif: tiap tahap = jumlah yang mencapai minimal tahap itu.
-  var terdaftar = perStatus['TERDAFTAR'] || 0;
-  var berkas    = perStatus['BERKAS_OK'] || 0;
-  var wawancara = perStatus['WAWANCARA'] || 0;
+  // Funnel kumulatif: tiap tahap = jumlah yang mencapai minimal tahap itu (tanpa Ditolak/Batal).
+  // Sejak Okt 2026 pendaftar langsung masuk tahap Wawancara (pemeriksaan berkas dihapus);
+  // sisa status lama TERDAFTAR/BERKAS_OK yang belum dimigrasi dihitung di tahap Wawancara.
+  var wawancara = (perStatus['WAWANCARA'] || 0) + (perStatus['TERDAFTAR'] || 0) + (perStatus['BERKAS_OK'] || 0);
   var diterima  = perStatus['DITERIMA']  || 0;
-  var f4 = diterima;
-  var f3 = wawancara + f4;
-  var f2 = berkas + f3;
-  var f1 = terdaftar + f2;
+  var f2 = diterima;
+  var f1 = wawancara + f2;
 
   _charts['funnel'] = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['Terdaftar', 'Berkas OK', 'Wawancara', 'Diterima'],
+      labels: ['Wawancara', 'Diterima'],
       datasets: [{
-        data: [f1, f2, f3, f4],
-        backgroundColor: ['rgba(14,165,233,.75)', 'rgba(99,102,241,.75)', 'rgba(245,158,11,.75)', 'rgba(16,185,129,.75)'],
+        data: [f1, f2],
+        backgroundColor: ['rgba(245,158,11,.75)', 'rgba(16,185,129,.75)'],
         borderRadius: 6
       }]
     },

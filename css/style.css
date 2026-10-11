@@ -1068,7 +1068,6 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
 }
 
 .status-TERDAFTAR  { background: var(--soft); color: var(--primary-3); }
-.status-BERKAS_OK  { background: rgba(16,185,129,.1); color: #047857; }
 .status-DITERIMA   { background: rgba(16,185,129,.1); color: #047857; }
 .status-DITOLAK    { background: rgba(239,68,68,.1);  color: #b91c1c; }
 .status-WAWANCARA  { background: rgba(245,158,11,.1); color: #92400e; }
