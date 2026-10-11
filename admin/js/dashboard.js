@@ -357,13 +357,17 @@ function bulkUpdateStatus() {
   if (!status) { tampilkanToast('Pilih status tujuan dulu.', 'error'); return; }
   var nos = Object.keys(state.selected);
   if (!nos.length) return;
-  var catatan = (document.getElementById('bulk-catatan') || {}).value || '';
+  var catatan = ((document.getElementById('bulk-catatan') || {}).value || '').trim();
   var labelTujuan = labelStatus(status);
   if (!confirm('Ubah status ' + nos.length + ' pendaftar menjadi ' + labelTujuan + '?' +
-               (catatan ? '\n\nCatatan: ' + catatan : ''))) return;
+               (catatan ? '\n\nCatatan publik berikut akan MENGGANTIKAN catatan publik setiap pendaftar terpilih:\n' + catatan : ''))) return;
   _bulkRun(nos, function (no) {
-    return _adminPost({ action: 'admin.updateStatus', token: state.token,
-                        no_pendaftaran: no, status: status, catatan_publik: catatan });
+    var payload = { action: 'admin.updateStatus', token: state.token, no_pendaftaran: no, status: status };
+    // catatan_publik HANYA dikirim bila diisi. Backend memperlakukan field yang dikirim
+    // (termasuk teks kosong) sebagai nilai baru; tidak dikirim = catatan lama dipertahankan.
+    // Dulu selalu dikirim → aksi massal tanpa catatan MENGHAPUS catatan publik pendaftar.
+    if (catatan) payload.catatan_publik = catatan;
+    return _adminPost(payload);
   }, 'Status diperbarui');
 }
 
@@ -1170,33 +1174,36 @@ function labelStatus(status) {
   return map[status] || status;
 }
 
+// Waktu dari backend datang dalam beberapa bentuk:
+//  - teks WIB tanpa zona: 'yyyy-MM-dd' / 'yyyy-MM-dd HH:mm:ss' → dipotong langsung
+//    (Safari tidak bisa mem-parse format bertanda spasi);
+//  - Date mentah dari Sheets (mis. StatusLog, tgl_lahir lama) → ISO UTC berakhiran 'Z',
+//    atau String(Date) 'Sun Oct 11 2026 10:15:00 GMT+0700 (…)' → dikonversi lewat Date
+//    ke jam perangkat. Memotong ISO 'Z' langsung = jam mundur 7 jam / tanggal mundur sehari.
+var RE_WAKTU_LOKAL = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?)?$/;
+function _pecahWaktu(iso) {
+  var str = String(iso).trim();
+  var m = str.match(RE_WAKTU_LOKAL);
+  if (m) return { y: m[1], mo: m[2], d: m[3], hh: m[4] || '', mi: m[5] || '' };
+  var dt = new Date(str);
+  if (isNaN(dt.getTime())) return null;
+  return {
+    y: String(dt.getFullYear()), mo: ('0' + (dt.getMonth() + 1)).slice(-2), d: ('0' + dt.getDate()).slice(-2),
+    hh: ('0' + dt.getHours()).slice(-2), mi: ('0' + dt.getMinutes()).slice(-2)
+  };
+}
+
 function formatTanggal(iso) {
   if (!iso) return '—';
-  var str = String(iso).trim();
-  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (m) {
-    return m[3] + '/' + m[2] + '/' + m[1];
-  }
-  var d = new Date(str.indexOf(' ') !== -1 ? str.replace(' ', 'T') : str);
-  if (isNaN(d.getTime())) return iso;
-  var dd = ('0' + d.getDate()).slice(-2);
-  var mm = ('0' + (d.getMonth() + 1)).slice(-2);
-  var yy = d.getFullYear();
-  return dd + '/' + mm + '/' + yy;
+  var p = _pecahWaktu(iso);
+  return p ? p.d + '/' + p.mo + '/' + p.y : String(iso);
 }
 
 function formatTanggalJam(iso) {
   if (!iso) return '';
-  var str = String(iso).trim();
-  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/);
-  if (m) {
-    return m[3] + '/' + m[2] + '/' + m[1] + ' ' + m[4] + ':' + m[5];
-  }
-  var d = new Date(str.indexOf(' ') !== -1 ? str.replace(' ', 'T') : str);
-  if (isNaN(d.getTime())) return str;
-  var hh = ('0' + d.getHours()).slice(-2);
-  var mi = ('0' + d.getMinutes()).slice(-2);
-  return formatTanggal(str) + ' ' + hh + ':' + mi;
+  var p = _pecahWaktu(iso);
+  if (!p) return String(iso);
+  return p.d + '/' + p.mo + '/' + p.y + (p.hh ? ' ' + p.hh + ':' + p.mi : '');
 }
 
 /**
