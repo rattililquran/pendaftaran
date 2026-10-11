@@ -1770,12 +1770,40 @@ html.theme-dark .step-label { color: var(--ink-3); }
 .kartu-info-icon .ik { width: 22px; height: 22px; }
 .banner-ditutup-icon { display: flex; }
 .banner-ditutup-icon .ik { width: 22px; height: 22px; }
-.banner-ditutup-icon .ik-jam { display: none; }
-.banner-ditutup.segera .banner-ditutup-icon .ik-jam { display: block; }
-.banner-ditutup.segera .banner-ditutup-icon .ik-gembok { display: none; }
+/* Segera dibuka: tanpa ikon (jam pasir dihapus atas permintaan, Okt 2026). */
+.banner-ditutup.segera .banner-ditutup-icon { display: none; }
 .alert-icon { display: flex; }
 .alert-icon .ik { width: 18px; height: 18px; }
 .modal-note-penting-icon { display: flex; padding-top: 2px; }
 .modal-note-penting-icon .ik { width: 18px; height: 18px; }
 .waiting-warning-head .ik, .modal-waiting-note .ik { width: 1.1em; height: 1.1em; margin-right: 2px; }
 .jadwal-meta .ik { width: 14px; height: 14px; }
+
+/* ============================================================
+   KARTU GELOMBANG + STATUS DIGABUNG (Okt 2026)
+   #banner-ditutup kini berada DI DALAM #banner-gelombang sebagai strip bawah:
+   satu kartu, lebih ringkas. Warna ikon menandai keadaan (kuning = segera,
+   merah = ditutup/berakhir); judul hanya untuk pembaca layar.
+   ============================================================ */
+.banner-gelombang-icon { color: #fff; }
+.banner-gelombang .banner-ditutup {
+  margin: 0; border: 0; border-radius: 0; box-shadow: none; animation: none;
+  border-top: 1px solid rgba(255,255,255,.14);
+  background: rgba(4,16,36,.30);
+  align-items: flex-start; gap: 10px; padding: 11px 18px 12px;
+}
+.banner-gelombang .banner-ditutup.segera { background: rgba(4,16,36,.30); box-shadow: none; }
+.banner-gelombang .banner-ditutup.segera .banner-ditutup-icon { display: none; }
+.banner-gelombang .banner-ditutup strong {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.banner-gelombang .banner-ditutup p { font-size: .84rem; line-height: 1.55; color: rgba(255,255,255,.92); }
+.banner-gelombang .banner-ditutup-icon { color: #fca5a5; padding-top: 1px; }
+.banner-gelombang .banner-ditutup-icon .ik { width: 18px; height: 18px; }
+@media (max-width: 520px) {
+  .banner-gelombang .banner-ditutup { padding: 10px 12px 11px; gap: 8px; }
+}
+@media (max-width: 640px) {
+  .banner-gelombang .banner-ditutup p { font-size: 14px; }
+}

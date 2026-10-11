@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/assets/fonts.css">
   <!-- ?v= disamakan dengan CACHE_NAME di sw.js: HTML baru selalu memuat CSS yang cocok
        (GitHub Pages menyimpan CSS di cache browser hingga 10 menit). -->
-  <link rel="stylesheet" href="css/style.css?v=20">
+  <link rel="stylesheet" href="css/style.css?v=21">
   <script>
     // Tema sama dengan situs utama (kunci 'theme'); 'rattilil-theme' lama tetap dibaca.
     (function() {
@@ -87,6 +87,17 @@
           </div>
           <span class="banner-gelombang-badge" id="banner-status-gelombang"></span>
         </div>
+        <!-- Status pendaftaran (segera dibuka / ditutup / berakhir) digabung di kartu yang
+             sama agar tidak memakan tempat. Judul hanya untuk pembaca layar; badge + pesan
+             sudah menyampaikannya secara visual. -->
+        <div id="banner-ditutup" class="banner-ditutup" style="display:none;" role="alert">
+          <!-- Ikon gembok hanya saat ditutup/berakhir; saat .segera (dipasang app.js) tanpa ikon. -->
+          <span class="banner-ditutup-icon"><svg class="ik" aria-hidden="true" focusable="false"><use href="#i-gembok"/></svg></span>
+          <div>
+            <strong id="banner-ditutup-judul">Pendaftaran Saat Ini Ditutup</strong>
+            <p id="banner-ditutup-pesan">Pendaftaran belum dibuka atau sudah berakhir. Pantau informasi terbaru di media sosial kami.</p>
+          </div>
+        </div>
       </div>
 
       <!-- Kartu: Tentang Program -->
@@ -109,16 +120,6 @@
         </div>
         <div class="kartu-info-cta">Cek Status &rarr;</div>
       </a>
-
-      <!-- Banner Pendaftaran Ditutup -->
-      <div id="banner-ditutup" class="banner-ditutup" style="display:none;" role="alert">
-        <!-- Dua ikon; .segera (dipasang app.js) menampilkan jam pasir, selain itu gembok. -->
-        <span class="banner-ditutup-icon"><svg class="ik ik-gembok" aria-hidden="true" focusable="false"><use href="#i-gembok"/></svg><svg class="ik ik-jam" aria-hidden="true" focusable="false"><use href="#i-jam-pasir"/></svg></span>
-        <div>
-          <strong id="banner-ditutup-judul">Pendaftaran Saat Ini Ditutup</strong>
-          <p id="banner-ditutup-pesan">Pendaftaran belum dibuka atau sudah berakhir. Pantau informasi terbaru di media sosial kami.</p>
-        </div>
-      </div>
 
       <!-- Progress Steps — 4 langkah -->
       <div class="steps" id="steps" aria-label="Langkah pendaftaran">
@@ -623,7 +624,7 @@
   <script src="js/tema.js"></script>
   <script src="js/config.js"></script>
   <script src="js/kota-list.js"></script>
-  <script src="js/app.js?v=20"></script>
+  <script src="js/app.js?v=21"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(function() {});

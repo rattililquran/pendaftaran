@@ -264,6 +264,12 @@ function tampilkanBannerGelombang(info) {
 
   if (!info) return;
 
+  // Baris nama/periode/badge hanya bila ada nama gelombang. Kartu tetap tampil saat
+  // pendaftaran tertutup (pesan status berada di dalam kartu yang sama).
+  var barisGel = bannerGel ? bannerGel.querySelector('.banner-gelombang-inner') : null;
+  if (barisGel) barisGel.style.display = info.nama ? '' : 'none';
+  if (bannerGel && !info.nama) bannerGel.style.display = info.pendaftaran_buka ? 'none' : 'block';
+
   // Tampilkan banner gelombang jika ada nama
   if (info.nama) {
     var elNama    = document.getElementById('banner-nama-gelombang');
@@ -369,6 +375,9 @@ document.addEventListener('visibilitychange', function () {
 
 function _labelPeriode(tglMulai, tglSelesai) {
   if (!tglMulai && !tglSelesai) return '';
+  // Bulan & tahun sama → "20–30 Oktober 2026" (ringkas, sama dengan situs utama).
+  if (tglMulai && tglSelesai && tglMulai.slice(0, 7) === tglSelesai.slice(0, 7) && /^\d{4}-\d{2}-\d{2}$/.test(tglMulai))
+    return parseInt(tglMulai.slice(8), 10) + '–' + formatTanggal(tglSelesai);
   if (tglMulai && tglSelesai)   return formatTanggal(tglMulai) + ' – ' + formatTanggal(tglSelesai);
   if (tglMulai)                 return 'Mulai ' + formatTanggal(tglMulai);
   return 'Tutup ' + formatTanggal(tglSelesai);
