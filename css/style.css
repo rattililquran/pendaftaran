@@ -2,8 +2,9 @@
    Rattilil Qur'an — Design System (sama persis dengan landing page)
    ============================================================ */
 
-/* ---- Fonts (sama dengan landing page) ---- */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap');
+/* ---- Fonts ----
+   Dimuat lewat /assets/fonts.css (font lokal situs utama) di setiap halaman.
+   @import Google Fonts dihapus (Okt 2026): unduhan ganda & menahan tampilan pertama. */
 
 /* ---- Design Tokens ---- */
 :root {
@@ -1757,3 +1758,24 @@ html.theme-dark .latar-foto::after {
    (aktif & selesai tetap memakai aturan .step-ind.active/.done yang lebih spesifik). */
 .step-label { color: var(--ink-2); }
 html.theme-dark .step-label { color: var(--ink-3); }
+
+/* ============================================================
+   IKON GARIS — pengganti emoji (sprite SVG di index.html, Okt 2026).
+   Warna mengikuti teks sekitarnya (currentColor).
+   ============================================================ */
+.ik { width: 1em; height: 1em; flex-shrink: 0; vertical-align: -.14em; }
+.banner-gelombang-icon { display: flex; }
+.banner-gelombang-icon .ik { width: 26px; height: 26px; }
+.kartu-info-icon { color: var(--link, var(--primary)); }
+.kartu-info-icon .ik { width: 22px; height: 22px; }
+.banner-ditutup-icon { display: flex; }
+.banner-ditutup-icon .ik { width: 22px; height: 22px; }
+.banner-ditutup-icon .ik-jam { display: none; }
+.banner-ditutup.segera .banner-ditutup-icon .ik-jam { display: block; }
+.banner-ditutup.segera .banner-ditutup-icon .ik-gembok { display: none; }
+.alert-icon { display: flex; }
+.alert-icon .ik { width: 18px; height: 18px; }
+.modal-note-penting-icon { display: flex; padding-top: 2px; }
+.modal-note-penting-icon .ik { width: 18px; height: 18px; }
+.waiting-warning-head .ik, .modal-waiting-note .ik { width: 1.1em; height: 1.1em; margin-right: 2px; }
+.jadwal-meta .ik { width: 14px; height: 14px; }

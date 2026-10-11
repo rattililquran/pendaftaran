@@ -300,8 +300,7 @@ function tampilkanBannerGelombang(info) {
     var elJudulTutup = document.getElementById('banner-ditutup-judul');
     if (elJudulTutup) elJudulTutup.textContent = segera ? 'Pendaftaran Segera Dibuka' : 'Pendaftaran Saat Ini Ditutup';
     if (bannerTutup) {
-      var elIkonTutup = bannerTutup.querySelector('.banner-ditutup-icon');
-      if (elIkonTutup) elIkonTutup.textContent = segera ? '⏳' : '🔒';
+      // Ikon (jam pasir / gembok) dipilih CSS lewat kelas .segera — lihat index.html.
       bannerTutup.classList.toggle('segera', segera);
       bannerTutup.style.display = 'flex';
     }
@@ -682,9 +681,9 @@ function renderJadwal(list) {
       '</div>' +
 // Info tambahan kecil
     '<div class="jadwal-meta">' +
-      (j.pengajar ? '<span>👤 ' + esc(j.pengajar) + '</span>' : '') +
-      (j.gender   ? '<span>👥 ' + esc(j.gender) + '</span>' : '') +
-      (waiting && j.jumlah_waiting ? '<span>⏳ ' + esc(String(j.jumlah_waiting)) + ' di daftar tunggu</span>' : '') +
+      (j.pengajar ? '<span>' + ikon('i-orang') + esc(j.pengajar) + '</span>' : '') +
+      (j.gender   ? '<span>' + ikon('i-orang-dua') + esc(j.gender) + '</span>' : '') +
+      (waiting && j.jumlah_waiting ? '<span>' + ikon('i-jam-pasir') + esc(String(j.jumlah_waiting)) + ' di daftar tunggu</span>' : '') +
     '</div>' +
     // Catatan daftar tunggu di BAWAH kartu agar tidak menabrak badge kanan-atas
     (waiting ? '<div class="jadwal-waiting-note">Kuota penuh — Anda tetap dapat mendaftar dan akan masuk ke daftar tunggu.</div>' : '');
@@ -1067,6 +1066,11 @@ function formatTanggal(iso) {
 
 function generateToken() {
   return 'tok-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+}
+
+// Ikon garis dari sprite SVG di index.html (pengganti emoji yang beda-beda tiap HP).
+function ikon(id) {
+  return '<svg class="ik" aria-hidden="true" focusable="false"><use href="#' + id + '"/></svg>';
 }
 
 function esc(str) {

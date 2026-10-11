@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/assets/fonts.css">
   <!-- ?v= disamakan dengan CACHE_NAME di sw.js: HTML baru selalu memuat CSS yang cocok
        (GitHub Pages menyimpan CSS di cache browser hingga 10 menit). -->
-  <link rel="stylesheet" href="css/style.css?v=17">
+  <link rel="stylesheet" href="css/style.css?v=18">
   <script>
     // Tema sama dengan situs utama (kunci 'theme'); 'rattilil-theme' lama tetap dibaca.
     (function() {
@@ -24,6 +24,18 @@
   </script>
 </head>
 <body>
+  <!-- Ikon garis (gaya situs utama). Menggantikan emoji yang gambarnya berbeda-beda
+       tiap HP — mis. 📅 di iPhone/Mac bergambar "17 Juli". -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-kalender" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-buku" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.8C9.6 5.2 6.6 4.6 3.5 5.2v13.3c3.1-.6 6.1 0 8.5 1.6 2.4-1.6 5.4-2.2 8.5-1.6V5.2c-3.1-.6-6.1 0-8.5 1.6z"/><path d="M12 6.8v13.3"/></symbol>
+    <symbol id="i-cari" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.3-4.3"/></symbol>
+    <symbol id="i-jam-pasir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3h11M6.5 21h11"/><path d="M8 3v2.5c0 2.2 1.6 3.8 4 6.5 2.4-2.7 4-4.3 4-6.5V3M8 21v-2.5c0-2.2 1.6-3.8 4-6.5 2.4 2.7 4 4.3 4 6.5V21"/></symbol>
+    <symbol id="i-gembok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></symbol>
+    <symbol id="i-peringatan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 4.2 2.6 17.6A2 2 0 0 0 4.3 20.5h15.4a2 2 0 0 0 1.7-2.9L13.7 4.2a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4.2M12 17h.01"/></symbol>
+    <symbol id="i-orang" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.6 7-5.6s6.2 2 7 5.6"/></symbol>
+    <symbol id="i-orang-dua" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.6"/><path d="M15.8 14.5c2.3-.2 4.2 1.4 4.7 4.2"/></symbol>
+  </svg>
   <!-- Navbar — selaras situs utama (logo, Beranda, tombol tema) -->
   <nav class="form-nav" aria-label="Navigasi">
     <div class="form-nav-inner">
@@ -68,7 +80,7 @@
       <!-- Banner Info Gelombang -->
       <div id="banner-gelombang" class="banner-gelombang" style="display:none;" role="status" aria-live="polite">
         <div class="banner-gelombang-inner">
-          <span class="banner-gelombang-icon">&#128197;</span>
+          <span class="banner-gelombang-icon"><svg class="ik" aria-hidden="true" focusable="false"><use href="#i-kalender"/></svg></span>
           <div class="banner-gelombang-body">
             <span class="banner-gelombang-nama" id="banner-nama-gelombang"></span>
             <span class="banner-gelombang-periode" id="banner-periode-gelombang"></span>
@@ -79,7 +91,7 @@
 
       <!-- Kartu: Tentang Program -->
       <a id="kartu-tentang-program" class="kartu-info-link" href="https://rattililquran.com/program.html" target="_blank" rel="noopener noreferrer">
-        <div class="kartu-info-icon" aria-hidden="true">&#128218;</div>
+        <div class="kartu-info-icon" aria-hidden="true"><svg class="ik" aria-hidden="true" focusable="false"><use href="#i-buku"/></svg></div>
         <div class="kartu-info-body">
           <div class="kartu-info-judul">Tentang Program</div>
           <div class="kartu-info-sub">Info lengkap: materi, biaya, syarat &amp; alur pendaftaran angkatan ini.</div>
@@ -90,7 +102,7 @@
       <!-- Kartu: Sudah mendaftar? — di atas, agar pendaftar yang ingin cek status
            tidak perlu menggulir melewati seluruh formulir. -->
       <a id="kartu-cek-status" class="kartu-info-link" href="status.html">
-        <div class="kartu-info-icon" aria-hidden="true">&#128269;</div>
+        <div class="kartu-info-icon" aria-hidden="true"><svg class="ik" aria-hidden="true" focusable="false"><use href="#i-cari"/></svg></div>
         <div class="kartu-info-body">
           <div class="kartu-info-judul">Sudah mendaftar?</div>
           <div class="kartu-info-sub">Cek status pendaftaran Anda di sini</div>
@@ -100,7 +112,8 @@
 
       <!-- Banner Pendaftaran Ditutup -->
       <div id="banner-ditutup" class="banner-ditutup" style="display:none;" role="alert">
-        <span class="banner-ditutup-icon">&#128274;</span>
+        <!-- Dua ikon; .segera (dipasang app.js) menampilkan jam pasir, selain itu gembok. -->
+        <span class="banner-ditutup-icon"><svg class="ik ik-gembok" aria-hidden="true" focusable="false"><use href="#i-gembok"/></svg><svg class="ik ik-jam" aria-hidden="true" focusable="false"><use href="#i-jam-pasir"/></svg></span>
         <div>
           <strong id="banner-ditutup-judul">Pendaftaran Saat Ini Ditutup</strong>
           <p id="banner-ditutup-pesan">Pendaftaran belum dibuka atau sudah berakhir. Pantau informasi terbaru di media sosial kami.</p>
@@ -132,7 +145,7 @@
 
       <!-- Alert Banner -->
       <div class="alert alert-error" id="alert-banner" role="alert">
-        <span class="alert-icon">⚠</span>
+        <span class="alert-icon"><svg class="ik" aria-hidden="true" focusable="false"><use href="#i-peringatan"/></svg></span>
         <span id="alert-message"></span>
       </div>
 
@@ -440,7 +453,7 @@
       <div class="card" id="step-3" style="display:none">
         <h2 class="card-title">Pilih Jadwal</h2>
         <p class="card-subtitle">Jadwal ditampilkan sesuai jenis kelamin yang dipilih.</p>
-        <div class="gender-info-badge" id="gender-badge">👤 <span id="gender-badge-text">—</span></div>
+        <div class="gender-info-badge" id="gender-badge"><svg class="ik" aria-hidden="true" focusable="false"><use href="#i-orang"/></svg> <span id="gender-badge-text">—</span></div>
 
         <div id="jadwal-loading">
           <div class="skeleton"></div>
@@ -530,7 +543,7 @@
 
         <!-- Peringatan + persetujuan Daftar Tunggu (muncul bila jadwal terpilih penuh) -->
         <div id="waiting-warning" class="waiting-warning" style="display:none">
-          <div class="waiting-warning-head">⚠️ Jadwal ini sudah penuh</div>
+          <div class="waiting-warning-head"><svg class="ik" aria-hidden="true" focusable="false"><use href="#i-peringatan"/></svg> Jadwal ini sudah penuh</div>
           <p class="waiting-warning-body">
             Kursi utama untuk jadwal ini sudah terisi. Jika Anda tetap mendaftar, Anda akan
             masuk <strong>daftar tunggu (waiting list)</strong> — kami hubungi bila ada kursi
@@ -584,7 +597,7 @@
       </div>
 
       <div id="modal-waiting-note" class="modal-waiting-note" style="display:none" role="note">
-        ⏳ Anda masuk <strong>daftar tunggu</strong>. Kursi utama untuk jadwal ini sudah penuh —
+        <svg class="ik" aria-hidden="true" focusable="false"><use href="#i-jam-pasir"/></svg> Anda masuk <strong>daftar tunggu</strong>. Kursi utama untuk jadwal ini sudah penuh —
         kami akan menghubungi Anda bila ada kursi tersedia. Pantau juga lewat Cek Status.
       </div>
 
@@ -594,7 +607,7 @@
       </button>
 
       <div class="modal-note-penting" role="note">
-        <span class="modal-note-penting-icon" aria-hidden="true">⚠️</span>
+        <span class="modal-note-penting-icon" aria-hidden="true"><svg class="ik" aria-hidden="true" focusable="false"><use href="#i-peringatan"/></svg></span>
         <div class="modal-note-penting-body">
           <strong>Simpan nomor ini baik-baik</strong> — ini kunci untuk memantau status pendaftaran Anda.<br>
           Konfirmasi juga dikirim ke email Anda.<br>
@@ -609,7 +622,7 @@
   <script src="js/tema.js"></script>
   <script src="js/config.js"></script>
   <script src="js/kota-list.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=18"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(function() {});

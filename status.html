@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/assets/fonts.css">
   <!-- ?v= disamakan dengan CACHE_NAME di sw.js: HTML baru selalu memuat CSS yang cocok
        (GitHub Pages menyimpan CSS di cache browser hingga 10 menit). -->
-  <link rel="stylesheet" href="css/style.css?v=17">
+  <link rel="stylesheet" href="css/style.css?v=18">
   <script>
     // Tema sama dengan situs utama (kunci 'theme'); 'rattilil-theme' lama tetap dibaca.
     (function() {
@@ -321,6 +321,16 @@
   <div class="orb orb-3" aria-hidden="true"></div>
 
   <div class="page-wrapper">
+    <!-- Latar foto "Program" — sama dengan formulir pendaftaran (CSS .latar-foto di style.css). -->
+    <div class="latar-foto" aria-hidden="true">
+      <picture>
+        <source media="(max-width:900px)" type="image/webp" srcset="/assets/images/Program-mobile-780.webp 780w, /assets/images/Program-mobile-1170.webp 1170w" sizes="100vw">
+        <source media="(max-width:900px)" srcset="/assets/images/Program-mobile-780.jpg 780w, /assets/images/Program-mobile-1170.jpg 1170w" sizes="100vw">
+        <source type="image/webp" srcset="/assets/images/Program-desktop-1280.webp 1280w, /assets/images/Program-desktop-1920.webp 1920w" sizes="100vw">
+        <source srcset="/assets/images/Program-desktop-1280.jpg 1280w, /assets/images/Program-desktop-1920.jpg 1920w" sizes="100vw">
+        <img src="/assets/images/Program-desktop-1280.jpg" alt="" decoding="async" fetchpriority="high">
+      </picture>
+    </div>
     <div class="container">
 
       <!-- Header -->
