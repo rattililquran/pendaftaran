@@ -107,6 +107,9 @@ function tampilkanHasil(data) {
   // Tahap pemeriksaan berkas dihapus (Okt 2026). Data lama terarsip yang masih BERKAS_OK
   // ditampilkan setara "Terdaftar" (label, warna, keterangan, dan timeline sekaligus).
   if (status === 'BERKAS_OK') status = 'TERDAFTAR';
+  // Daftar tunggu hanya berarti sesuatu sebelum keputusan: setelah Diterima/Ditolak/Batal
+  // penandanya tidak ditampilkan (Diterima dari daftar tunggu = sudah mendapat kursi).
+  var menunggu = !!data.waiting_list && (status === 'WAWANCARA' || status === 'TERDAFTAR');
 
   // Nomor pendaftaran pill
   document.getElementById('hasil-nomor').textContent = data.no_pendaftaran || '—';
@@ -121,30 +124,15 @@ function tampilkanHasil(data) {
   var hero = document.getElementById('status-hero');
   // BATAL memakai gaya visual yang sama dengan DITOLAK (kelas CSS s-BATAL tidak ada).
   hero.className = 'status-hero s-' + (status === 'BATAL' ? 'DITOLAK' : status);
-  document.getElementById('status-icon').textContent      = ikonStatus(status);
+  // Daftar tunggu: belum ada kursi → tahap Wawancara (ramah tamah) belum berlaku. Judul,
+  // ikon, keterangan, dan timeline sama-sama menyebut daftar tunggu (kalimat keterangan
+  // sama dengan modal formulir pendaftaran). Warna kartu tetap kuning seperti tahap aktif.
+  document.getElementById('status-icon').textContent      = menunggu ? '📋' : ikonStatus(status);
   document.getElementById('status-hero-label').textContent = 'Status Pendaftaran';
-  document.getElementById('status-hero-text').textContent  = labelStatus(status);
-  // Daftar tunggu: belum ada kursi → keterangan tahap Wawancara (ramah tamah) belum berlaku;
-  // tampilkan kabar daftar tunggu (kalimat sama dengan modal formulir pendaftaran).
-  document.getElementById('status-hero-desc').textContent  =
-    (data.waiting_list && status === 'WAWANCARA')
-      ? 'Anda masuk daftar tunggu. Kursi utama untuk jadwal ini sudah penuh — kami akan menghubungi Anda bila ada kursi tersedia.'
-      : deskripsiStatus(status);
-
-  // Chip Daftar Tunggu (waiting list) — dibuat/di-update dinamis di dalam hero
-  var chip = document.getElementById('status-waiting-chip');
-  if (data.waiting_list) {
-    if (!chip) {
-      chip = document.createElement('div');
-      chip.id = 'status-waiting-chip';
-      chip.className = 'status-waiting-chip';
-      hero.appendChild(chip);
-    }
-    chip.textContent = '⏳ Daftar Tunggu — menunggu kursi tersedia';
-    chip.style.display = '';
-  } else if (chip) {
-    chip.style.display = 'none';
-  }
+  document.getElementById('status-hero-text').textContent  = menunggu ? 'Daftar Tunggu' : labelStatus(status);
+  document.getElementById('status-hero-desc').textContent  = menunggu
+    ? 'Anda masuk daftar tunggu. Kursi utama untuk jadwal ini sudah penuh — kami akan menghubungi Anda bila ada kursi tersedia.'
+    : deskripsiStatus(status);
 
   // Catatan publik
   var catatanBox = document.getElementById('catatan-box');
@@ -157,7 +145,7 @@ function tampilkanHasil(data) {
   }
 
   // Timeline status
-  renderTimeline(status);
+  renderTimeline(status, menunggu);
 
   // Tampilkan result wrapper
   var wrapper = document.getElementById('result-wrapper');
@@ -179,7 +167,7 @@ var ALUR_STATUS = [
 ];
 
 
-function renderTimeline(statusAktif) {
+function renderTimeline(statusAktif, menunggu) {
   var container = document.getElementById('status-timeline');
   container.innerHTML = '';
 
@@ -193,12 +181,21 @@ function renderTimeline(statusAktif) {
     return;
   }
 
+  // Daftar tunggu: sisipkan langkah "Daftar Tunggu" sebagai tahap saat ini sebelum Wawancara.
+  var alur = ALUR_STATUS;
+  if (menunggu) {
+    alur = [ALUR_STATUS[0],
+            { key: 'TUNGGU', label: 'Daftar Tunggu', sub: 'Kursi tersedia', icon: '📋' }]
+           .concat(ALUR_STATUS.slice(1));
+    statusAktif = 'TUNGGU';
+  }
+
   var aktifIdx = -1;
-  ALUR_STATUS.forEach(function(s, i) {
+  alur.forEach(function(s, i) {
     if (s.key === statusAktif) aktifIdx = i;
   });
 
-  ALUR_STATUS.forEach(function(s, i) {
+  alur.forEach(function(s, i) {
     var done    = i < aktifIdx;
     var current = i === aktifIdx;
     var pending = i > aktifIdx;
@@ -219,7 +216,9 @@ function renderTimeline(statusAktif) {
 
     var sub = document.createElement('div');
     sub.className = 'timeline-sub';
-    sub.textContent = done ? s.sub : (current ? 'Tahap saat ini' : 'Menunggu');
+    sub.textContent = done ? s.sub
+                    : current ? (s.key === 'TUNGGU' ? 'Menunggu kursi tersedia' : 'Tahap saat ini')
+                    : 'Menunggu';
 
     info.appendChild(name);
     info.appendChild(sub);

@@ -758,20 +758,6 @@ html.theme-dark .orb-3 { background: linear-gradient(135deg,#0d3b30,#0d2f3b); op
 .theme-dark .modal-waiting-note { background: rgba(245,158,11,.10); border-color: rgba(245,158,11,.35); color: #fde68a; }
 .theme-dark .modal-waiting-note strong { color: #fcd34d; }
 
-/* Chip daftar tunggu di halaman Cek Status */
-.status-waiting-chip {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: rgba(245,158,11,.16);
-  border: 1px solid rgba(245,158,11,.4);
-  color: #b45309;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-.theme-dark .status-waiting-chip { color: #fcd34d; background: rgba(245,158,11,.12); }
-
 /* ---- Gender Info Badge ---- */
 .gender-info-badge {
   display: inline-flex;
