@@ -142,19 +142,25 @@
           </div>
 
           <!-- Bulk action bar -->
-          <div class="bulk-bar" id="bulk-bar" style="display:none">
-            <span id="bulk-count" style="font-weight:700">0 dipilih</span>
-            <select class="filter-select" id="bulk-status">
-              <option value="">Ubah status ke…</option>
-              <option value="TERDAFTAR">Terdaftar</option>
-              <option value="BERKAS_OK">Berkas OK</option>
-              <option value="WAWANCARA">Wawancara</option>
-              <option value="DITERIMA">Diterima</option>
-              <option value="DITOLAK">Ditolak</option>
-            </select>
-            <button class="btn btn-primary btn-sm" onclick="bulkUpdateStatus()">Terapkan</button>
-            <button class="btn btn-danger btn-sm" onclick="bulkArsip()">Arsipkan</button>
-            <button class="btn btn-outline btn-sm" onclick="bulkClear()">Batal</button>
+          <div class="bulk-bar" id="bulk-bar" style="display:none" role="toolbar" aria-label="Aksi massal">
+            <span id="bulk-count" class="bulk-count-badge">0 dipilih</span>
+            <div class="bulk-actions">
+              <select class="filter-select" id="bulk-status" aria-label="Status tujuan">
+                <option value="">Ubah status ke…</option>
+                <option value="TERDAFTAR">Terdaftar</option>
+                <option value="BERKAS_OK">Berkas OK</option>
+                <option value="WAWANCARA">Wawancara</option>
+                <option value="DITERIMA">Diterima</option>
+                <option value="DITOLAK">Ditolak</option>
+              </select>
+              <input class="form-input bulk-catatan" id="bulk-catatan" type="text"
+                     placeholder="Catatan (opsional, masuk ke riwayat status)…"
+                     aria-label="Catatan untuk riwayat status">
+              <button class="btn btn-primary btn-sm" id="btn-bulk-apply" onclick="bulkUpdateStatus()">Terapkan</button>
+              <button class="btn btn-danger btn-sm" id="btn-bulk-arsip" onclick="bulkArsip()">Arsipkan</button>
+              <button class="btn btn-outline btn-sm" onclick="bulkClear()">Batal</button>
+            </div>
+            <span id="bulk-progress" class="bulk-progress" style="display:none" aria-live="polite"></span>
           </div>
 
           <!-- Table -->
@@ -496,7 +502,7 @@
 
       <div class="form-group" id="riwayat-panel">
         <label class="form-label">🕘 Riwayat Status</label>
-        <div id="riwayat-status" class="timeline"></div>
+        <div id="riwayat-status" class="timeline" role="list" aria-label="Riwayat perubahan status"></div>
       </div>
 
       <div class="form-group" id="wa-panel">

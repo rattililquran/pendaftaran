@@ -357,9 +357,13 @@ function bulkUpdateStatus() {
   if (!status) { tampilkanToast('Pilih status tujuan dulu.', 'error'); return; }
   var nos = Object.keys(state.selected);
   if (!nos.length) return;
-  if (!confirm('Ubah status ' + nos.length + ' pendaftar menjadi ' + labelStatus(status) + '?')) return;
+  var catatan = (document.getElementById('bulk-catatan') || {}).value || '';
+  var labelTujuan = labelStatus(status);
+  if (!confirm('Ubah status ' + nos.length + ' pendaftar menjadi ' + labelTujuan + '?' +
+               (catatan ? '\n\nCatatan: ' + catatan : ''))) return;
   _bulkRun(nos, function (no) {
-    return _adminPost({ action: 'admin.updateStatus', token: state.token, no_pendaftaran: no, status: status });
+    return _adminPost({ action: 'admin.updateStatus', token: state.token,
+                        no_pendaftaran: no, status: status, catatan_publik: catatan });
   }, 'Status diperbarui');
 }
 
@@ -395,10 +399,31 @@ function bulkArsip() {
 
 // Jalankan aksi berurutan (hindari membebani LockService GAS).
 function _bulkRun(nos, fn, okMsg) {
-  tampilkanToast('Memproses ' + nos.length + ' data…', 'info');
+  var total = nos.length;
+  tampilkanToast('Memproses ' + total + ' data…', 'info');
+
+  // Tampilkan progress & nonaktifkan tombol selama proses berjalan
+  var prog = document.getElementById('bulk-progress');
+  var btnApply = document.getElementById('btn-bulk-apply');
+  var btnArsip = document.getElementById('btn-bulk-arsip');
+  function setProgress(done) {
+    if (prog) { prog.style.display = ''; prog.textContent = done + ' / ' + total; }
+  }
+  function setLocked(locked) {
+    if (btnApply) btnApply.disabled = locked;
+    if (btnArsip) btnArsip.disabled = locked;
+  }
+  setProgress(0);
+  setLocked(true);
+
   var i = 0, ok = 0, fail = 0;
   function next() {
     if (i >= nos.length) {
+      setLocked(false);
+      if (prog) prog.style.display = 'none';
+      // Kosongkan catatan setelah selesai
+      var cEl = document.getElementById('bulk-catatan');
+      if (cEl) cEl.value = '';
       tampilkanToast(okMsg + ': ' + ok + ' berhasil' + (fail ? ', ' + fail + ' gagal' : ''), fail ? 'error' : 'success');
       state.selected = {};
       muatStats();
@@ -408,7 +433,7 @@ function _bulkRun(nos, fn, okMsg) {
     fn(nos[i])
       .then(function (res) { if (res && res.ok) ok++; else fail++; })
       .catch(function () { fail++; })
-      .then(function () { i++; next(); });
+      .then(function () { i++; setProgress(i); next(); });
   }
   next();
 }
@@ -621,28 +646,35 @@ var bukaDetail = bukaDetal;
 function muatRiwayatStatus(no) {
   var box = document.getElementById('riwayat-status');
   if (!box) return;
-  box.innerHTML = '<div style="color:var(--ink-4);font-size:0.8rem">Memuat riwayat…</div>';
+  box.innerHTML = '<div style="color:var(--ink-4);font-size:0.8rem;padding:4px 0">Memuat riwayat…</div>';
 
   _adminGet({ action: 'admin.statuslog', token: state.token, no_pendaftaran: no })
     .then(function (res) {
       if (!res.ok || !res.data || res.data.length === 0) {
-        box.innerHTML = '<div style="color:var(--ink-4);font-size:0.8rem">Belum ada perubahan status.</div>';
+        box.innerHTML = '<div style="color:var(--ink-4);font-size:0.8rem;padding:4px 0">Belum ada perubahan status.</div>';
         return;
       }
-      box.innerHTML = res.data.map(function (r) {
+      box.innerHTML = res.data.map(function (r, idx) {
+        var isFirst = idx === 0;  // terbaru dulu (sudah di-reverse di backend)
         var ket = r.status_lama
-          ? esc(labelStatus(r.status_lama)) + ' → <strong>' + esc(labelStatus(r.status_baru)) + '</strong>'
+          ? esc(labelStatus(r.status_lama)) + ' \u2192 <strong>' + esc(labelStatus(r.status_baru)) + '</strong>'
           : '<strong>' + esc(labelStatus(r.status_baru)) + '</strong>';
-        return '<div class="timeline-item">' +
-          '<div class="timeline-dot badge-' + esc(r.status_baru) + '"></div>' +
+        return '<div class="timeline-item" role="listitem">' +
+          '<div class="timeline-dot-wrap">' +
+            '<div class="timeline-dot ' + esc('badge-' + r.status_baru) + '" title="' + esc(labelStatus(r.status_baru)) + '"></div>' +
+          '</div>' +
           '<div class="timeline-body">' +
-            '<div class="timeline-head">' + ket + '<span class="timeline-time">' + formatTanggalJam(r.timestamp) + '</span></div>' +
+            '<div class="timeline-head">' + ket +
+              '<span class="timeline-time">' + formatTanggalJam(r.timestamp) + '</span>' +
+            '</div>' +
             (r.catatan ? '<div class="timeline-note">' + esc(r.catatan) + '</div>' : '') +
-          '</div></div>';
+            (r.oleh ? '<div class="timeline-oleh">oleh ' + esc(r.oleh) + '</div>' : '') +
+          '</div>' +
+        '</div>';
       }).join('');
     })
     .catch(function () {
-      box.innerHTML = '<div style="color:var(--ink-4);font-size:0.8rem">Gagal memuat riwayat.</div>';
+      box.innerHTML = '<div style="color:var(--ink-4);font-size:0.8rem;padding:4px 0">Gagal memuat riwayat.</div>';
     });
 }
 
