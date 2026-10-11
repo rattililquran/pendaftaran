@@ -9,7 +9,9 @@
   <link rel="manifest" href="manifest.json">
   <!-- Font lokal situs utama (Plus Jakarta Sans + Amiri), tanpa Google Fonts -->
   <link rel="stylesheet" href="/assets/fonts.css">
-  <link rel="stylesheet" href="css/style.css">
+  <!-- ?v= disamakan dengan CACHE_NAME di sw.js: HTML baru selalu memuat CSS yang cocok
+       (GitHub Pages menyimpan CSS di cache browser hingga 10 menit). -->
+  <link rel="stylesheet" href="css/style.css?v=17">
   <script>
     // Tema sama dengan situs utama (kunci 'theme'); 'rattilil-theme' lama tetap dibaca.
     (function() {

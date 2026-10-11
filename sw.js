@@ -3,7 +3,8 @@
  * Rattilil Qur'an PMB
  */
 
-var CACHE_NAME = 'rattilil-pmb-v16';
+// Naikkan bersama ?v= pada tautan css/style.css di index/status/share.html.
+var CACHE_NAME = 'rattilil-pmb-v17';
 var ASSETS = [
   './',
   './index.html',
@@ -11,7 +12,7 @@ var ASSETS = [
   './program.html',
   './share.html',
   './404.html',
-  './css/style.css',
+  './css/style.css?v=17',
   './js/config.js',
   './js/kota-list.js',
   './js/app.js',
