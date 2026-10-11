@@ -180,10 +180,10 @@ document.addEventListener('DOMContentLoaded', function () {
   // Fetch info gelombang aktif
   muatInfoGelombang();
 
-  // Set max date tgl_lahir ke hari ini (tidak bisa pilih masa depan)
-  var today = new Date().toISOString().split('T')[0];
+  // Set max date tgl_lahir ke hari ini (tidak bisa pilih masa depan). Tanggal LOKAL —
+  // toISOString() memakai UTC sehingga pukul 00.00–07.00 WIB masih "kemarin".
   var tglInput = document.getElementById('tgl_lahir');
-  if (tglInput) tglInput.setAttribute('max', today);
+  if (tglInput) tglInput.setAttribute('max', hariIniLokal());
 
   // Dynamic year di footer
   var tahunEl = document.getElementById('tahun-footer');
@@ -511,8 +511,16 @@ function validasiStep1() {
     tampilkanError('email', false);
   }
 
-  // Tanggal lahir
+  // Tanggal lahir — kunci verifikasi Cek Status, jadi tolak nilai yang jelas salah ketik:
+  // di masa depan atau sebelum 1900 (mis. tahun "0026" saat diketik manual di desktop).
+  // Atribut max/min saja tidak cukup: browser tetap mengizinkan nilai di luar rentang.
+  var errTgl = document.getElementById('err-tgl_lahir');
   if (!tgl) {
+    if (errTgl) errTgl.textContent = 'Tanggal lahir wajib diisi.';
+    tampilkanError('tgl_lahir', true);
+    valid = false;
+  } else if (!/^\d{4}-\d{2}-\d{2}$/.test(tgl) || tgl < '1900-01-01' || tgl > hariIniLokal()) {
+    if (errTgl) errTgl.textContent = 'Tanggal lahir tidak valid. Periksa kembali tahunnya.';
     tampilkanError('tgl_lahir', true);
     valid = false;
   } else {
@@ -637,11 +645,14 @@ function tampilkanError(field, tampil) {
 // ============================================================================
 
 function muatJadwal() {
-  // Reset jadwal terpilih saat masuk step 3
+  // Reset jadwal terpilih saat masuk step 3 — tetapi ingat pilihan sebelumnya (mis. saat
+  // kembali dari langkah 4) agar tidak perlu memilih ulang; lihat pulihkanPilihanJadwal.
+  var sebelumnya = state.jadwalTerpilih ? state.jadwalTerpilih.jadwal_id : null;
   state.jadwalTerpilih = null;
 
   if (state.jadwalList.length > 0) {
     renderJadwal(filterJadwalByGender(state.jadwalList));
+    pulihkanPilihanJadwal(sebelumnya);
     return;
   }
 
@@ -761,6 +772,18 @@ function renderJadwal(list) {
 
     grid.appendChild(card);
   });
+}
+
+/** Pilih ulang jadwal `id` bila kartunya masih ada & bisa dipilih (tidak ditutup admin). */
+function pulihkanPilihanJadwal(id) {
+  if (!id) return;
+  var jadwal = null;
+  state.jadwalList.forEach(function (j) { if (j.jadwal_id === id && j.penuh !== true) jadwal = j; });
+  if (!jadwal) return;
+  var cards = document.querySelectorAll('#jadwal-grid .jadwal-card');
+  for (var i = 0; i < cards.length; i++) {
+    if (cards[i].getAttribute('for') === 'jadwal-' + id) { pilihJadwal(jadwal, cards[i]); return; }
+  }
 }
 
 function pilihJadwal(jadwal, cardEl) {
@@ -1117,6 +1140,12 @@ function formatTanggal(iso) {
   if (parts.length !== 3) return iso;
   var bulan = ['', 'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
   return parseInt(parts[2]) + ' ' + bulan[parseInt(parts[1])] + ' ' + parts[0];
+}
+
+/** Tanggal hari ini menurut jam perangkat, 'YYYY-MM-DD'. */
+function hariIniLokal() {
+  var d = new Date();
+  return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
 }
 
 function generateToken() {
