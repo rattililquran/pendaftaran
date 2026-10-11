@@ -4,10 +4,14 @@
  */
 
 document.addEventListener('DOMContentLoaded', function () {
-  // Set max date ke hari ini
-  var today = new Date().toISOString().split('T')[0];
+  // Set max date ke hari ini (zona lokal)
+  var d = new Date();
+  var today = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
   var tglInput = document.getElementById('tgl_verif');
-  if (tglInput) tglInput.setAttribute('max', today);
+  if (tglInput) {
+    tglInput.setAttribute('max', today);
+    tglInput.setAttribute('min', '1900-01-01');
+  }
 
   // Dynamic year di footer
   var tahunEl = document.getElementById('tahun-footer');
@@ -47,15 +51,23 @@ function cekStatus() {
   var btn  = document.getElementById('btn-cek');
 
   // Validasi
+  var dNow = new Date();
+  var maxTgl = dNow.getFullYear() + '-' + ('0' + (dNow.getMonth() + 1)).slice(-2) + '-' + ('0' + dNow.getDate()).slice(-2);
   var valid = true;
-  if (!no || !/^RTL\d{4,}$/.test(no)) {
-    tampilkanError('no', true);
+  if (!no) {
+    tampilkanError('no', true, 'Nomor pendaftaran wajib diisi.');
+    valid = false;
+  } else if (!/^RTL\d{4,}$/.test(no)) {
+    tampilkanError('no', true, 'Format nomor pendaftaran tidak valid (contoh: RTL24180400).');
     valid = false;
   } else {
     tampilkanError('no', false);
   }
   if (!tgl) {
-    tampilkanError('tgl', true);
+    tampilkanError('tgl', true, 'Tanggal lahir wajib diisi.');
+    valid = false;
+  } else if (tgl < '1900-01-01' || tgl > maxTgl) {
+    tampilkanError('tgl', true, 'Tanggal lahir tidak valid.');
     valid = false;
   } else {
     tampilkanError('tgl', false);
@@ -259,6 +271,15 @@ function deskripsiStatus(status) {
 
 function formatTanggal(val) {
   if (!val) return '—';
+  var parts = String(val).trim().split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    var bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    var bIdx = parseInt(parts[1], 10) - 1;
+    var tgl = parseInt(parts[2], 10);
+    if (bIdx >= 0 && bIdx < 12 && !isNaN(tgl)) {
+      return tgl + ' ' + bulan[bIdx] + ' ' + parts[0];
+    }
+  }
   // Handle ISO timestamp
   var d = new Date(val);
   if (!isNaN(d.getTime())) {
@@ -268,11 +289,12 @@ function formatTanggal(val) {
   return val;
 }
 
-function tampilkanError(field, tampil) {
+function tampilkanError(field, tampil, pesan) {
   var input = field === 'no'  ? document.getElementById('no_pendaftaran') : document.getElementById('tgl_verif');
   var err   = field === 'no'  ? document.getElementById('err-no')         : document.getElementById('err-tgl');
   if (!input || !err) return;
   if (tampil) {
+    if (pesan) err.textContent = pesan;
     input.classList.add('error');
     err.classList.add('visible');
   } else {

@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/assets/fonts.css">
   <!-- ?v= disamakan dengan CACHE_NAME di sw.js: HTML baru selalu memuat CSS yang cocok
        (GitHub Pages menyimpan CSS di cache browser hingga 10 menit). -->
-  <link rel="stylesheet" href="css/style.css?v=21">
+  <link rel="stylesheet" href="css/style.css?v=22">
   <script>
     // Tema sama dengan situs utama (kunci 'theme'); 'rattilil-theme' lama tetap dibaca.
     (function() {
@@ -377,6 +377,7 @@
             class="form-input"
             type="date"
             id="tgl_verif"
+            min="1900-01-01"
             required
           >
           <div class="form-hint">Digunakan sebagai verifikasi identitas.</div>
@@ -458,7 +459,7 @@
 
   <script src="js/tema.js"></script>
   <script src="js/config.js"></script>
-  <script src="js/status.js"></script>
+  <script src="js/status.js?v=22"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(function() {});

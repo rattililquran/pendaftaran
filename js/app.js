@@ -183,7 +183,10 @@ document.addEventListener('DOMContentLoaded', function () {
   // Set max date tgl_lahir ke hari ini (tidak bisa pilih masa depan). Tanggal LOKAL —
   // toISOString() memakai UTC sehingga pukul 00.00–07.00 WIB masih "kemarin".
   var tglInput = document.getElementById('tgl_lahir');
-  if (tglInput) tglInput.setAttribute('max', hariIniLokal());
+  if (tglInput) {
+    tglInput.setAttribute('max', hariIniLokal());
+    tglInput.setAttribute('min', '1900-01-01');
+  }
 
   // Dynamic year di footer
   var tahunEl = document.getElementById('tahun-footer');
@@ -1145,10 +1148,13 @@ function setLoading(btn, loading) {
 
 function formatTanggal(iso) {
   if (!iso) return '—';
-  var parts = iso.split('-');
+  var parts = String(iso).split('-');
   if (parts.length !== 3) return iso;
   var bulan = ['', 'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-  return parseInt(parts[2]) + ' ' + bulan[parseInt(parts[1])] + ' ' + parts[0];
+  var bIdx = parseInt(parts[1], 10);
+  var tgl = parseInt(parts[2], 10);
+  if (isNaN(bIdx) || isNaN(tgl) || bIdx < 1 || bIdx > 12) return iso;
+  return tgl + ' ' + bulan[bIdx] + ' ' + parts[0];
 }
 
 /** Tanggal hari ini menurut jam perangkat, 'YYYY-MM-DD'. */

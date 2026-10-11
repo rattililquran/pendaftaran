@@ -615,6 +615,7 @@ function bukaDetal(no) {
 
   bukaModal('modal-detail');
 }
+var bukaDetail = bukaDetal;
 
 // Muat & render timeline riwayat status untuk satu pendaftar.
 function muatRiwayatStatus(no) {
@@ -1084,10 +1085,12 @@ function exportCSV() {
     ].join(',') + '\n';
   });
 
-  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
   var link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = 'pendaftar-' + new Date().toISOString().split('T')[0] + '.csv';
+  var dNow = new Date();
+  var fileDate = dNow.getFullYear() + '-' + ('0' + (dNow.getMonth() + 1)).slice(-2) + '-' + ('0' + dNow.getDate()).slice(-2);
+  link.download = 'pendaftar-' + fileDate + '.csv';
   link.click();
   tampilkanToast('CSV berhasil diunduh.', 'success');
 }
@@ -1137,7 +1140,12 @@ function labelStatus(status) {
 
 function formatTanggal(iso) {
   if (!iso) return '—';
-  var d = new Date(iso);
+  var str = String(iso).trim();
+  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) {
+    return m[3] + '/' + m[2] + '/' + m[1];
+  }
+  var d = new Date(str.indexOf(' ') !== -1 ? str.replace(' ', 'T') : str);
   if (isNaN(d.getTime())) return iso;
   var dd = ('0' + d.getDate()).slice(-2);
   var mm = ('0' + (d.getMonth() + 1)).slice(-2);
@@ -1147,11 +1155,16 @@ function formatTanggal(iso) {
 
 function formatTanggalJam(iso) {
   if (!iso) return '';
-  var d = new Date(iso);
-  if (isNaN(d.getTime())) return String(iso);
+  var str = String(iso).trim();
+  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/);
+  if (m) {
+    return m[3] + '/' + m[2] + '/' + m[1] + ' ' + m[4] + ':' + m[5];
+  }
+  var d = new Date(str.indexOf(' ') !== -1 ? str.replace(' ', 'T') : str);
+  if (isNaN(d.getTime())) return str;
   var hh = ('0' + d.getHours()).slice(-2);
   var mi = ('0' + d.getMinutes()).slice(-2);
-  return formatTanggal(iso) + ' ' + hh + ':' + mi;
+  return formatTanggal(str) + ' ' + hh + ':' + mi;
 }
 
 /**
