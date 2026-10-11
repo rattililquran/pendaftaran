@@ -5,7 +5,7 @@
 
 // Naikkan bersama ?v= pada tautan css/style.css (index/status/share.html)
 // dan js/app.js (index.html) — juga entri berversi di ASSETS di bawah.
-var CACHE_NAME = 'rattilil-pmb-v18';
+var CACHE_NAME = 'rattilil-pmb-v19';
 var ASSETS = [
   './',
   './index.html',
@@ -13,10 +13,10 @@ var ASSETS = [
   './program.html',
   './share.html',
   './404.html',
-  './css/style.css?v=18',
+  './css/style.css?v=19',
   './js/config.js',
   './js/kota-list.js',
-  './js/app.js?v=18',
+  './js/app.js?v=19',
   './js/status.js',
   './js/tema.js',
   './manifest.json'

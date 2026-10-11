@@ -248,6 +248,7 @@ function muatInfoGelombang() {
       if (res && res.ok && res.data) {
         state.infoGelombang = res.data;
         tampilkanBannerGelombang(res.data);
+        jadwalkanCekUlangBuka(res.data);
       }
     })
     .catch(function () {
@@ -279,6 +280,11 @@ function tampilkanBannerGelombang(info) {
       if (st === 'AKTIF' && info.alasan_tutup === 'BELUM_DIBUKA') {
         elBadge.textContent = 'Segera';
         elBadge.className   = 'banner-gelombang-badge';
+      } else if (st === 'AKTIF' && info.alasan_tutup === 'DITUTUP_ADMIN') {
+        // Ditutup admin (mis. kuota penuh sebelum tanggal selesai): jangan "Aktif"
+        // hijau di samping banner merah "Pendaftaran Saat Ini Ditutup".
+        elBadge.textContent = 'Ditutup';
+        elBadge.className   = 'banner-gelombang-badge selesai';
       } else {
         elBadge.textContent = st === 'AKTIF' ? 'Aktif' : (st === 'SELESAI' ? 'Selesai' : st);
         elBadge.className   = 'banner-gelombang-badge' + (st === 'AKTIF' ? ' aktif' : st === 'SELESAI' ? ' selesai' : '');
@@ -309,8 +315,57 @@ function tampilkanBannerGelombang(info) {
       btnLanjut1.classList.add('btn-submit-disabled');
       btnLanjut1.title     = segera ? 'Pendaftaran belum dibuka.' : 'Pendaftaran saat ini ditutup.';
     }
+  } else {
+    // Terbuka — termasuk saat berubah dari "Segera Dibuka" di halaman yang sama
+    // (cek ulang tengah malam, lihat jadwalkanCekUlangBuka): kembalikan keadaan awal.
+    if (bannerTutup) {
+      bannerTutup.style.display = 'none';
+      bannerTutup.classList.remove('segera');
+    }
+    if (btnLanjut1) {
+      btnLanjut1.disabled = false;
+      btnLanjut1.classList.remove('btn-submit-disabled');
+      btnLanjut1.removeAttribute('title');
+    }
   }
 }
+
+// Halaman yang dibuka SEBELUM jam pembukaan memeriksa ulang status sendiri tepat setelah
+// 00.00 WIB tgl_mulai, jadi pendaftar yang menunggu tidak perlu memuat ulang. Jeda acak
+// 3–30 detik menyebar permintaan agar Apps Script tidak diserbu bersamaan tepat 00.00.
+// Jam perangkat bisa lebih cepat dari server: bila server masih "belum dibuka", dicoba
+// lagi beberapa kali (maks. 6 permintaan per halaman). Saat tab kembali dibuka setelah
+// HP tidur (timer bisa tertahan), status juga dicek ulang.
+var cekUlangBuka = { timer: null, sisa: 6 };
+function _waktuBuka(info) {
+  if (!info || info.pendaftaran_buka || info.alasan_tutup !== 'BELUM_DIBUKA') return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(info.tgl_mulai || '')) return null;
+  var t = new Date(info.tgl_mulai + 'T00:00:00+07:00').getTime();
+  return isNaN(t) ? null : t;
+}
+function _cekUlangSekarang() {
+  if (cekUlangBuka.sisa <= 0) return;
+  cekUlangBuka.sisa--;
+  muatInfoGelombang();
+}
+function jadwalkanCekUlangBuka(info) {
+  if (cekUlangBuka.timer) { clearTimeout(cekUlangBuka.timer); cekUlangBuka.timer = null; }
+  var tBuka = _waktuBuka(info);
+  if (tBuka === null || cekUlangBuka.sisa <= 0) return;
+  var jeda = tBuka - Date.now();
+  if (jeda <= 0) jeda = 15000;                    // sudah lewat menurut jam perangkat
+  if (jeda > 2000000000) return;                  // > ±23 hari: batas aman setTimeout
+  jeda += 3000 + Math.floor(Math.random() * 27000);
+  cekUlangBuka.timer = setTimeout(function () {
+    cekUlangBuka.timer = null;
+    _cekUlangSekarang();
+  }, jeda);
+}
+document.addEventListener('visibilitychange', function () {
+  if (document.hidden) return;
+  var tBuka = _waktuBuka(state.infoGelombang);
+  if (tBuka !== null && Date.now() >= tBuka && !cekUlangBuka.timer) _cekUlangSekarang();
+});
 
 function _labelPeriode(tglMulai, tglSelesai) {
   if (!tglMulai && !tglSelesai) return '';
