@@ -223,6 +223,7 @@ html.theme-dark .orb-2 { background:linear-gradient(135deg,#23275e,#2d1f5e); opa
 .stat-card.accent::before  { background: linear-gradient(135deg,#10b981,#34d399); }
 .stat-card.warning::before { background: linear-gradient(135deg,#f59e0b,#fbbf24); }
 .stat-card.danger::before  { background: linear-gradient(135deg,#ef4444,#f87171); }
+.stat-card.wl-stat::before { background: linear-gradient(135deg,#d97706,#f59e0b); }
 /* icon chip (top-right) */
 .stat-card::after {
   position: absolute;
@@ -237,6 +238,7 @@ html.theme-dark .orb-2 { background:linear-gradient(135deg,#23275e,#2d1f5e); opa
 .stat-card.accent::after  { content: '✅'; background: rgba(16,185,129,.12); }
 .stat-card.warning::after { content: '⏳'; background: rgba(245,158,11,.12); }
 .stat-card.danger::after  { content: '⛔'; background: rgba(239,68,68,.12); }
+.stat-card.wl-stat::after { content: '📋'; background: rgba(217,119,6,.12); }
 
 .stat-label { font-size: 0.78rem; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px; padding-right: 44px; }
 .stat-value { font-size: 2rem; font-weight: 800; color: var(--ink); line-height: 1; font-variant-numeric: tabular-nums; }
@@ -250,6 +252,12 @@ html.theme-dark .orb-2 { background:linear-gradient(135deg,#23275e,#2d1f5e); opa
 .stat-card.accent  .stat-value { color: var(--accent); }
 .stat-card.warning .stat-value { color: var(--warning); }
 .stat-card.danger  .stat-value { color: var(--danger); }
+.stat-card.wl-stat .stat-value { color: #d97706; }
+.stat-card.wl-stat.active {
+  border-color: #d97706;
+  box-shadow: 0 0 0 2px rgba(217,119,6,.28);
+  background: rgba(245,158,11,.05);
+}
 
 /* ---- Toolbar ---- */
 .toolbar {
@@ -885,6 +893,13 @@ html:not(.theme-dark) .btn-outline { color: #0369a1; border-color: #0284c7; }
 html:not(.theme-dark) .stat-card.accent  .stat-value { color: #047857; }
 html:not(.theme-dark) .stat-card.warning .stat-value { color: #b45309; }
 html:not(.theme-dark) .stat-card.danger  .stat-value { color: #b91c1c; }
+html:not(.theme-dark) .stat-card.wl-stat .stat-value { color: #b45309; }
+html.theme-dark .stat-card.wl-stat .stat-value { color: #fbbf24; }
+html.theme-dark .stat-card.wl-stat.active {
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 2px rgba(251,191,36,.25);
+  background: rgba(251,191,36,.08);
+}
 html:not(.theme-dark) .btn-logout { color: #dc2626; }
 html:not(.theme-dark) .btn-danger { color: #b91c1c; border-color: rgba(185,28,28,.3); }
 html:not(.theme-dark) .form-label { --danger: #dc2626; }   /* tanda * wajib diisi */

@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex, nofollow, noarchive">
   <title>Dashboard Admin — Rattilil Qur'an</title>
   <link rel="stylesheet" href="/assets/fonts.css">
-  <link rel="stylesheet" href="css/admin.css?v=25">
+  <link rel="stylesheet" href="css/admin.css?v=26">
 </head>
 <body>
   <div class="orb orb-1" aria-hidden="true"></div>
@@ -105,6 +105,11 @@
               <div class="stat-label">Ditolak</div>
               <div class="stat-value" id="stat-ditolak">—</div>
             </div>
+            <div class="stat-card wl-stat" id="stat-card-wl" onclick="filterHanyaWaitingList()" title="Klik untuk filter hanya Waiting List" style="cursor:pointer">
+              <div class="stat-label">Waiting List</div>
+              <div class="stat-value" id="stat-waiting">—</div>
+              <div class="stat-sub">Cadangan · Klik filter</div>
+            </div>
           </div>
 
           <!-- Pantauan email: sisa kuota harian & email yang gagal terkirim (diisi muatStats) -->
@@ -127,6 +132,11 @@
               <!-- Status lama (sebelum Okt 2026) — untuk mencari sisa data setelah migrasi -->
               <option value="TERDAFTAR">Terdaftar (lama)</option>
               <option value="BERKAS_OK">Berkas OK (lama)</option>
+            </select>
+            <select class="filter-select" id="filter-waiting" onchange="filterData()" aria-label="Filter status antrean atau waiting list">
+              <option value="">Semua Antrean</option>
+              <option value="waiting">⏳ Waiting List</option>
+              <option value="confirmed">Confirmed (Bukan WL)</option>
             </select>
             <select class="filter-select" id="filter-gender" onchange="filterData()">
               <option value="">Semua Gender</option>
@@ -777,7 +787,7 @@
        URL build/qrcode.min.js-nya 404). -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="../js/config.js"></script>
-  <script src="js/dashboard.js?v=25"></script>
+  <script src="js/dashboard.js?v=26"></script>
   <script>
     // Init dark mode sebelum render
     (function() {

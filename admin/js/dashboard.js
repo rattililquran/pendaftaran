@@ -156,6 +156,10 @@ function muatStats() {
         var proses = (stats.per_status['WAWANCARA'] || 0) + (stats.per_status['TERDAFTAR'] || 0) + (stats.per_status['BERKAS_OK'] || 0);
         document.getElementById('stat-proses').textContent = proses;
         document.getElementById('stat-ditolak').textContent = stats.per_status['DITOLAK'] || 0;
+        if (stats.waiting_total != null) {
+          var elW = document.getElementById('stat-waiting');
+          if (elW) elW.textContent = stats.waiting_total;
+        }
         renderInfoEmail(stats.email);
       }
     })
@@ -214,11 +218,22 @@ function muatPendaftar() {
       }
       state.pendaftar = res.data || [];
       state.filteredData = state.pendaftar;
+      _updateWaitingStat();
       renderTabelPendaftar();
     })
     .catch(function () {
       tbody.innerHTML = '<tr><td colspan="11" class="no-data">Koneksi bermasalah.</td></tr>';
     });
+}
+
+function _updateWaitingStat() {
+  var elW = document.getElementById('stat-waiting');
+  if (!elW) return;
+  var count = 0;
+  if (state.pendaftar) {
+    count = state.pendaftar.filter(function (r) { return !!r.waiting_list; }).length;
+  }
+  elW.textContent = count;
 }
 
 function renderTabelPendaftar() {
@@ -246,6 +261,8 @@ function renderTabelPendaftar() {
       var va, vb;
       if (k === 'timestamp') {
         va = new Date(a[k]).getTime() || 0; vb = new Date(b[k]).getTime() || 0;
+      } else if (k === 'waiting_list') {
+        va = a[k] ? 1 : 0; vb = b[k] ? 1 : 0;
       } else {
         va = String(a[k] || '').toLowerCase(); vb = String(b[k] || '').toLowerCase();
       }
@@ -538,19 +555,42 @@ function filterData() {
 function resetFilter() {
   document.getElementById('search-input').value  = '';
   document.getElementById('filter-status').value = '';
+  var fw = document.getElementById('filter-waiting');
+  if (fw) fw.value = '';
   document.getElementById('filter-gender').value = '';
   document.getElementById('filter-jadwal').value = '';
   _doFilter();
 }
 
+function filterHanyaWaitingList() {
+  var fw = document.getElementById('filter-waiting');
+  if (!fw) return;
+  if (fw.value === 'waiting') {
+    fw.value = '';
+  } else {
+    fw.value = 'waiting';
+  }
+  _doFilter();
+}
+
 function _doFilter() {
-  var search = document.getElementById('search-input').value.toLowerCase();
-  var status = document.getElementById('filter-status').value;
-  var gender = document.getElementById('filter-gender').value;
-  var jadwal = document.getElementById('filter-jadwal').value;
+  var search  = document.getElementById('search-input').value.toLowerCase();
+  var status  = document.getElementById('filter-status').value;
+  var waiting = (document.getElementById('filter-waiting') || {}).value || '';
+  var gender  = document.getElementById('filter-gender').value;
+  var jadwal  = document.getElementById('filter-jadwal').value;
+
+  // Sinkronkan styling aktif pada kartu stat Waiting List
+  var cardWl = document.getElementById('stat-card-wl');
+  if (cardWl) {
+    if (waiting === 'waiting') cardWl.classList.add('active');
+    else cardWl.classList.remove('active');
+  }
 
   state.filteredData = state.pendaftar.filter(function (row) {
     if (status && row.status !== status) return false;
+    if (waiting === 'waiting' && !row.waiting_list) return false;
+    if (waiting === 'confirmed' && row.waiting_list) return false;
     if (gender && row.gender !== gender) return false;
     if (jadwal && row.jadwal_id !== jadwal) return false;
     if (search) {
@@ -1118,7 +1158,7 @@ function salinJadwal() {
 // ============================================================================
 
 function exportCSV() {
-  var csv = 'No. Pendaftaran,Nama,HP,HP Keluarga,Atas Nama/Hubungan,Email,Tgl. Lahir,Domisili,Gender,Program,Jadwal,Status,Tgl. Daftar,Jenis Biaya,Pernyataan Beasiswa,Tgl. Pernyataan,Kemampuan Awal,Pernah Tahsin,Motivasi,Saran/Masukan,Gelombang\n';
+  var csv = 'No. Pendaftaran,Nama,HP,HP Keluarga,Atas Nama/Hubungan,Email,Tgl. Lahir,Domisili,Gender,Program,Jadwal,Status,Antrean,Tgl. Daftar,Jenis Biaya,Pernyataan Beasiswa,Tgl. Pernyataan,Kemampuan Awal,Pernah Tahsin,Motivasi,Saran/Masukan,Gelombang\n';
   function csvSafe(v) {
     var s = String(v || '');
     // Cegah CSV injection
@@ -1140,6 +1180,7 @@ function exportCSV() {
       csvSafe(r.program),
       csvSafe(r.jadwal_id),
       csvSafe(r.status),
+      csvSafe(r.waiting_list ? 'Waiting List' : 'Confirmed'),
       csvSafe(formatTanggal(r.timestamp)),
       csvSafe(r.jenis_biaya),
       csvSafe(r.beasiswa_ack ? 'Ya' : (r.jenis_biaya === 'Beasiswa' ? 'TIDAK tercatat' : '')),
