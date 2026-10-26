@@ -1157,8 +1157,26 @@ function salinJadwal() {
 // EKSPOR CSV
 // ============================================================================
 
-function exportCSV() {
-  var csv = 'No. Pendaftaran,Nama,HP,HP Keluarga,Atas Nama/Hubungan,Email,Tgl. Lahir,Domisili,Gender,Program,Jadwal,Status,Antrean,Tgl. Daftar,Jenis Biaya,Pernyataan Beasiswa,Tgl. Pernyataan,Kemampuan Awal,Pernah Tahsin,Motivasi,Saran/Masukan,Gelombang\n';
+async function exportCSV() {
+  // Label jadwal (Hari/Jam/Pengajar) dibaca impor Muqabalah Portal per nama header.
+  if (!state.jadwal || !state.jadwal.length) {
+    try {
+      var resJ = await _adminGet({ action: 'admin.jadwal', token: state.token });
+      if (resJ && resJ.ok) {
+        state.jadwal = resJ.data || [];
+      } else if (resJ && resJ.error === 'UNAUTHORIZED') {
+        logout();
+        return;
+      } else {
+        tampilkanToast('Label jadwal tidak termuat; CSV tanpa Hari/Jam/Pengajar.', 'warning');
+      }
+    } catch (e) {
+      tampilkanToast('Label jadwal tidak termuat; CSV tanpa Hari/Jam/Pengajar.', 'warning');
+    }
+  }
+  var mapJ = {};
+  (state.jadwal || []).forEach(function (j) { mapJ[j.jadwal_id] = j; });
+  var csv = 'No. Pendaftaran,Nama,HP,HP Keluarga,Atas Nama/Hubungan,Email,Tgl. Lahir,Domisili,Gender,Program,Jadwal,Hari,Jam,Pengajar,Status,Antrean,Tgl. Daftar,Jenis Biaya,Pernyataan Beasiswa,Tgl. Pernyataan,Kemampuan Awal,Pernah Tahsin,Motivasi,Saran/Masukan,Gelombang\n';
   function csvSafe(v) {
     var s = String(v || '');
     // Cegah CSV injection
@@ -1167,6 +1185,7 @@ function exportCSV() {
     return '"' + s.replace(/"/g, '""') + '"';
   }
   state.filteredData.forEach(function (r) {
+    var j = mapJ[r.jadwal_id] || {};
     csv += [
       csvSafe(r.no_pendaftaran),
       csvSafe(r.nama),
@@ -1179,6 +1198,9 @@ function exportCSV() {
       csvSafe(r.gender),
       csvSafe(r.program),
       csvSafe(r.jadwal_id),
+      csvSafe(j.hari),
+      csvSafe(j.jam),
+      csvSafe(j.pengajar),
       csvSafe(r.status),
       csvSafe(r.waiting_list ? 'Waiting List' : 'Confirmed'),
       csvSafe(formatTanggal(r.timestamp)),
