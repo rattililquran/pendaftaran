@@ -393,6 +393,8 @@ html.theme-dark .orb-2 { background:linear-gradient(135deg,#23275e,#2d1f5e); opa
 .badge-WAWANCARA  { background: rgba(245,158,11,.12);     color: #92400e; border-color: rgba(245,158,11,.28); }
 .badge-DITERIMA   { background: rgba(16,185,129,.1);      color: #047857; border-color: rgba(16,185,129,.22); }
 .badge-DITOLAK    { background: rgba(239,68,68,.1);       color: #b91c1c; border-color: rgba(239,68,68,.22); }
+.badge-WAITING_LIST { background: rgba(180,83,9,.1);     color: #b45309; border-color: rgba(180,83,9,.25); }
+.badge-DEFAULT    { background: transparent;              color: var(--ink-2); }
 /* Status slot jadwal (badge-' + j.status_slot di renderTabelJadwal) —
    sebelumnya tanpa definisi CSS sehingga kolom Status tampil polos. */
 .badge-TERSEDIA   { background: rgba(16,185,129,.1);      color: #047857; border-color: rgba(16,185,129,.22); }

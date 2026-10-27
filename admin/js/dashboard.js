@@ -1283,7 +1283,8 @@ function labelStatus(status) {
     'WAWANCARA': 'Wawancara',
     'DITERIMA': 'Diterima',
     'DITOLAK': 'Ditolak',
-    'BATAL': 'Dibatalkan'
+    'BATAL': 'Dibatalkan',
+    'WAITING_LIST': 'Daftar Tunggu'
   };
   return map[status] || status;
 }
@@ -1488,8 +1489,24 @@ var WA_FALLBACK = {
   DEFAULT:   'Assalamu\'alaikum {nama_depan}, kami dari Panitia Pendaftaran Rattilil Qur\'an terkait pendaftaran Anda (No. {nomor}).',
   WAWANCARA: 'Assalamu\'alaikum {nama_depan}, Anda diundang mengikuti wawancara untuk pendaftaran No. {nomor} ({program}). Detail jadwal: ',
   DITERIMA:  'Assalamu\'alaikum {nama_depan}, selamat! Anda dinyatakan DITERIMA sebagai santri Rattilil Qur\'an (No. {nomor}). Info daftar ulang: ',
-  DITOLAK:   'Assalamu\'alaikum {nama_depan}, terima kasih atas pendaftaran Anda (No. {nomor}). Mohon maaf untuk periode ini kami belum dapat menerima. Semoga Allah memudahkan.'
+  DITOLAK:   'Assalamu\'alaikum {nama_depan}, terima kasih atas pendaftaran Anda (No. {nomor}). Mohon maaf untuk periode ini kami belum dapat menerima. Semoga Allah memudahkan.',
+  WAITING_LIST: "Assalamu’alaikum {nama_depan}, terima kasih sudah mendaftar di Rattililqur’an (No. {nomor}). Saat ini Anda berada di daftar tunggu karena kursi utama untuk jadwal pilihan Anda sudah penuh.\n\n*Silakan bergabung ke grup WhatsApp daftar tunggu agar mendapat kabar terbaru bila ada kursi tersedia atau kami akan menawarkan belajar di jadwal lainnya.*\n\n*Mohon untuk Save Nomor WA ini* kemudian bergabung ke grup melalui tautan berikut:\n[tautan grup]\n\nSemoga Allah mudahkan langkah kita\nBaarakallahu fiikum"
 };
+
+// Pendaftar daftar tunggu yang belum diputuskan memakai template WAITING_LIST (undangan grup),
+// bukan template status-nya. Setelah Diterima/Ditolak, template status yang berlaku.
+function _kunciTemplate(row) {
+  var aktif = row.status === 'WAWANCARA' || row.status === 'TERDAFTAR' || row.status === 'BERKAS_OK';
+  return (row.waiting_list && aktif) ? 'WAITING_LIST' : row.status;
+}
+
+// Template undangan grup masih berisi penanda → tolak kirim agar pendaftar tidak menerima
+// pesan tanpa tautan grup.
+function _masihPenanda(pesan) {
+  if (!/\[tautan grup\]/i.test(pesan)) return false;
+  tampilkanToast('Ganti dulu [tautan grup] dengan tautan grup WhatsApp daftar tunggu (Tab Template WA).', 'error', 8000);
+  return true;
+}
 
 function muatWaTemplates() {
   _adminGet({ action: 'admin.watemplates', token: state.token })
@@ -1525,13 +1542,14 @@ function _isiTemplate(teks, row) {
 // Daftar template untuk satu pendaftar: status-nya dulu, lalu DEFAULT, lalu sisanya.
 function _daftarTemplateUntuk(row) {
   var src = state.waTemplates;
+  var kunci = _kunciTemplate(row);
   var list = [];
   if (src && src.length) {
-    src.forEach(function (t) { if (t.status === row.status)    list.push(t); });
-    src.forEach(function (t) { if (t.status === 'DEFAULT')     list.push(t); });
-    src.forEach(function (t) { if (t.status !== row.status && t.status !== 'DEFAULT') list.push(t); });
+    src.forEach(function (t) { if (t.status === kunci)         list.push(t); });
+    src.forEach(function (t) { if (t.status === 'DEFAULT' && kunci !== 'DEFAULT') list.push(t); });
+    src.forEach(function (t) { if (t.status !== kunci && t.status !== 'DEFAULT') list.push(t); });
   } else {
-    var st = WA_FALLBACK[row.status] ? row.status : 'DEFAULT';
+    var st = WA_FALLBACK[kunci] ? kunci : 'DEFAULT';
     list.push({ status: st, label: labelStatus(st) || 'Sesuai Status', pesan: WA_FALLBACK[st] });
     if (st !== 'DEFAULT') list.push({ status: 'DEFAULT', label: 'Sapaan Umum', pesan: WA_FALLBACK.DEFAULT });
   }
@@ -1556,7 +1574,9 @@ function chatWa(no) {
   var row = state.pendaftar.find(function (r) { return r.no_pendaftaran === no; });
   if (!row) return;
   var tmpl = _daftarTemplateUntuk(row)[0];
-  _bukaWa(row.hp, _isiTemplate(tmpl.pesan, row),
+  var pesanWa = _isiTemplate(tmpl.pesan, row);
+  if (_masihPenanda(pesanWa)) return;
+  _bukaWa(row.hp, pesanWa,
           { no_pendaftaran: row.no_pendaftaran, nama: row.nama, template: tmpl.label });
 }
 
@@ -1576,6 +1596,7 @@ function bukaWaDariModal() {
   var sel = document.getElementById('wa-template');
   var list = state._waList || [];
   var lbl = (list[parseInt(sel.value, 10) || 0] || {}).label || '';
+  if (_masihPenanda(document.getElementById('wa-pesan').value)) return;
   _bukaWa(row.hp, document.getElementById('wa-pesan').value,
           { no_pendaftaran: row.no_pendaftaran, nama: row.nama, template: lbl });
 }
