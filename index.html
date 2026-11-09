@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="/assets/fonts.css">
   <!-- ?v= disamakan dengan CACHE_NAME di sw.js: HTML baru selalu memuat CSS yang cocok
        (GitHub Pages menyimpan CSS di cache browser hingga 10 menit). -->
-  <link rel="stylesheet" href="css/style.css?v=25">
+  <link rel="stylesheet" href="css/style.css?v=26">
   <script>
     // Tema sama dengan situs utama (kunci 'theme'); 'rattilil-theme' lama tetap dibaca.
     (function() {
@@ -90,7 +90,7 @@
         <img src="/assets/images/Program-desktop-1280.jpg" alt="" decoding="async" fetchpriority="high">
       </picture>
     </div>
-    <div class="container">
+    <div class="container" role="main">
 
       <!-- Header -->
       <header class="site-header">
@@ -99,12 +99,14 @@
       </header>
 
       <!-- Banner Info Gelombang -->
-      <div id="banner-gelombang" class="banner-gelombang" style="display:none;" role="status" aria-live="polite">
+      <!-- Tampil sejak awal ("memuat") agar ruangnya sudah ada: dulu muncul setelah fetch
+           dan mendorong formulir ke bawah (CLS 0,15). -->
+      <div id="banner-gelombang" class="banner-gelombang memuat" role="status" aria-live="polite">
         <div class="banner-gelombang-inner">
           <span class="banner-gelombang-icon"><svg class="ik" aria-hidden="true" focusable="false"><use href="#i-kalender"/></svg></span>
           <div class="banner-gelombang-body">
-            <span class="banner-gelombang-nama" id="banner-nama-gelombang"></span>
-            <span class="banner-gelombang-periode" id="banner-periode-gelombang"></span>
+            <span class="banner-gelombang-nama" id="banner-nama-gelombang">Memuat info gelombang…</span>
+            <span class="banner-gelombang-periode" id="banner-periode-gelombang">&nbsp;</span>
           </div>
           <span class="banner-gelombang-badge" id="banner-status-gelombang"></span>
         </div>
@@ -649,7 +651,7 @@
   <script src="js/tema.js"></script>
   <script src="js/config.js"></script>
   <script src="js/kota-list.js"></script>
-  <script src="js/app.js?v=25"></script>
+  <script src="js/app.js?v=26"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(function() {});

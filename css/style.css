@@ -1403,6 +1403,10 @@ html.theme-dark body {
   animation: fadeInDown .35s ease both;
 }
 
+/* Keadaan awal sebelum info gelombang datang (lihat index.html). */
+.banner-gelombang.memuat .banner-gelombang-nama { opacity: .75; font-weight: 600; }
+.banner-gelombang-badge:empty { display: none; }
+
 .banner-gelombang-inner {
   display: flex;
   align-items: center;

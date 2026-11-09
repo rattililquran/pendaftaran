@@ -252,11 +252,22 @@ function muatInfoGelombang() {
         state.infoGelombang = res.data;
         tampilkanBannerGelombang(res.data);
         jadwalkanCekUlangBuka(res.data);
+      } else {
+        sembunyikanBannerMemuat();
       }
     })
     .catch(function () {
-      // Gagal fetch info gelombang — tidak blokir form, banner tetap tersembunyi
+      // Gagal fetch info gelombang — tidak blokir form; sembunyikan kartu "memuat".
+      sembunyikanBannerMemuat();
     });
+}
+
+function sembunyikanBannerMemuat() {
+  var b = document.getElementById('banner-gelombang');
+  if (b && b.classList.contains('memuat')) {
+    b.classList.remove('memuat');
+    b.style.display = 'none';
+  }
 }
 
 function tampilkanBannerGelombang(info) {
@@ -266,6 +277,7 @@ function tampilkanBannerGelombang(info) {
   var btnLanjut1  = document.getElementById('btn-next-1');
 
   if (!info) return;
+  if (bannerGel) bannerGel.classList.remove('memuat');
 
   // Baris nama/periode/badge hanya bila ada nama gelombang. Kartu tetap tampil saat
   // pendaftaran tertutup (pesan status berada di dalam kartu yang sama).
