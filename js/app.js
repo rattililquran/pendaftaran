@@ -245,10 +245,24 @@ document.addEventListener('DOMContentLoaded', function () {
 // INFO GELOMBANG
 // ============================================================================
 
+// Info gelombang terakhir disimpan di peramban: pengunjung yang kembali langsung melihat
+// banner (termasuk "Segera Dibuka"/"Ditutup") tanpa formulir bergeser saat data datang.
+// Hanya untuk TAMPILAN — state.infoGelombang selalu diisi data segar, dan server tetap
+// memeriksa status pendaftaran saat formulir dikirim.
+var KUNCI_INFO_GELOMBANG = 'rq-info-gelombang';
+var UMUR_INFO_MAKS_MS    = 12 * 60 * 60 * 1000;
+
 function muatInfoGelombang() {
+  if (!state.infoGelombang) {
+    try {
+      var simpan = JSON.parse(localStorage.getItem(KUNCI_INFO_GELOMBANG) || 'null');
+      if (simpan && simpan.data && Date.now() - simpan.t < UMUR_INFO_MAKS_MS) tampilkanBannerGelombang(simpan.data);
+    } catch (e) {}
+  }
   fetchBackend('GET', { action: 'info' })
     .then(function (res) {
       if (res && res.ok && res.data) {
+        try { localStorage.setItem(KUNCI_INFO_GELOMBANG, JSON.stringify({ t: Date.now(), data: res.data })); } catch (e) {}
         state.infoGelombang = res.data;
         tampilkanBannerGelombang(res.data);
         jadwalkanCekUlangBuka(res.data);
